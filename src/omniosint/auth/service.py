@@ -11,7 +11,7 @@ import math
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, NoReturn
 
 from sqlalchemy import func, select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -358,7 +358,7 @@ class AuthService:
         submitted: str,
         reason: str,
         request: RequestInfo,
-    ) -> None:
+    ) -> NoReturn:
         """Record a failed sign-in, commit, and raise the one generic error."""
         details: dict[str, Any] = {"reason": reason}
         if user is None:

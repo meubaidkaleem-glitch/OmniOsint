@@ -36,9 +36,7 @@ def create(
         Path | None,
         typer.Option("--output", "-o", help="Directory to write the archive to."),
     ] = None,
-    label: Annotated[
-        str | None, typer.Option(help="Short label added to the file name.")
-    ] = None,
+    label: Annotated[str | None, typer.Option(help="Short label added to the file name.")] = None,
     json_output: Annotated[bool, typer.Option("--json", help="Machine-readable output.")] = False,
 ) -> None:
     """Create a backup archive (database dump, settings file, checksums).
@@ -71,8 +69,13 @@ def list_backups(
     runtime = load_runtime()
     items = backup.list_backups(runtime.paths)
     if json_output:
-        emit_json({"ok": True, "directory": str(runtime.paths.backups_dir),
-                   "backups": [item.to_dict() for item in items]})
+        emit_json(
+            {
+                "ok": True,
+                "directory": str(runtime.paths.backups_dir),
+                "backups": [item.to_dict() for item in items],
+            }
+        )
         return
     if not items:
         console.print(f"No backups in {escape(str(runtime.paths.backups_dir))}.")
@@ -105,9 +108,7 @@ def verify(
 @app.command("restore")
 def restore(
     archive: Annotated[Path, typer.Argument(help="Backup archive to restore.")],
-    yes: Annotated[
-        bool, typer.Option("--yes", "-y", help="Do not ask for confirmation.")
-    ] = False,
+    yes: Annotated[bool, typer.Option("--yes", "-y", help="Do not ask for confirmation.")] = False,
     no_safety_backup: Annotated[
         bool,
         typer.Option("--no-safety-backup", help="Skip the backup of the current data."),
@@ -155,6 +156,4 @@ def restore(
     )
     console.print(f"[green]Restore complete.[/green] Schema revision {result.schema_revision}.")
     if result.safety_backup is not None:
-        console.print(
-            f"The previous data was saved to {escape(str(result.safety_backup.path))}."
-        )
+        console.print(f"The previous data was saved to {escape(str(result.safety_backup.path))}.")

@@ -123,9 +123,7 @@ def connection_environment(url: URL, ssl_mode: str) -> dict[str, str]:
     return environment
 
 
-def run_tool(
-    tool: Path, arguments: list[str], *, environment: dict[str, str], action: str
-) -> None:
+def run_tool(tool: Path, arguments: list[str], *, environment: dict[str, str], action: str) -> None:
     """Run a client tool; raise :class:`ExternalToolError` with its message on failure."""
     try:
         completed = subprocess.run(  # noqa: S603 - executable located by find_tool
@@ -140,7 +138,9 @@ def run_tool(
     except subprocess.TimeoutExpired as exc:
         raise ExternalToolError(f"{action} timed out.") from exc
     except OSError as exc:
-        raise ExternalToolError(f"{action} failed: `{tool.name}` could not be run ({exc}).") from exc
+        raise ExternalToolError(
+            f"{action} failed: `{tool.name}` could not be run ({exc})."
+        ) from exc
     if completed.returncode != 0:
         output = (completed.stderr or completed.stdout or "").strip().splitlines()
         reason = output[-1] if output else f"exit code {completed.returncode}"

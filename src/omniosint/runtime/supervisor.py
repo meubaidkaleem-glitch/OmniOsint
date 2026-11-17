@@ -351,9 +351,7 @@ def start(settings: Settings, paths: AppPaths, *, wait: bool = True) -> StartRes
     if existing is not None:
         alive = [item for item in existing.processes if is_alive(item)]
         if alive and len(alive) == len(existing.processes):
-            return StartResult(
-                already_running=True, state=existing, status=status(settings, paths)
-            )
+            return StartResult(already_running=True, state=existing, status=status(settings, paths))
         if alive:
             stop(settings, paths)  # half-running: clean up before starting again
         clear_state(paths)

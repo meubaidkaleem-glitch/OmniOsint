@@ -49,9 +49,15 @@ def as_omni_error(exc: BaseException) -> OmniError | None:
                 hint="Run: omniosint db upgrade",
             )
         if (
-            isinstance(item, ConnectionError | TimeoutError | socket.gaierror)
-            or isinstance(item, sa_exc.TimeoutError | sa_exc.OperationalError)
-            or isinstance(item, sa_exc.InterfaceError)
+            isinstance(
+                item,
+                ConnectionError
+                | TimeoutError
+                | socket.gaierror
+                | sa_exc.TimeoutError
+                | sa_exc.OperationalError
+                | sa_exc.InterfaceError,
+            )
             or name in _CONNECTION_ERROR_NAMES
         ):
             return DatabaseUnavailable()

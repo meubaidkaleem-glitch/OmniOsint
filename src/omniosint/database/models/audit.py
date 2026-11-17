@@ -17,8 +17,8 @@ from omniosint.database.base import Base
 class AuditEvent(Base):
     """One security-relevant action.
 
-    The table is append-only: a trigger created by the initial migration
-    rejects updates, and rejects deletes unless the retention job has set
+    The table is append-only: triggers created by the initial migration reject
+    updates, and reject deletes and truncation unless the retention job has set
     ``omniosint.audit_purge`` for its transaction. There are deliberately no
     foreign keys, so an audit row outlives whatever it refers to and is never
     touched by a cascade.

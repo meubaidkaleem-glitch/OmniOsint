@@ -164,7 +164,7 @@ async def me(
     request: Request, principal: PrincipalDep, context: ContextDep, session: SessionDep
 ) -> AuthState:
     user = await context.users.get_user(session, principal.user_id)
-    is_cookie = request.state.token_method == "cookie"
+    is_cookie = request.state.token_method == "cookie"  # noqa: S105 - a method name, not a secret
     return AuthState(
         user=UserOut.from_user(user),
         permissions=sorted(principal.permissions),

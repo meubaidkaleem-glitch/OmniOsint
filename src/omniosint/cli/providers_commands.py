@@ -82,7 +82,7 @@ def list_providers(
 
 
 @app.command("test")
-def test_providers(
+def check_providers(
     provider_id: Annotated[
         str | None, typer.Argument(help="Catalogue identifier; all providers when omitted.")
     ] = None,
@@ -120,7 +120,9 @@ def test_providers(
         emit_json({"ok": False, "tested": 0, "results": results})
     else:
         for result in results:
-            console.print(f"[yellow]NOT TESTED[/yellow] {escape(str(result['name']))}: "
-                          f"{escape(str(result['message']))}")
+            console.print(
+                f"[yellow]NOT TESTED[/yellow] {escape(str(result['name']))}: "
+                f"{escape(str(result['message']))}"
+            )
         console.print("No provider was tested: no integration is implemented yet.")
     raise typer.Exit(EXIT_USAGE)

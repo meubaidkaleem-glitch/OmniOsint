@@ -229,9 +229,7 @@ def check_secret_storage(paths: AppPaths) -> Check:
 def check_exposure(settings: Settings) -> Check:
     host = settings.server.host
     if is_loopback_host(host):
-        return Check(
-            "Network exposure", CheckStatus.OK, f"Listens on {host} only (this machine)."
-        )
+        return Check("Network exposure", CheckStatus.OK, f"Listens on {host} only (this machine).")
     return Check(
         "Network exposure",
         CheckStatus.WARN,
@@ -284,8 +282,7 @@ async def _service_checks(settings: Settings, paths: AppPaths) -> list[Check]:
                     "Database",
                     CheckStatus.WARN,
                     database.detail,
-                    "PostgreSQL 15 or later is recommended; this version is past its "
-                    "end of life.",
+                    "PostgreSQL 15 or later is recommended; this version is past its end of life.",
                 )
             )
         else:

@@ -177,8 +177,7 @@ def create_backup(
     if tool_major < server_major:
         raise OmniError(
             f"pg_dump {tool_major} cannot back up a PostgreSQL {server_major} server.",
-            hint="Install client tools at least as new as the server, or set "
-            "database.pg_bin_dir.",
+            hint="Install client tools at least as new as the server, or set database.pg_bin_dir.",
         )
 
     destination_dir = output_dir or paths.backups_dir
@@ -350,10 +349,13 @@ def restore_backup(
     with tempfile.TemporaryDirectory(dir=paths.run_dir, prefix="restore-") as tmp:
         workdir = Path(tmp)
         dump_path = workdir / DUMP_NAME
-        with zipfile.ZipFile(archive_path) as archive, archive.open(DUMP_NAME) as source:
-            with dump_path.open("wb") as target:
-                while chunk := source.read(_CHUNK):
-                    target.write(chunk)
+        with (
+            zipfile.ZipFile(archive_path) as archive,
+            archive.open(DUMP_NAME) as source,
+            dump_path.open("wb") as target,
+        ):
+            while chunk := source.read(_CHUNK):
+                target.write(chunk)
 
         dump_sql = workdir / "dump.sql"
         pgtools.run_tool(

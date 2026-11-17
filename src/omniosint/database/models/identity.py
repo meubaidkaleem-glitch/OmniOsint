@@ -147,9 +147,7 @@ class User(Base):
 
     @property
     def permission_codes(self) -> frozenset[str]:
-        return frozenset(
-            permission.code for role in self.roles for permission in role.permissions
-        )
+        return frozenset(permission.code for role in self.roles for permission in role.permissions)
 
 
 class UserSession(Base):

@@ -167,7 +167,5 @@ def create_app(
         csp_exempt_prefixes=(DOCS_PATH,) if docs_enabled else (),
     )
     app.add_middleware(HostValidationMiddleware, allowed_hosts=server.allowed_hosts)
-    app.add_middleware(
-        RequestContextMiddleware, access_log=resolved_settings.logging.access_log
-    )
+    app.add_middleware(RequestContextMiddleware, access_log=resolved_settings.logging.access_log)
     return app

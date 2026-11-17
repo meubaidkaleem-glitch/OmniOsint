@@ -67,7 +67,7 @@ def describe_database_error(exc: BaseException) -> str:
         return "authentication failed (check the database user and password)"
     if "invalidauthorizationspecification" in name.lower():
         return "authentication failed (check the database user and password)"
-    if "invalidcatalogname" in name.lower() or "does not exist" in text and "database" in text:
+    if "invalidcatalogname" in name.lower() or ("does not exist" in text and "database" in text):
         return "the database does not exist"
     if isinstance(exc, ConnectionRefusedError) or "connection refused" in text:
         return "connection refused (is PostgreSQL running?)"

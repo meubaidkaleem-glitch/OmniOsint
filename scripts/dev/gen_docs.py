@@ -286,9 +286,8 @@ def dependencies_markdown() -> str:
         lines += ["", f"## {title} (npm, direct dependencies)", ""]
         lines += ["| Package | Version | Licence | Shipped to users |", "|---|---|---|---|"]
         for name, version, licence, runtime in rows:
-            lines.append(
-                f"| {name} | {version} | {_cell(licence)} | {'yes' if runtime else 'no (build/test)'} |"
-            )
+            shipped = "yes" if runtime else "no (build/test)"
+            lines.append(f"| {name} | {version} | {_cell(licence)} | {shipped} |")
     lines += [
         "",
         "## External programs",

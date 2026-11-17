@@ -48,9 +48,8 @@ def scram_verifier(password: str, *, salt: bytes | None = None) -> str | None:
     def encode(value: bytes) -> str:
         return base64.b64encode(value).decode("ascii")
 
-    return (
-        f"SCRAM-SHA-256${_SCRAM_ITERATIONS}:{encode(salt)}${encode(stored_key)}:{encode(server_key)}"
-    )
+    keys = f"{encode(stored_key)}:{encode(server_key)}"
+    return f"SCRAM-SHA-256${_SCRAM_ITERATIONS}:{encode(salt)}${keys}"
 
 
 @dataclass(frozen=True, slots=True)
@@ -72,7 +71,7 @@ async def bootstrap_database(
     database: str,
     reset_password: bool = False,
     ssl_mode: str = "prefer",
-    timeout: float = 10.0,
+    connect_timeout: float = 10.0,
 ) -> BootstrapResult:
     """Create ``role`` and ``database`` if they do not exist.
 
@@ -90,13 +89,11 @@ async def bootstrap_database(
         password=admin_password,
         database=admin_database,
         ssl=ssl_mode,
-        timeout=timeout,
+        timeout=connect_timeout,
     )
     try:
         secret = scram_verifier(role_password) or role_password
-        role_exists = await connection.fetchval(
-            "SELECT 1 FROM pg_roles WHERE rolname = $1", role
-        )
+        role_exists = await connection.fetchval("SELECT 1 FROM pg_roles WHERE rolname = $1", role)
         role_created = False
         password_set = False
         if not role_exists:

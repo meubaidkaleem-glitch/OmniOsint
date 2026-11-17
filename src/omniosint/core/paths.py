@@ -7,6 +7,7 @@ kept apart so that updating or removing the program never touches user data.
 
 from __future__ import annotations
 
+import contextlib
 import os
 import sys
 from dataclasses import dataclass
@@ -147,11 +148,9 @@ def restrict_to_owner(path: Path) -> None:
     if sys.platform == "win32":
         return
     mode = 0o700 if path.is_dir() else 0o600
-    try:
+    # A read-only or foreign-owned location is reported by the doctor command.
+    with contextlib.suppress(OSError):
         path.chmod(mode)
-    except OSError:
-        # A read-only or foreign-owned location; the doctor command reports it.
-        pass
 
 
 def is_owner_only(path: Path) -> bool | None:

@@ -124,9 +124,7 @@ async def list_events(
             )
         )
 
-    query = query.order_by(AuditEvent.occurred_at.desc(), AuditEvent.id.desc()).limit(
-        page_size + 1
-    )
+    query = query.order_by(AuditEvent.occurred_at.desc(), AuditEvent.id.desc()).limit(page_size + 1)
     rows = list((await session.execute(query)).scalars())
     has_more = len(rows) > page_size
     items = rows[:page_size]

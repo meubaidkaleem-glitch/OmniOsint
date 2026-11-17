@@ -79,9 +79,7 @@ class SessionExpired(AuthenticationRequired):
 class InvalidCredentials(OmniError):
     code = "invalid_credentials"
     status_code = 401
-    default_message = (
-        "The username or password is incorrect, or the account is temporarily locked."
-    )
+    default_message = "The username or password is incorrect, or the account is temporarily locked."
 
 
 class CsrfFailed(OmniError):

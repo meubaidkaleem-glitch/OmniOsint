@@ -8,6 +8,7 @@ process in later phases.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import os
 import signal
 from datetime import timedelta
@@ -88,10 +89,9 @@ def _install_signal_handlers(loop: asyncio.AbstractEventLoop, stop: asyncio.Even
         signum = getattr(signal, name, None)
         if signum is None:
             continue
-        try:
+        # Fails outside the main thread or where the signal is unsupported.
+        with contextlib.suppress(ValueError, OSError):
             signal.signal(signum, request_stop)
-        except (ValueError, OSError):  # not the main thread, or unsupported here
-            pass
 
 
 def run_worker(settings: Settings, paths: AppPaths) -> None:

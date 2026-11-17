@@ -188,7 +188,7 @@ def bootstrap(
             database=database_settings.name,
             reset_password=reset_password,
             ssl_mode=database_settings.ssl_mode,
-            timeout=database_settings.connect_timeout_seconds,
+            connect_timeout=database_settings.connect_timeout_seconds,
         )
     )
     target = describe_target(build_database_url(runtime.settings))

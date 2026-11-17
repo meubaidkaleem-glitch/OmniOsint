@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import sys
-from typing import Annotated
+from typing import Annotated, Any
 
 import typer
 import yaml
@@ -97,7 +97,9 @@ def create_user(
 
     created = run_async(create())
     runtime.paths.setup_token_file.unlink(missing_ok=True)
-    console.print(f"[green]Created user[/green] {escape(created)} with role(s): {', '.join(roles)}.")
+    console.print(
+        f"[green]Created user[/green] {escape(created)} with role(s): {', '.join(roles)}."
+    )
 
 
 @admin_app.command("list-users")
@@ -109,8 +111,8 @@ def list_users(
     runtime = load_runtime()
     _auth, users = _services(runtime)
 
-    async def read() -> list[dict[str, object]]:
-        rows: list[dict[str, object]] = []
+    async def read() -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
         cursor: str | None = None
         async with open_database(runtime) as database, database.session() as session:
             while True:
@@ -134,8 +136,10 @@ def list_users(
         emit_json({"ok": True, "users": rows})
         return
     if not rows:
-        console.print("No users exist yet. Complete first-run setup or run: "
-                      "omniosint admin create-user <name>")
+        console.print(
+            "No users exist yet. Complete first-run setup or run: "
+            "omniosint admin create-user <name>"
+        )
         return
     table = Table("Username", "Name", "Roles", "Active", "Last sign-in")
     for row in rows:
@@ -143,9 +147,9 @@ def list_users(
         table.add_row(
             escape(str(row["username"])),
             escape(str(row["display_name"])),
-            ", ".join(row["roles"]),  # type: ignore[arg-type]
+            ", ".join(row["roles"]),
             "yes" if row["active"] else "no",
-            f"{last:%Y-%m-%d %H:%M} UTC" if last else "never",  # type: ignore[str-format]
+            f"{last:%Y-%m-%d %H:%M} UTC" if last else "never",
         )
     console.print(table)
 
@@ -179,7 +183,9 @@ def reset_password(
             )
 
     run_async(reset())
-    console.print(f"[green]Password reset[/green] for {escape(username)}. Their sessions were ended.")
+    console.print(
+        f"[green]Password reset[/green] for {escape(username)}. Their sessions were ended."
+    )
 
 
 @admin_app.command("setup-token")
@@ -202,13 +208,14 @@ def setup_token(
         )
         return
     if token is None:
-        console.print("Setup is complete: a user already exists. Sign in at "
-                      f"{base_url}/")
+        console.print(f"Setup is complete: a user already exists. Sign in at {base_url}/")
         return
     console.print("First-run setup is pending.")
     console.print(f"  Setup token: [bold]{escape(token)}[/bold]")
     console.print(f"  Open:        {escape(setup_url(base_url, token))}")
-    console.print(f"[dim]The token is also stored in {escape(str(runtime.paths.setup_token_file))}[/dim]")
+    console.print(
+        f"[dim]The token is also stored in {escape(str(runtime.paths.setup_token_file))}[/dim]"
+    )
 
 
 # --------------------------------------------------------------------------- secrets
@@ -275,7 +282,9 @@ def config_paths() -> None:
     for label, path, exists in config_files(paths):
         table.add_row(f"Config: {label}", str(path), "yes" if exists else "no")
     console.print(table)
-    console.print("[dim]Priority: environment variables, .env files, user settings, defaults.[/dim]")
+    console.print(
+        "[dim]Priority: environment variables, .env files, user settings, defaults.[/dim]"
+    )
 
 
 @config_app.command("validate")

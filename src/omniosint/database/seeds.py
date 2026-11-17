@@ -45,10 +45,9 @@ async def seed_builtin(session: AsyncSession) -> SeedReport:
     # A permission removed from the code no longer protects anything.
     await session.execute(delete(Permission).where(Permission.code.not_in(codes)))
 
-    permission_ids = {
-        code: permission_id
-        for code, permission_id in (await session.execute(select(Permission.code, Permission.id)))
-    }
+    permission_ids = dict(
+        (await session.execute(select(Permission.code, Permission.id))).tuples().all()
+    )
 
     # Roles --------------------------------------------------------------------
     for definition in BUILTIN_ROLES:
@@ -68,9 +67,7 @@ async def seed_builtin(session: AsyncSession) -> SeedReport:
         role_id = (
             await session.execute(select(Role.id).where(Role.name == definition.name))
         ).scalar_one()
-        await session.execute(
-            delete(role_permissions).where(role_permissions.c.role_id == role_id)
-        )
+        await session.execute(delete(role_permissions).where(role_permissions.c.role_id == role_id))
         if definition.permissions:
             await session.execute(
                 insert(role_permissions),

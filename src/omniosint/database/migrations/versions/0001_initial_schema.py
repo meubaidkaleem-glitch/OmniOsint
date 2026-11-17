@@ -21,16 +21,19 @@ depends_on: str | Sequence[str] | None = None
 _NOW = sa.text("now()")
 _EMPTY_JSON = sa.text("'{}'::jsonb")
 
-# The audit trail is append-only. Updates are always refused. Deletes are
-# refused unless the transaction has opted in, which only the retention job
+# The audit trail is append-only. UPDATE is always refused. DELETE and TRUNCATE
+# are refused unless the transaction has opted in, which only the retention job
 # does (SET LOCAL omniosint.audit_purge = 'on').
 _AUDIT_GUARD_FUNCTION = """
 CREATE FUNCTION omniosint_audit_events_guard() RETURNS trigger
 LANGUAGE plpgsql AS $$
 BEGIN
-    IF TG_OP = 'DELETE'
+    IF TG_OP IN ('DELETE', 'TRUNCATE')
        AND current_setting('omniosint.audit_purge', true) IS NOT DISTINCT FROM 'on' THEN
-        RETURN OLD;
+        IF TG_OP = 'DELETE' THEN
+            RETURN OLD;
+        END IF;
+        RETURN NULL;
     END IF;
     RAISE EXCEPTION 'audit_events is append-only (% refused)', TG_OP
         USING ERRCODE = 'integrity_constraint_violation';
@@ -38,11 +41,18 @@ END;
 $$
 """
 
-_AUDIT_GUARD_TRIGGER = """
-CREATE TRIGGER audit_events_append_only
-BEFORE UPDATE OR DELETE ON audit_events
-FOR EACH ROW EXECUTE FUNCTION omniosint_audit_events_guard()
-"""
+_AUDIT_GUARD_TRIGGERS = (
+    """
+    CREATE TRIGGER audit_events_append_only
+    BEFORE UPDATE OR DELETE ON audit_events
+    FOR EACH ROW EXECUTE FUNCTION omniosint_audit_events_guard()
+    """,
+    """
+    CREATE TRIGGER audit_events_no_truncate
+    BEFORE TRUNCATE ON audit_events
+    FOR EACH STATEMENT EXECUTE FUNCTION omniosint_audit_events_guard()
+    """,
+)
 
 
 def upgrade() -> None:
@@ -72,9 +82,7 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_audit_events")),
     )
-    op.create_index(
-        "ix_audit_events_action_occurred_at", "audit_events", ["action", "occurred_at"]
-    )
+    op.create_index("ix_audit_events_action_occurred_at", "audit_events", ["action", "occurred_at"])
     op.create_index(
         "ix_audit_events_actor_user_id_occurred_at",
         "audit_events",
@@ -86,7 +94,8 @@ def upgrade() -> None:
         [sa.literal_column("occurred_at DESC"), sa.literal_column("id DESC")],
     )
     op.execute(_AUDIT_GUARD_FUNCTION)
-    op.execute(_AUDIT_GUARD_TRIGGER)
+    for trigger in _AUDIT_GUARD_TRIGGERS:
+        op.execute(trigger)
 
     op.create_table(
         "permissions",
@@ -167,9 +176,7 @@ def upgrade() -> None:
             "failed_login_count >= 0",
             name=op.f("ck_users_failed_login_count_non_negative"),
         ),
-        sa.CheckConstraint(
-            "username = lower(username)", name=op.f("ck_users_username_lowercase")
-        ),
+        sa.CheckConstraint("username = lower(username)", name=op.f("ck_users_username_lowercase")),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_users")),
         sa.UniqueConstraint("username", name=op.f("uq_users_username")),
     )
@@ -232,9 +239,7 @@ def upgrade() -> None:
         sa.Column("ip_address", sa.String(length=64), nullable=True),
         sa.Column("user_agent", sa.String(length=255), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=_NOW, nullable=False),
-        sa.Column(
-            "last_seen_at", sa.DateTime(timezone=True), server_default=_NOW, nullable=False
-        ),
+        sa.Column("last_seen_at", sa.DateTime(timezone=True), server_default=_NOW, nullable=False),
         sa.Column("expires_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("revoked_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("revoke_reason", sa.String(length=64), nullable=True),
@@ -268,6 +273,7 @@ def downgrade() -> None:
     op.drop_table("service_instances")
     op.drop_table("roles")
     op.drop_table("permissions")
+    op.execute("DROP TRIGGER IF EXISTS audit_events_no_truncate ON audit_events")
     op.execute("DROP TRIGGER IF EXISTS audit_events_append_only ON audit_events")
     op.drop_table("audit_events")
     op.execute("DROP FUNCTION IF EXISTS omniosint_audit_events_guard()")

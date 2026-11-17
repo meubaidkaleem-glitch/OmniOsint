@@ -53,9 +53,7 @@ BUILTIN_ROLES: tuple[RoleDefinition, ...] = (
     ),
     RoleDefinition(
         name=ANALYST,
-        description=(
-            "Investigation work. Receives permissions as intelligence modules are added."
-        ),
+        description=("Investigation work. Receives permissions as intelligence modules are added."),
         permissions=frozenset(),
     ),
     RoleDefinition(

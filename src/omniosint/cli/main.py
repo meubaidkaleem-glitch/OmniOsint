@@ -106,7 +106,7 @@ def _print_status(report: supervisor.StatusReport) -> None:
             str(component.get("status")), "red"
         )
         console.print(
-            f"  [{marker}]{str(component.get('status')):<15}[/{marker}] {component.get('label')}"
+            f"  [{marker}]{component.get('status')!s:<15}[/{marker}] {component.get('label')}"
         )
 
 

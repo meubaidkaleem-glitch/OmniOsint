@@ -334,8 +334,8 @@ def load_settings(
     token = _yaml_layer.set(layer)
     try:
         return Settings(
-            _env_file=tuple(str(path) for path in env_files) or None,  # type: ignore[call-arg]
-            _env_file_encoding="utf-8",  # type: ignore[call-arg]
+            _env_file=tuple(str(path) for path in env_files) or None,
+            _env_file_encoding="utf-8",
             **(overrides or {}),
         )
     except ValidationError as exc:

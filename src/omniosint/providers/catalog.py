@@ -125,7 +125,9 @@ class ProviderCatalogue(BaseModel):
 
     @model_validator(mode="after")
     def _unique_ids(self) -> ProviderCatalogue:
-        duplicates = [key for key, count in Counter(p.id for p in self.providers).items() if count > 1]
+        duplicates = [
+            key for key, count in Counter(p.id for p in self.providers).items() if count > 1
+        ]
         if duplicates:
             raise ValueError(f"duplicate provider id(s): {', '.join(sorted(duplicates))}")
         return self

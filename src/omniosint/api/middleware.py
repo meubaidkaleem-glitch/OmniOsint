@@ -203,7 +203,10 @@ class BodySizeLimitMiddleware:
                 too_large = True
             if too_large:
                 response = error_response(
-                    413, "payload_too_large", "The request body is too large.", request_id=request_id
+                    413,
+                    "payload_too_large",
+                    "The request body is too large.",
+                    request_id=request_id,
                 )
                 await response(scope, receive, send)
                 return

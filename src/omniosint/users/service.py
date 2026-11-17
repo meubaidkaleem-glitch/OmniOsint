@@ -12,7 +12,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
 
-from sqlalchemy import func, or_, select, text, update
+from sqlalchemy import ColumnElement, func, or_, select, text, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -73,7 +73,7 @@ class UserService:
     ) -> Page[User]:
         """Users ordered by username, keyset-paginated."""
         page_size = clamp_limit(limit)
-        filters = [User.deleted_at.is_(None)]
+        filters: list[ColumnElement[bool]] = [User.deleted_at.is_(None)]
         if search and search.strip():
             # The pattern is a bound parameter; % and _ are escaped so that the
             # search term is always treated literally.
@@ -89,8 +89,9 @@ class UserService:
             )
 
         total = int(
-            (await session.execute(select(func.count()).select_from(User).where(*filters)))
-            .scalar_one()
+            (
+                await session.execute(select(func.count()).select_from(User).where(*filters))
+            ).scalar_one()
         )
 
         query = select(User).where(*filters)
@@ -264,7 +265,7 @@ class UserService:
         *,
         actor: Actor,
         display_name: str | Any = UNSET,
-        email: str | None | Any = UNSET,
+        email: str | Any | None = UNSET,
         is_active: bool | Any = UNSET,
         roles: Sequence[str] | Any = UNSET,
         request: RequestInfo | None = None,

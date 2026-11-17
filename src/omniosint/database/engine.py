@@ -3,11 +3,17 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Mapping
 from typing import Any
 
 from sqlalchemy import URL, make_url, text
 from sqlalchemy.exc import ArgumentError
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from omniosint.core.config import DatabaseSettings, Settings
 from omniosint.core.errors import ConfigurationError
@@ -35,8 +41,7 @@ def build_database_url(settings: Settings, paths: AppPaths | None = None) -> URL
             raise ConfigurationError("database.url is not a valid database URL.") from exc
         if url.get_backend_name() not in ("postgresql", "postgres"):
             raise ConfigurationError(
-                "OmniOSINT requires PostgreSQL; database.url points at "
-                f"{url.get_backend_name()!r}."
+                f"OmniOSINT requires PostgreSQL; database.url points at {url.get_backend_name()!r}."
             )
         query = {key: value for key, value in url.query.items() if key not in _SSL_QUERY_KEYS}
         url = url.set(drivername=ASYNC_DRIVER, query=query)
@@ -63,6 +68,7 @@ def build_database_url(settings: Settings, paths: AppPaths | None = None) -> URL
 def ssl_mode_for(settings: DatabaseSettings) -> str:
     """SSL mode, honouring ``sslmode`` in ``database.url`` when present."""
     if settings.url is not None:
+        query: Mapping[str, Any]
         try:
             query = make_url(settings.url.get_secret_value()).query
         except ArgumentError:
