@@ -97,8 +97,14 @@ omniosint/
 ├── tests/                   unit/, integration/, security/, end_to_end/
 ├── frontend/                React + TypeScript + Vite web interface
 ├── desktop/                 Tauri desktop shell
+│   ├── backend-control/     Rust library: locate, start, probe, stop (no Tauri)
+│   ├── src-tauri/           window, notifications, two status-page commands
+│   └── ui/                  bundled status page
 ├── config/                  settings.yaml, logging.yaml, providers.yaml (defaults)
-├── scripts/                 windows/*.ps1, linux/*.sh, dev/ tooling
+├── scripts/                 windows/ (shared PowerShell and .cmd helpers),
+│                            linux/install.sh, dev/ (docs generator, e2e runner)
+├── .github/workflows/       CI: Linux checks, browser tests, Windows install,
+│                            Windows desktop build
 ├── docs/                    this documentation
 ├── *.bat, setup.ps1         Windows entry points (thin wrappers)
 └── docker-compose.yml       optional local PostgreSQL / Redis
@@ -242,16 +248,18 @@ The full data model is in [DATABASE_SCHEMA](DATABASE_SCHEMA.md).
 
 ## 7. Frontend architecture
 
-**[Implemented]** React + TypeScript, built with Vite, styled with Tailwind
-CSS, served by the API process from the same origin.
+**[Implemented]** React 19 + TypeScript 5.9, built with Vite, styled with
+Tailwind CSS 4, served by the API process from the same origin. Interactive
+primitives come from Radix UI (dialogs, menus) and cmdk (command palette);
+icons from lucide-react. Building it needs Node.js 22.22 or later.
 
 ```
 frontend/src/
-├── app/            router, providers (query client, theme), route guards
-├── api/            typed client generated from the OpenAPI schema, query hooks
-├── components/ui/  design-system primitives (button, input, table, dialog, ...)
-├── components/     application pieces (shell, sidebar, command palette, ...)
-├── pages/          one directory per navigation section
+├── app/            router, query client, route guard, shell context
+├── api/            fetch client, generated OpenAPI types, query hooks
+├── components/ui/  design-system primitives (button, form, surface, table, overlay)
+├── components/layout/  shell, sidebar, top bar, command palette
+├── pages/          dashboard, planned, integrations, auth/, admin/
 ├── stores/         Zustand stores for UI state (theme, sidebar)
 ├── lib/            navigation spec, formatting, utilities
 └── styles/         design tokens (dark default, light alternative)
@@ -280,12 +288,20 @@ Libraries added only when the feature that needs them lands: Cytoscape.js
 1. shows a local status page while it runs `omniosint start`,
 2. loads the local web interface from `http://127.0.0.1:<port>` once the
    backend reports ready,
-3. polls `omniosint status` and raises a system notification if the backend
-   stops,
+3. probes the liveness endpoint every few seconds, raises a system
+   notification and returns to the status page (with a restart button) if the
+   backend stops,
 4. stops the backend on quit if it was the one that started it.
 
-The remote page gets no access to Tauri commands; only the bundled status page
-does. Background/tray operation arrives with monitoring in Phase 11.
+The lifecycle work is in a separate Rust library, `desktop/backend-control`,
+which has no Tauri dependency so that it is tested on every platform, including
+against a real installation. The shell finds the program folder through
+`OMNIOSINT_ROOT`, the `install.json` record that the installers write to the
+data folder, or the folders above its executable.
+
+The remote page gets no access to Tauri commands: the two commands are declared
+in an app manifest and granted only to the bundled status page by the
+capability file. Background/tray operation arrives with monitoring in Phase 11.
 
 ## 9. AI investigation system
 
@@ -569,8 +585,8 @@ in [DEPENDENCIES](DEPENDENCIES.md).
 | Configuration | pydantic-settings, PyYAML, platformdirs | Layered settings, data directory |
 | Operations | structlog, psutil, httpx | Logging, process control, health checks |
 | CLI | Typer | Command-line interface |
-| Web UI | React, React Router, TanStack Query, Zustand, Tailwind CSS, Radix UI primitives | Interface |
-| Desktop | Tauri | Desktop shell |
+| Web UI | React, React Router, TanStack Query, Zustand, Tailwind CSS, Radix UI primitives, cmdk, lucide-react | Interface |
+| Desktop | Tauri 2, tauri-plugin-notification, serde | Desktop shell |
 
 Tenacity, Celery, Neo4j drivers, OpenSearch clients and the visualisation
 libraries named in the brief are deliberately not installed yet; each is added

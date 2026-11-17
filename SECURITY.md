@@ -104,6 +104,10 @@ records who approved it and on what authority.
 ## Known limitations
 
 * Backups are not encrypted (Phase 13). Keep them on an encrypted volume.
+* Restoring a backup restores its audit trail as well; entries recorded after
+  the backup was taken are kept only in the automatic pre-restore backup.
+* On Linux the secret store's master key is protected by file permissions only;
+  `omniosint doctor` reports this.
 * The login throttle is per process and in memory; it becomes shared when Redis
   is configured in Phase 2.
 * TLS is not terminated by OmniOSINT. It is designed for loopback use; anyone

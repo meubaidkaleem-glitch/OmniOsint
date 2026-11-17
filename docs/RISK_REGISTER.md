@@ -8,7 +8,7 @@ phase.
 
 | ID | Risk | L | I | Mitigation | Owner phase | State |
 |---|---|---|---|---|---|---|
-| T-01 | Windows behaviour differs from the Linux build environment (process control, paths, DPAPI, event loop) | High | High | One lifecycle implementation in Python with no reliance on POSIX signals; Windows job in CI that installs, starts, health-checks and stops the app; DPAPI round-trip test that runs only on Windows | 1 | Open — see Phase 1 report for what has been verified on Windows |
+| T-01 | Windows behaviour differs from the Linux build environment (process control, paths, DPAPI, event loop) | High | High | One lifecycle implementation in Python with no reliance on POSIX signals; Windows job in CI that installs, starts, health-checks, backs up, restores and stops the app and runs the test suite; DPAPI round-trip test that runs only on Windows | 1 | **Open** — Windows scripts reviewed and type-checked but not executed by the developer; confirm with the CI `windows` job |
 | T-02 | PostgreSQL is a heavy prerequisite for a desktop user | Medium | Medium | Installer detects an existing server, offers `winget` or Docker with consent; managed portable PostgreSQL considered for the packaged installer | 1, 14 | Open |
 | T-03 | No official Redis build for Windows | High | Low | Redis is optional; in-process fallbacks for cache and rate limiting; job queue lives in PostgreSQL | 1, 2 | Mitigated by design |
 | T-04 | Celery is unsupported on Windows | High | Medium | PostgreSQL-backed queue with asyncio workers (ADR-004) | 2 | Mitigated by design |
@@ -19,7 +19,7 @@ phase.
 | T-09 | Graph outgrows relational queries | Low | Medium | `GraphStore` interface; Neo4j projection as an option decided on measurements | 7 | Open |
 | T-10 | Unbounded growth of raw responses and observations | Medium | Medium | Content-addressed storage, retention periods, partitioning of observation tables | 2, 11 | Open |
 | T-11 | New Python or Node releases lack binary wheels or break builds | Medium | Medium | Supported version range checked by the installer; hash-pinned lock files; CI matrix | 1 | Open |
-| T-12 | Desktop shell cannot be built on a user machine without Rust and MSVC | High | Low | The web interface works without the shell; prebuilt installer in Phase 14 | 1, 14 | Accepted |
+| T-12 | Desktop shell cannot be built on a user machine without Rust and MSVC | High | Low | The web interface works without the shell; CI builds the installer as a downloadable artifact; signed release installer in Phase 14 | 1, 14 | Accepted |
 | T-13 | Tauri depends on WebView2, missing on some Windows 10 machines | Low | Low | Installer bundle includes the WebView2 bootstrapper (Phase 14) | 14 | Open |
 | T-14 | Dependency versions move faster than documentation or prior knowledge | Medium | Medium | Behaviour verified by tests against the pinned versions, not assumed | all | Ongoing |
 | T-15 | Long-running collection blocks the interface | Medium | Medium | All collection is a background job with progress events; request handlers never call providers | 2 | Open |

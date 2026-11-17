@@ -23,9 +23,9 @@ Status legend: **Available** · **Partial** (some of it works, limits stated) ·
 | Protected secret storage (DPAPI) | 1 | Available | Used for the database password now, provider keys from Phase 5 |
 | Health checks and diagnostics | 1 | Available | `health/live`, `health/ready`, `omniosint doctor` |
 | Process lifecycle (start, stop, status) | 1 | Available | |
-| Windows install and lifecycle scripts | 1 | Available | See the Phase 1 report for what was verified where |
+| Windows install and lifecycle scripts | 1 | Available | Reviewed and type-checked; executed on Windows only by the CI `windows` job (see the Phase 1 report) |
 | Backup and restore | 1 | Partial | Unencrypted archives; encryption in Phase 13 |
-| Desktop shell | 1 | Partial | Starts, monitors and stops the backend; tray mode in Phase 11 |
+| Desktop shell | 1 | Partial | Starts, monitors and stops the backend; built for Windows by CI; tray mode in Phase 11 |
 | Command palette (Ctrl+K) | 1 | Partial | Navigation and actions; indicator search in Phase 2 |
 | Redis cache and rate limiting | 2 | Planned | Connection health check exists |
 | Collection job queue | 2 | Planned | |
