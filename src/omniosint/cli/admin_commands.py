@@ -28,7 +28,7 @@ from omniosint.cli.common import (
     run_async,
     use_json,
 )
-from omniosint.core.config import config_files, load_settings
+from omniosint.core.config import SECRET_YAML_PATHS, Settings, config_files, load_settings
 from omniosint.core.errors import OmniError
 from omniosint.core.paths import AppPaths, default_config_dir, project_root
 from omniosint.core.secrets import SecretStore, validate_secret_name
@@ -313,6 +313,104 @@ def config_show(
         emit_json(data)
     else:
         sys.stdout.write(yaml.safe_dump(data, sort_keys=False, default_flow_style=False))
+
+
+def _parse_key(key: str) -> tuple[str, str]:
+    """Validate a ``section.field`` settings key."""
+    section, _, field = key.partition(".")
+    section_info = Settings.model_fields.get(section)
+    model = section_info.annotation if section_info else None
+    fields = getattr(model, "model_fields", None)
+    if not field or "." in field or fields is None or field not in fields:
+        fail(
+            f"Unknown setting {key!r}.",
+            hint="Use section.name, for example server.port or database.host. "
+            "Run `omniosint config show` to see every setting.",
+            code=EXIT_USAGE,
+        )
+    if (section, field) in SECRET_YAML_PATHS:
+        fail(
+            f"{key} is a secret and is not stored in the settings file.",
+            hint=f"Run: omniosint secrets set {key}",
+            code=EXIT_USAGE,
+        )
+    return section, field
+
+
+def _write_user_settings(paths: AppPaths, data: dict[str, Any]) -> None:
+    """Write the user settings file, keeping the previous one if the result is invalid."""
+    target = paths.user_settings_file
+    previous = target.read_text(encoding="utf-8") if target.is_file() else None
+    paths.config_dir.mkdir(parents=True, exist_ok=True)
+    header = "# OmniOSINT user settings. Edit by hand or with `omniosint config set`.\n"
+    target.write_text(
+        header + yaml.safe_dump(data, sort_keys=True, default_flow_style=False),
+        encoding="utf-8",
+    )
+    try:
+        load_settings(paths)
+    except OmniError as exc:
+        if previous is None:
+            target.unlink(missing_ok=True)
+        else:
+            target.write_text(previous, encoding="utf-8")
+        console.print(f"[red]Not changed.[/red] {escape(exc.message)}")
+        raise typer.Exit(EXIT_CONFIGURATION) from exc
+
+
+def _read_user_settings(paths: AppPaths) -> dict[str, Any]:
+    target = paths.user_settings_file
+    if not target.is_file():
+        return {}
+    data = yaml.safe_load(target.read_text(encoding="utf-8")) or {}
+    if not isinstance(data, dict):
+        fail(f"{target} does not contain a mapping.", code=EXIT_CONFIGURATION)
+    return data
+
+
+@config_app.command("set")
+def config_set(
+    key: Annotated[str, typer.Argument(help="Setting as section.name, e.g. server.port.")],
+    value: Annotated[str, typer.Argument(help="New value (YAML syntax: 9000, true, [a, b]).")],
+) -> None:
+    """Change one setting in the user settings file. The result is validated first."""
+    section, field = _parse_key(key)
+    paths = AppPaths.resolve()
+    try:
+        parsed = yaml.safe_load(value)
+    except yaml.YAMLError:
+        parsed = value
+    data = _read_user_settings(paths)
+    section_data = data.setdefault(section, {})
+    if not isinstance(section_data, dict):
+        fail(
+            f"The {section} section of the settings file is not a mapping.", code=EXIT_CONFIGURATION
+        )
+    section_data[field] = parsed
+    _write_user_settings(paths, data)
+    console.print(
+        f"[green]Set[/green] {key} = {escape(repr(parsed))} in {paths.user_settings_file}"
+    )
+    console.print("[dim]Restart OmniOSINT for the change to take effect.[/dim]")
+
+
+@config_app.command("unset")
+def config_unset(
+    key: Annotated[str, typer.Argument(help="Setting as section.name.")],
+) -> None:
+    """Remove a setting from the user settings file, restoring its default."""
+    section, field = _parse_key(key)
+    paths = AppPaths.resolve()
+    data = _read_user_settings(paths)
+    section_data = data.get(section)
+    if not isinstance(section_data, dict) or field not in section_data:
+        console.print(f"{key} is not set in the user settings file.")
+        return
+    del section_data[field]
+    if not section_data:
+        del data[section]
+    _write_user_settings(paths, data)
+    console.print(f"[green]Removed[/green] {key}; the default applies.")
 
 
 def known_roles() -> str:

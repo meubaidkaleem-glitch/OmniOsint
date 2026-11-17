@@ -31,7 +31,7 @@ ENV_PREFIX = "OMNIOSINT_"
 
 # Keys that must not be supplied through YAML files: they are secrets and
 # belong in the environment or the protected secret store.
-_SECRET_YAML_PATHS: tuple[tuple[str, str], ...] = (
+SECRET_YAML_PATHS: tuple[tuple[str, str], ...] = (
     ("database", "password"),
     ("database", "url"),
     ("redis", "url"),
@@ -241,7 +241,7 @@ def _check_yaml_layer(data: dict[str, Any], source: Path) -> None:
             f"{source} contains unknown setting(s): {', '.join(unknown)}.",
             hint=f"Known top-level settings: {', '.join(sorted(Settings.model_fields))}.",
         )
-    for section, key in _SECRET_YAML_PATHS:
+    for section, key in SECRET_YAML_PATHS:
         section_data = data.get(section)
         if isinstance(section_data, dict) and section_data.get(key) is not None:
             raise ConfigurationError(

@@ -39,8 +39,9 @@ echo "==> Preparing the database"
 
 echo "==> Starting OmniOSINT on port $PORT"
 START_JSON="$("$PYTHON" -m omniosint start --json)"
-export OMNIOSINT_E2E_BASE_URL="$(printf '%s' "$START_JSON" | "$PYTHON" -c 'import json,sys; print(json.load(sys.stdin)["url"])')"
-export OMNIOSINT_E2E_SETUP_URL="$(printf '%s' "$START_JSON" | "$PYTHON" -c 'import json,sys; print(json.load(sys.stdin)["open_url"])')"
+OMNIOSINT_E2E_BASE_URL="$(printf '%s' "$START_JSON" | "$PYTHON" -c 'import json,sys; print(json.load(sys.stdin)["url"])')"
+OMNIOSINT_E2E_SETUP_URL="$(printf '%s' "$START_JSON" | "$PYTHON" -c 'import json,sys; print(json.load(sys.stdin)["open_url"])')"
+export OMNIOSINT_E2E_BASE_URL OMNIOSINT_E2E_SETUP_URL
 [[ -n "$SCREENSHOTS" ]] && export OMNIOSINT_E2E_SCREENSHOTS="$SCREENSHOTS"
 
 echo "==> Running browser tests"

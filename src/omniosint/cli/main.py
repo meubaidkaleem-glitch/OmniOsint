@@ -116,7 +116,8 @@ def start(
         bool, typer.Option("--no-wait", help="Return without waiting for readiness.")
     ] = False,
     open_browser: Annotated[
-        bool, typer.Option("--open", help="Open the interface in the default browser.")
+        bool,
+        typer.Option("--open/--no-open", help="Open the interface in the default browser."),
     ] = False,
     json_output: Annotated[bool, typer.Option("--json", help="Machine-readable output.")] = False,
 ) -> None:
