@@ -1,0 +1,19 @@
+{
+  "name": "omniosint-desktop",
+  "private": true,
+  "version": "0.1.0",
+  "description": "OmniOSINT desktop shell (Tauri)",
+  "engines": {
+    "node": ">=22.22.0"
+  },
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "build:exe": "tauri build --no-bundle",
+    "icons": "tauri icon app-icon.png"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.12.4"
+  }
+}

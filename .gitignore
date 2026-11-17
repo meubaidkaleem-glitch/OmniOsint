@@ -44,6 +44,7 @@ frontend/blob-report/
 # --- Desktop shell (Tauri / Rust) --------------------------------------------
 desktop/src-tauri/target/
 desktop/src-tauri/gen/
+desktop/backend-control/target/
 
 # --- Editors and operating systems -------------------------------------------
 .idea/
