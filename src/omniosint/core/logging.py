@@ -88,7 +88,13 @@ def _formatter(*, as_json: bool, colors: bool) -> logging.Formatter:
     if as_json:
         processors += [structlog.processors.format_exc_info, structlog.processors.JSONRenderer()]
     else:
-        processors.append(structlog.dev.ConsoleRenderer(colors=colors))
+        # Plain tracebacks on purpose: the "rich" formatter prints local
+        # variables, which can include passwords and tokens.
+        processors.append(
+            structlog.dev.ConsoleRenderer(
+                colors=colors, exception_formatter=structlog.dev.plain_traceback
+            )
+        )
     return structlog.stdlib.ProcessorFormatter(
         foreign_pre_chain=_shared_processors(),
         processors=processors,

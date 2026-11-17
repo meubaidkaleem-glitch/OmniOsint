@@ -17,3 +17,9 @@ NAMING_CONVENTION = {
 
 class Base(DeclarativeBase):
     metadata = MetaData(naming_convention=NAMING_CONVENTION)
+
+    # Fetch server-generated values (defaults and ``onupdate`` timestamps) as
+    # part of the INSERT/UPDATE itself. Without this an updated row's
+    # ``updated_at`` is left expired, and reading it later would need a lazy
+    # load, which is not possible from async code.
+    __mapper_args__ = {"eager_defaults": True}
