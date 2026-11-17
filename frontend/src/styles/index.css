@@ -1,0 +1,154 @@
+@import "tailwindcss";
+
+/* Dark theme is the default; [data-theme="light"] on <html> switches. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  --font-sans: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue",
+    Arial, sans-serif;
+  --font-mono: "Cascadia Mono", "Cascadia Code", ui-monospace, SFMono-Regular, Menlo, Consolas,
+    monospace;
+
+  --color-canvas: var(--c-canvas);
+  --color-surface: var(--c-surface);
+  --color-surface-2: var(--c-surface-2);
+  --color-surface-3: var(--c-surface-3);
+  --color-line: var(--c-line);
+  --color-line-strong: var(--c-line-strong);
+  --color-fg: var(--c-fg);
+  --color-fg-muted: var(--c-fg-muted);
+  --color-fg-subtle: var(--c-fg-subtle);
+  --color-accent: var(--c-accent);
+  --color-accent-strong: var(--c-accent-strong);
+  --color-accent-soft: var(--c-accent-soft);
+  --color-on-accent: var(--c-on-accent);
+  --color-ok: var(--c-ok);
+  --color-ok-soft: var(--c-ok-soft);
+  --color-warn: var(--c-warn);
+  --color-warn-soft: var(--c-warn-soft);
+  --color-danger: var(--c-danger);
+  --color-danger-soft: var(--c-danger-soft);
+  --color-neutral-soft: var(--c-neutral-soft);
+  --color-focus: var(--c-focus);
+}
+
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --c-canvas: #0a0e13;
+  --c-surface: #10161d;
+  --c-surface-2: #151d26;
+  --c-surface-3: #1b2530;
+  --c-line: #212c38;
+  --c-line-strong: #2e3d4d;
+  --c-fg: #e3e9ef;
+  --c-fg-muted: #9aa8b6;
+  --c-fg-subtle: #6d7c8b;
+  --c-accent: #5aacde;
+  --c-accent-strong: #2a6fb0;
+  --c-accent-soft: rgb(90 172 222 / 0.12);
+  --c-on-accent: #ffffff;
+  --c-ok: #4cba86;
+  --c-ok-soft: rgb(76 186 134 / 0.13);
+  --c-warn: #d9ac3d;
+  --c-warn-soft: rgb(217 172 61 / 0.13);
+  --c-danger: #ec6a62;
+  --c-danger-soft: rgb(236 106 98 / 0.13);
+  --c-neutral-soft: rgb(154 168 182 / 0.12);
+  --c-focus: #5aacde;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --c-canvas: #f3f5f8;
+  --c-surface: #ffffff;
+  --c-surface-2: #f6f8fa;
+  --c-surface-3: #edf1f5;
+  --c-line: #dde3ea;
+  --c-line-strong: #c4cfda;
+  --c-fg: #111a23;
+  --c-fg-muted: #4a5867;
+  --c-fg-subtle: #6a7785;
+  --c-accent: #1d68ad;
+  --c-accent-strong: #1d68ad;
+  --c-accent-soft: rgb(29 104 173 / 0.09);
+  --c-on-accent: #ffffff;
+  --c-ok: #1b7a4b;
+  --c-ok-soft: rgb(27 122 75 / 0.1);
+  --c-warn: #8f6200;
+  --c-warn-soft: rgb(143 98 0 / 0.1);
+  --c-danger: #be2f29;
+  --c-danger-soft: rgb(190 47 41 / 0.09);
+  --c-neutral-soft: rgb(74 88 103 / 0.08);
+  --c-focus: #1d68ad;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    background-color: var(--c-canvas);
+    color: var(--c-fg);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--c-focus);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--c-accent-soft);
+  }
+
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--font-mono);
+  }
+
+  * {
+    scrollbar-color: var(--c-line-strong) transparent;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer utilities {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Skeleton shimmer, deliberately subtle. */
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+.skeleton {
+  animation: skeleton-pulse 1.6s ease-in-out infinite;
+  background: var(--c-surface-3);
+  border-radius: 4px;
+}
