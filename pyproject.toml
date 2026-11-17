@@ -1,0 +1,160 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "omniosint"
+dynamic = ["version"]
+description = "OmniOSINT - evidence-driven OSINT and intelligence investigation platform"
+readme = "README.md"
+requires-python = ">=3.12"
+keywords = ["osint", "threat-intelligence", "investigation", "security"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Environment :: Web Environment",
+    "Framework :: FastAPI",
+    "Intended Audience :: Information Technology",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security",
+]
+# Runtime dependencies. Ranges live here; exact, hash-pinned versions live in
+# requirements.txt (generated - see docs/DEVELOPER_GUIDE.md "Dependency management").
+dependencies = [
+    "alembic>=1.14",
+    "argon2-cffi>=23.1",
+    "asyncpg>=0.30",
+    "cryptography>=44",
+    "email-validator>=2.2",
+    "fastapi>=0.115",
+    "httpx>=0.28",
+    "platformdirs>=4.3",
+    "psutil>=6.1",
+    "pydantic>=2.10",
+    "pydantic-settings>=2.7",
+    "pyyaml>=6.0.2",
+    "redis>=5.2",
+    "sqlalchemy[asyncio]>=2.0.36",
+    "structlog>=24.4",
+    "typer>=0.15",
+    "uvicorn>=0.34",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.14",
+    "pip-audit>=2.7",
+    "pytest>=8.3",
+    "pytest-asyncio>=0.25",
+    "pytest-cov>=6.0",
+    "ruff>=0.9",
+    "types-psutil",
+    "types-pyyaml",
+]
+
+[project.scripts]
+omniosint = "omniosint.cli.main:main"
+
+[tool.hatch.version]
+path = "src/omniosint/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/omniosint"]
+
+# Ship the default configuration inside the wheel so a non-editable install
+# still finds it (see omniosint.core.paths.default_config_dir).
+[tool.hatch.build.targets.wheel.force-include]
+"config" = "omniosint/_default_config"
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "config", "README.md", "pyproject.toml"]
+
+# --------------------------------------------------------------------------
+# Tooling
+# --------------------------------------------------------------------------
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = "-ra --strict-markers --strict-config"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+markers = [
+    "integration: needs a reachable PostgreSQL test database",
+    "security: security-focused checks",
+    "e2e: starts the real application processes",
+    "windows_only: exercises Windows-specific code paths",
+]
+filterwarnings = ["error::DeprecationWarning:omniosint.*"]
+
+[tool.coverage.run]
+source = ["omniosint"]
+branch = true
+# SQLAlchemy's async layer runs code in greenlets; the CLI, supervisor and
+# lifecycle tests run real subprocesses. Both are measured.
+concurrency = ["thread", "greenlet"]
+patch = ["subprocess"]
+omit = ["*/database/migrations/versions/*"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "@overload",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+extend-exclude = ["frontend", "desktop"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort
+    "B",        # bugbear
+    "UP",       # pyupgrade
+    "S",        # bandit-style security checks
+    "ASYNC",    # async pitfalls
+    "C4",       # comprehensions
+    "SIM",      # simplifications
+    "RUF",
+    "DTZ",      # naive datetimes
+    "T20",      # stray print()
+    "PT",       # pytest style
+]
+ignore = [
+    "S101",     # assert is fine in tests and for invariants
+    "B008",     # FastAPI/Typer use calls in argument defaults by design
+    "RUF012",   # SQLAlchemy/pydantic class attributes
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Compound assertions read well in tests; small blocking file reads in async
+# tests are harmless.
+"tests/**" = ["S105", "S106", "S107", "S108", "S603", "S607", "T20", "PT018", "ASYNC240"]
+"src/omniosint/cli/**" = ["T20"]
+"scripts/**" = ["T20", "S603", "S607"]
+"src/omniosint/database/migrations/versions/*" = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["omniosint"]
+
+[tool.mypy]
+python_version = "3.12"
+packages = ["omniosint"]
+mypy_path = "src"
+strict = true
+warn_unreachable = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["asyncpg.*", "argon2.*"]
+ignore_missing_imports = true

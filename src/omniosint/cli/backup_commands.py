@@ -1,0 +1,159 @@
+"""`omniosint backup ...`"""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Annotated
+
+import typer
+from rich.table import Table
+
+from omniosint.backup import service as backup
+from omniosint.cli.common import (
+    EXIT_FAILURE,
+    EXIT_USAGE,
+    console,
+    emit_json,
+    escape,
+    fail,
+    load_runtime,
+    use_json,
+)
+from omniosint.runtime import supervisor
+
+app = typer.Typer(help="Back up and restore the database.", no_args_is_help=True)
+
+
+def _size(size_bytes: int) -> str:
+    if size_bytes >= 1024**2:
+        return f"{size_bytes / 1024**2:.1f} MiB"
+    return f"{size_bytes / 1024:.1f} KiB"
+
+
+@app.command("create")
+def create(
+    output: Annotated[
+        Path | None,
+        typer.Option("--output", "-o", help="Directory to write the archive to."),
+    ] = None,
+    label: Annotated[str | None, typer.Option(help="Short label added to the file name.")] = None,
+    json_output: Annotated[bool, typer.Option("--json", help="Machine-readable output.")] = False,
+) -> None:
+    """Create a backup archive (database dump, settings file, checksums).
+
+    Archives are not encrypted: keep them somewhere only you can read.
+    """
+    use_json(json_output)
+    runtime = load_runtime()
+    info = backup.create_backup(runtime.settings, runtime.paths, output_dir=output, label=label)
+    if json_output:
+        emit_json({"ok": True, **info.to_dict()})
+        return
+    console.print(f"[green]Backup created:[/green] {escape(str(info.path))}")
+    console.print(
+        f"  {_size(info.size_bytes)}, schema revision {info.schema_revision}, "
+        f"PostgreSQL {escape(info.server_version)}"
+    )
+    console.print(
+        "[yellow]This archive is not encrypted.[/yellow] It contains password hashes and "
+        "all stored data; keep it on an encrypted volume."
+    )
+
+
+@app.command("list")
+def list_backups(
+    json_output: Annotated[bool, typer.Option("--json", help="Machine-readable output.")] = False,
+) -> None:
+    """List backups in the backup directory, newest first."""
+    use_json(json_output)
+    runtime = load_runtime()
+    items = backup.list_backups(runtime.paths)
+    if json_output:
+        emit_json(
+            {
+                "ok": True,
+                "directory": str(runtime.paths.backups_dir),
+                "backups": [item.to_dict() for item in items],
+            }
+        )
+        return
+    if not items:
+        console.print(f"No backups in {escape(str(runtime.paths.backups_dir))}.")
+        return
+    table = Table("File", "Created (UTC)", "Size", "Version", "Schema")
+    for item in items:
+        table.add_row(
+            escape(item.path.name),
+            item.created_at.replace("T", " ")[:19],
+            _size(item.size_bytes),
+            escape(item.app_version),
+            str(item.schema_revision),
+        )
+    console.print(table)
+    console.print(f"[dim]{escape(str(runtime.paths.backups_dir))}[/dim]")
+
+
+@app.command("verify")
+def verify(
+    archive: Annotated[Path, typer.Argument(help="Backup archive to check.")],
+) -> None:
+    """Check that an archive is complete and unmodified."""
+    info = backup.verify_backup(archive)
+    console.print(
+        f"[green]Valid backup[/green] created {info.created_at} by version "
+        f"{escape(info.app_version)} (schema revision {info.schema_revision})."
+    )
+
+
+@app.command("restore")
+def restore(
+    archive: Annotated[Path, typer.Argument(help="Backup archive to restore.")],
+    yes: Annotated[bool, typer.Option("--yes", "-y", help="Do not ask for confirmation.")] = False,
+    no_safety_backup: Annotated[
+        bool,
+        typer.Option("--no-safety-backup", help="Skip the backup of the current data."),
+    ] = False,
+    restore_settings: Annotated[
+        bool,
+        typer.Option("--restore-settings", help="Also replace the user settings file."),
+    ] = False,
+) -> None:
+    """Replace the current database content with a backup.
+
+    OmniOSINT must be stopped. The current data is backed up first unless
+    --no-safety-backup is given, and the restore either completes fully or
+    changes nothing.
+    """
+    runtime = load_runtime()
+    info = backup.verify_backup(archive)
+
+    state = supervisor.read_state(runtime.paths)
+    if state is not None and any(supervisor.is_alive(item) for item in state.processes):
+        fail(
+            "OmniOSINT is running.",
+            hint="Stop it first (stop.bat or `omniosint stop`), then restore.",
+            code=EXIT_FAILURE,
+        )
+
+    console.print(
+        f"About to restore [bold]{escape(info.path.name)}[/bold] "
+        f"(created {info.created_at}, version {escape(info.app_version)})."
+    )
+    console.print(
+        "[yellow]All current data in the database will be replaced.[/yellow]"
+        + ("" if no_safety_backup else " A backup of the current data is made first.")
+    )
+    if not yes and not typer.confirm("Continue?", default=False):
+        console.print("Nothing was changed.")
+        raise typer.Exit(EXIT_USAGE)
+
+    result = backup.restore_backup(
+        runtime.settings,
+        runtime.paths,
+        archive,
+        safety_backup=not no_safety_backup,
+        restore_settings=restore_settings,
+    )
+    console.print(f"[green]Restore complete.[/green] Schema revision {result.schema_revision}.")
+    if result.safety_backup is not None:
+        console.print(f"The previous data was saved to {escape(str(result.safety_backup.path))}.")
