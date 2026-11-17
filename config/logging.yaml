@@ -1,0 +1,19 @@
+# OmniOSINT default logging settings (merged into the `logging` section).
+#
+# Override in the user settings file under `logging:` or with environment
+# variables such as OMNIOSINT_LOGGING__LEVEL=DEBUG.
+
+# DEBUG | INFO | WARNING | ERROR
+level: INFO
+
+# auto: readable lines in a terminal, JSON lines otherwise.
+console_format: auto
+
+# One JSON-lines file per process (api.log, worker.log, cli.log) in the logs
+# directory of the data directory.
+file_enabled: true
+file_max_bytes: 10485760
+file_backup_count: 5
+
+# One line per HTTP request, with method, path, status, duration and request id.
+access_log: true
