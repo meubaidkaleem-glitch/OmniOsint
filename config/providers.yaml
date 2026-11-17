@@ -1,0 +1,974 @@
+# OmniOSINT provider catalogue
+#
+# This is the inventory of data sources and tools the platform is designed to
+# integrate. It is metadata, not configuration: it holds no credentials and
+# enables nothing by itself.
+#
+# status
+#   planned      no adapter exists yet (shown in the interface as
+#                "Planned - integration not yet implemented")
+#   available    an adapter exists and is tested
+#   excluded     will not be integrated; the note says why
+#
+# access (how the source can be used, to the best of current knowledge)
+#   free           no account or key needed
+#   free_key       free, but an account or key is required
+#   freemium       a limited free tier exists; fuller use is paid
+#   paid           a paid plan or credits are required
+#   self_hosted    connects to an instance the user operates or may use
+#   local_library  runs inside OmniOSINT, no network service
+#   local_tool     separate program the user installs; never bundled
+#   none           no official programmatic access
+#
+# IMPORTANT: access notes describe publicly documented terms as understood when
+# this file was written. Terms, quotas and endpoints change. Each entry is
+# re-verified against the provider's official documentation when its adapter is
+# built, and the adapter discovers plan and quota at runtime where the provider
+# exposes them. Nothing here is a promise of what a given account can do.
+
+version: 1
+
+providers:
+  # ---------------------------------------------------------------- internet assets
+  - id: shodan
+    name: Shodan
+    category: internet_assets
+    access: freemium
+    auth: api_key
+    docs_url: https://developer.shodan.io/api
+    phase: 5
+    status: planned
+    modules: [ip, internet_assets, network_topology]
+    notes: >-
+      Free accounts have little or no search quota; search filters and bulk
+      access need a paid plan. Plan and remaining credits are read from the
+      account information endpoint.
+
+  - id: shodan_internetdb
+    name: Shodan InternetDB
+    category: internet_assets
+    access: free
+    auth: none
+    docs_url: https://internetdb.shodan.io/
+    phase: 5
+    status: planned
+    modules: [ip, internet_assets]
+    notes: >-
+      Keyless per-IP summary (ports, hostnames, product identifiers,
+      vulnerability identifiers). Intended for non-commercial use. Preferred
+      free-first source before spending Shodan credits.
+
+  - id: censys
+    name: Censys
+    category: internet_assets
+    access: freemium
+    auth: token
+    docs_url: https://docs.censys.com/
+    phase: 5
+    status: planned
+    modules: [ip, domain, internet_assets, network_topology]
+    notes: >-
+      Two API generations exist (legacy Search and the Censys Platform) with
+      different authentication. The adapter must detect which one the account
+      can use instead of assuming either.
+
+  - id: fofa
+    name: FOFA
+    category: internet_assets
+    access: paid
+    auth: api_key
+    docs_url: https://en.fofa.info/api
+    phase: 5
+    status: planned
+    modules: [ip, domain, internet_assets]
+    notes: >-
+      Result fields and volumes depend on membership level and points. Free
+      accounts have very limited API access.
+
+  - id: zoomeye
+    name: ZoomEye
+    category: internet_assets
+    access: freemium
+    auth: api_key
+    docs_url: https://www.zoomeye.ai/
+    phase: 5
+    status: planned
+    modules: [ip, domain, internet_assets]
+    notes: Credit-based quota. API host and version have changed over time.
+
+  - id: netlas
+    name: Netlas
+    category: internet_assets
+    access: freemium
+    auth: api_key
+    docs_url: https://docs.netlas.io/
+    phase: 5
+    status: planned
+    modules: [ip, domain, internet_assets]
+    notes: Community tier has a small daily request allowance.
+
+  - id: onyphe
+    name: ONYPHE
+    category: internet_assets
+    access: freemium
+    auth: api_key
+    docs_url: https://search.onyphe.io/docs/
+    phase: 5
+    status: planned
+    modules: [ip, domain, internet_assets]
+    notes: Available data categories depend on the subscription.
+
+  # ---------------------------------------------------------------- threat intelligence
+  - id: virustotal
+    name: VirusTotal
+    category: threat
+    access: freemium
+    auth: api_key
+    docs_url: https://docs.virustotal.com/reference/overview
+    phase: 6
+    status: planned
+    modules: [threat, domain, ip]
+    notes: >-
+      The public API is rate-limited and for non-commercial use. Lookups by
+      hash, domain, IP and URL only; files are never uploaded without explicit
+      approval because submitted samples are shared with other subscribers.
+
+  - id: abuseipdb
+    name: AbuseIPDB
+    category: threat
+    access: freemium
+    auth: api_key
+    docs_url: https://docs.abuseipdb.com/
+    phase: 6
+    status: planned
+    modules: [threat, ip]
+    notes: Daily check allowance depends on the plan.
+
+  - id: greynoise
+    name: GreyNoise
+    category: threat
+    access: freemium
+    auth: api_key
+    docs_url: https://docs.greynoise.io/
+    phase: 6
+    status: planned
+    modules: [threat, ip]
+    notes: The community endpoint returns a reduced record; full context is paid.
+
+  - id: otx
+    name: AlienVault OTX
+    category: threat
+    access: free_key
+    auth: api_key
+    docs_url: https://otx.alienvault.com/api
+    phase: 6
+    status: planned
+    modules: [threat]
+    notes: Free registration required.
+
+  - id: urlhaus
+    name: URLhaus (abuse.ch)
+    category: threat
+    access: free_key
+    auth: api_key
+    docs_url: https://urlhaus-api.abuse.ch/
+    phase: 6
+    status: planned
+    modules: [threat]
+    notes: abuse.ch services require a free authentication key.
+
+  - id: threatfox
+    name: ThreatFox (abuse.ch)
+    category: threat
+    access: free_key
+    auth: api_key
+    docs_url: https://threatfox.abuse.ch/api/
+    phase: 6
+    status: planned
+    modules: [threat]
+    notes: abuse.ch services require a free authentication key.
+
+  - id: malwarebazaar
+    name: MalwareBazaar (abuse.ch)
+    category: threat
+    access: free_key
+    auth: api_key
+    docs_url: https://bazaar.abuse.ch/api/
+    phase: 6
+    status: planned
+    modules: [threat]
+    notes: >-
+      Metadata lookups by hash only. Samples are never downloaded or executed.
+
+  - id: spamhaus
+    name: Spamhaus
+    category: threat
+    access: freemium
+    auth: api_key
+    docs_url: https://docs.spamhaus.com/
+    phase: 6
+    status: planned
+    modules: [threat, ip, domain, email]
+    notes: >-
+      Blocklist lookups need a registered query key; the intelligence API is a
+      paid product.
+
+  - id: cisco_talos
+    name: Cisco Talos
+    category: threat
+    access: none
+    auth: none
+    docs_url: https://talosintelligence.com/
+    phase: 6
+    status: excluded
+    modules: [threat]
+    notes: >-
+      No official public API for reputation lookups. Not integrated unless
+      licensed access is supplied; the website is not scraped.
+
+  - id: misp
+    name: MISP
+    category: threat
+    access: self_hosted
+    auth: api_key
+    docs_url: https://www.misp-project.org/documentation/
+    phase: 6
+    status: planned
+    modules: [threat]
+    notes: Connects to an instance the user operates or is authorised to use.
+
+  - id: opencti
+    name: OpenCTI
+    category: threat
+    access: self_hosted
+    auth: token
+    docs_url: https://docs.opencti.io/
+    phase: 6
+    status: planned
+    modules: [threat]
+    notes: Connects to an instance the user operates or is authorised to use.
+
+  # ---------------------------------------------------------------- DNS and domains
+  - id: dns
+    name: DNS resolution
+    category: dns_domain
+    access: local_library
+    auth: none
+    docs_url: https://www.dnspython.org/
+    phase: 4
+    status: planned
+    modules: [domain, email, ip]
+    notes: Standard record lookups through the configured resolver.
+
+  - id: rdap
+    name: RDAP and WHOIS
+    category: dns_domain
+    access: free
+    auth: none
+    docs_url: https://about.rdap.org/
+    phase: 4
+    status: planned
+    modules: [domain, ip]
+    notes: >-
+      Registries rate-limit and many redact registrant data. Results are
+      whatever the registry publishes.
+
+  - id: crtsh
+    name: crt.sh
+    category: dns_domain
+    access: free
+    auth: none
+    docs_url: https://crt.sh/
+    phase: 4
+    status: planned
+    modules: [domain, historical]
+    notes: >-
+      Community service with no availability guarantee; often slow. Queried
+      sparingly and cached.
+
+  - id: certspotter
+    name: Cert Spotter
+    category: dns_domain
+    access: freemium
+    auth: api_key
+    docs_url: https://sslmate.com/help/reference/ct_search_api_v1
+    phase: 4
+    status: planned
+    modules: [domain, historical, brand_protection]
+    notes: Limited unauthenticated use; a key raises limits.
+
+  - id: securitytrails
+    name: SecurityTrails
+    category: dns_domain
+    access: freemium
+    auth: api_key
+    docs_url: https://docs.securitytrails.com/
+    phase: 5
+    status: planned
+    modules: [domain, historical]
+    notes: Small monthly free allowance; historical DNS depends on the plan.
+
+  - id: dnsdumpster
+    name: DNSDumpster
+    category: dns_domain
+    access: freemium
+    auth: api_key
+    docs_url: https://dnsdumpster.com/developer/
+    phase: 5
+    status: planned
+    modules: [domain]
+    notes: Official API with a key; the free tier is rate-limited.
+
+  - id: viewdns
+    name: ViewDNS.info
+    category: dns_domain
+    access: freemium
+    auth: api_key
+    docs_url: https://viewdns.info/api/
+    phase: 5
+    status: planned
+    modules: [domain, ip]
+    notes: Small free allowance.
+
+  - id: whoisxmlapi
+    name: WhoisXML API
+    category: dns_domain
+    access: freemium
+    auth: api_key
+    docs_url: https://www.whoisxmlapi.com/
+    phase: 5
+    status: planned
+    modules: [domain, ip, historical]
+    notes: Trial credits, then paid.
+
+  - id: rapiddns
+    name: RapidDNS
+    category: dns_domain
+    access: none
+    auth: none
+    docs_url: https://rapiddns.io/
+    phase: 5
+    status: excluded
+    modules: [domain]
+    notes: >-
+      No documented official API. Excluded unless official programmatic access
+      is offered; the website is not scraped.
+
+  - id: dnslytics
+    name: DNSlytics
+    category: dns_domain
+    access: paid
+    auth: api_key
+    docs_url: https://dnslytics.com/
+    phase: 5
+    status: planned
+    modules: [domain, ip]
+    notes: Paid API.
+
+  # ---------------------------------------------------------------- web
+  - id: urlscan
+    name: urlscan.io
+    category: web
+    access: freemium
+    auth: api_key
+    docs_url: https://urlscan.io/docs/api/
+    phase: 5
+    status: planned
+    modules: [domain, threat, brand_protection]
+    notes: >-
+      Searching existing scans is passive. Submitting a URL is an active
+      operation that discloses the target to a third party and needs approval.
+
+  - id: wayback
+    name: Wayback Machine
+    category: web
+    access: free
+    auth: none
+    docs_url: https://archive.org/help/wayback_api.php
+    phase: 4
+    status: planned
+    modules: [domain, historical]
+    notes: Rate-limited public service.
+
+  - id: commoncrawl
+    name: Common Crawl
+    category: web
+    access: free
+    auth: none
+    docs_url: https://commoncrawl.org/
+    phase: 9
+    status: planned
+    modules: [domain, historical]
+    notes: Index server is heavily rate-limited.
+
+  - id: builtwith
+    name: BuiltWith
+    category: web
+    access: freemium
+    auth: api_key
+    docs_url: https://api.builtwith.com/
+    phase: 5
+    status: planned
+    modules: [domain]
+    notes: The free API returns only summary counts; detail is paid.
+
+  - id: wappalyzer
+    name: Wappalyzer
+    category: web
+    access: paid
+    auth: api_key
+    docs_url: https://www.wappalyzer.com/api/
+    phase: 5
+    status: planned
+    modules: [domain]
+    notes: Paid API.
+
+  - id: publicwww
+    name: PublicWWW
+    category: web
+    access: paid
+    auth: api_key
+    docs_url: https://publicwww.com/
+    phase: 9
+    status: planned
+    modules: [domain, brand_protection]
+    notes: Paid API.
+
+  # ---------------------------------------------------------------- public code
+  - id: github
+    name: GitHub
+    category: code
+    access: free_key
+    auth: token
+    docs_url: https://docs.github.com/en/rest
+    phase: 6
+    status: planned
+    modules: [software_supply_chain, organization]
+    notes: Unauthenticated use is tightly limited; code search has its own limit.
+
+  - id: gitlab
+    name: GitLab
+    category: code
+    access: free_key
+    auth: token
+    docs_url: https://docs.gitlab.com/api/rest/
+    phase: 6
+    status: planned
+    modules: [software_supply_chain]
+    notes: Works with gitlab.com or a self-managed instance.
+
+  - id: grep_app
+    name: grep.app
+    category: code
+    access: none
+    auth: none
+    docs_url: https://grep.app/
+    phase: 6
+    status: excluded
+    modules: [software_supply_chain]
+    notes: >-
+      No documented, stable public API. Excluded until one is documented.
+
+  - id: gitleaks
+    name: Gitleaks
+    category: code
+    access: local_tool
+    auth: none
+    docs_url: https://github.com/gitleaks/gitleaks
+    phase: 6
+    status: planned
+    modules: [software_supply_chain]
+    notes: >-
+      MIT licence. Run only on authorised repositories or supplied material.
+      Findings are redacted; secrets are never used.
+
+  - id: trufflehog
+    name: TruffleHog
+    category: code
+    access: local_tool
+    auth: none
+    docs_url: https://github.com/trufflesecurity/trufflehog
+    phase: 6
+    status: planned
+    modules: [software_supply_chain]
+    notes: >-
+      AGPL-3.0 licence, so it is never bundled. Verification against live
+      services is disabled: a detected secret is never sent anywhere.
+
+  # ---------------------------------------------------------------- vulnerability and software
+  - id: nvd
+    name: NVD
+    category: vulnerability
+    access: free
+    auth: api_key
+    docs_url: https://nvd.nist.gov/developers
+    phase: 6
+    status: planned
+    modules: [vulnerability]
+    notes: A free key is optional and raises the rate limit.
+
+  - id: cisa_kev
+    name: CISA Known Exploited Vulnerabilities
+    category: vulnerability
+    access: free
+    auth: none
+    docs_url: https://www.cisa.gov/known-exploited-vulnerabilities-catalog
+    phase: 6
+    status: planned
+    modules: [vulnerability]
+    notes: Published as a downloadable feed.
+
+  - id: epss
+    name: FIRST EPSS
+    category: vulnerability
+    access: free
+    auth: none
+    docs_url: https://api.first.org/epss/
+    phase: 6
+    status: planned
+    modules: [vulnerability]
+    notes: Probability scores; not a statement that a system is exploitable.
+
+  - id: cwe
+    name: MITRE CWE
+    category: vulnerability
+    access: free
+    auth: none
+    docs_url: https://cwe.mitre.org/
+    phase: 6
+    status: planned
+    modules: [vulnerability]
+    notes: Weakness catalogue, downloaded and cached locally.
+
+  - id: osv
+    name: OSV
+    category: vulnerability
+    access: free
+    auth: none
+    docs_url: https://google.github.io/osv.dev/
+    phase: 6
+    status: planned
+    modules: [vulnerability, software_supply_chain]
+    notes: Package-version vulnerability queries.
+
+  - id: github_advisories
+    name: GitHub Advisory Database
+    category: vulnerability
+    access: free_key
+    auth: token
+    docs_url: https://docs.github.com/en/rest/security-advisories/global-advisories
+    phase: 6
+    status: planned
+    modules: [vulnerability, software_supply_chain]
+    notes: Uses the GitHub credential.
+
+  - id: package_registries
+    name: Package registries (PyPI, npm and others)
+    category: vulnerability
+    access: free
+    auth: none
+    docs_url: https://docs.pypi.org/api/json/
+    phase: 6
+    status: planned
+    modules: [software_supply_chain]
+    notes: Public package metadata; each registry is a separate small adapter.
+
+  # ---------------------------------------------------------------- network intelligence and geolocation
+  - id: ripestat
+    name: RIPEstat
+    category: network
+    access: free
+    auth: none
+    docs_url: https://stat.ripe.net/docs/data-api/ripestat-data-api
+    phase: 4
+    status: planned
+    modules: [ip, network_topology]
+    notes: Routing, prefix and ASN data.
+
+  - id: bgpview
+    name: BGPView
+    category: network
+    access: free
+    auth: none
+    docs_url: ""
+    phase: 4
+    status: excluded
+    modules: [ip, network_topology]
+    notes: >-
+      The public service did not respond when this catalogue was written and
+      appears to have been discontinued. RIPEstat covers the same routing data.
+      Re-checked if the service returns.
+
+  - id: ipinfo
+    name: IPinfo
+    category: network
+    access: freemium
+    auth: token
+    docs_url: https://ipinfo.io/developers
+    phase: 4
+    status: planned
+    modules: [ip, geospatial]
+    notes: Free tier is country and ASN level; finer data is paid.
+
+  - id: maxmind_geolite
+    name: MaxMind GeoLite2
+    category: network
+    access: free_key
+    auth: account
+    docs_url: https://dev.maxmind.com/geoip/geolite2-free-geolocation-data/
+    phase: 4
+    status: planned
+    modules: [ip, geospatial]
+    notes: >-
+      Local database downloaded with a free account. Licence requires keeping it
+      current. Locations are estimates, never addresses.
+
+  - id: nominatim
+    name: OpenStreetMap Nominatim
+    category: geospatial
+    access: free
+    auth: none
+    docs_url: https://nominatim.org/release-docs/latest/api/Overview/
+    phase: 9
+    status: planned
+    modules: [geospatial]
+    notes: >-
+      The public instance has a strict usage policy (low request rate,
+      identifying user agent, no bulk use). Heavy use needs a self-hosted or
+      commercial instance.
+
+  - id: map_tiles
+    name: Map tiles (configurable source)
+    category: geospatial
+    access: free
+    auth: none
+    docs_url: https://operations.osmfoundation.org/policies/tiles/
+    phase: 9
+    status: planned
+    modules: [geospatial]
+    notes: >-
+      The tile source is a setting. The public OpenStreetMap tile servers are
+      not meant for heavy application use; attribution is always required.
+
+  # ---------------------------------------------------------------- corporate and research
+  - id: opencorporates
+    name: OpenCorporates
+    category: corporate
+    access: paid
+    auth: api_key
+    docs_url: https://api.opencorporates.com/
+    phase: 9
+    status: planned
+    modules: [organization]
+    notes: Paid, with free access by application for qualifying open-data use.
+
+  - id: companies_house
+    name: UK Companies House
+    category: corporate
+    access: free_key
+    auth: api_key
+    docs_url: https://developer.company-information.service.gov.uk/
+    phase: 9
+    status: planned
+    modules: [organization]
+    notes: Example of an official registry; others are added per jurisdiction.
+
+  - id: sec_edgar
+    name: SEC EDGAR
+    category: corporate
+    access: free
+    auth: none
+    docs_url: https://www.sec.gov/search-filings/edgar-application-programming-interfaces
+    phase: 9
+    status: planned
+    modules: [organization]
+    notes: Requires a declared user agent and has a request-rate limit.
+
+  - id: gleif
+    name: GLEIF LEI
+    category: corporate
+    access: free
+    auth: none
+    docs_url: https://www.gleif.org/en/lei-data/gleif-api
+    phase: 9
+    status: planned
+    modules: [organization]
+    notes: Legal entity identifiers and published ownership relationships.
+
+  - id: crossref
+    name: Crossref
+    category: research
+    access: free
+    auth: none
+    docs_url: https://www.crossref.org/documentation/retrieve-metadata/rest-api/
+    phase: 9
+    status: planned
+    modules: [academic]
+    notes: Asks callers to identify themselves for the polite pool.
+
+  - id: openalex
+    name: OpenAlex
+    category: research
+    access: free
+    auth: none
+    docs_url: https://docs.openalex.org/
+    phase: 9
+    status: planned
+    modules: [academic]
+    notes: Key and usage policy to be confirmed at integration time.
+
+  - id: semantic_scholar
+    name: Semantic Scholar
+    category: research
+    access: free_key
+    auth: api_key
+    docs_url: https://www.semanticscholar.org/product/api
+    phase: 9
+    status: planned
+    modules: [academic]
+    notes: A key is recommended; the shared pool is heavily limited.
+
+  # ---------------------------------------------------------------- phone and email
+  - id: libphonenumber
+    name: libphonenumber
+    category: phone
+    access: local_library
+    auth: none
+    docs_url: https://github.com/google/libphonenumber
+    phase: 4
+    status: planned
+    modules: [phone]
+    notes: >-
+      Offline validation, region and number type. Carrier data reflects the
+      original allocation of a number range, not the current operator, and
+      never identifies a subscriber.
+
+  - id: carrier_lookup
+    name: Authorised carrier lookup
+    category: phone
+    access: paid
+    auth: api_key
+    docs_url: https://www.twilio.com/docs/lookup
+    phase: 4
+    status: planned
+    modules: [phone]
+    notes: >-
+      Line type and current carrier from a commercial lookup service (Twilio
+      Lookup is the reference adapter). Paid per query. No subscriber identity.
+
+  - id: hibp
+    name: Have I Been Pwned
+    category: email
+    access: paid
+    auth: api_key
+    docs_url: https://haveibeenpwned.com/API/v3
+    phase: 4
+    status: planned
+    modules: [email]
+    notes: >-
+      Breached-account search needs a paid key. Domain search needs verified
+      control of the domain. Passwords are never handled.
+
+  - id: emailrep
+    name: EmailRep
+    category: email
+    access: free_key
+    auth: api_key
+    docs_url: https://emailrep.io/
+    phase: 4
+    status: planned
+    modules: [email]
+    notes: Keys are issued on request; availability to be confirmed.
+
+  # ---------------------------------------------------------------- usernames, social, news
+  - id: sherlock
+    name: Sherlock
+    category: username
+    access: local_tool
+    auth: none
+    docs_url: https://github.com/sherlock-project/sherlock
+    phase: 4
+    status: planned
+    modules: [username]
+    notes: >-
+      MIT licence. Checks public profile URLs. Results are candidate
+      associations and include false positives.
+
+  - id: maigret
+    name: Maigret
+    category: username
+    access: local_tool
+    auth: none
+    docs_url: https://github.com/soxoj/maigret
+    phase: 4
+    status: planned
+    modules: [username]
+    notes: MIT licence. Same caveats as Sherlock.
+
+  - id: platform_apis
+    name: Official social platform APIs
+    category: social_news
+    access: freemium
+    auth: token
+    docs_url: ""
+    phase: 9
+    status: planned
+    modules: [social]
+    notes: >-
+      Each platform is evaluated separately and gets its own adapter. Many are
+      paid or restricted. Nothing behind a login or privacy setting is
+      collected.
+
+  - id: gdelt
+    name: GDELT
+    category: social_news
+    access: free
+    auth: none
+    docs_url: https://www.gdeltproject.org/
+    phase: 9
+    status: planned
+    modules: [news]
+    notes: Global news index.
+
+  - id: rss
+    name: Public RSS and Atom feeds
+    category: social_news
+    access: free
+    auth: none
+    docs_url: ""
+    phase: 9
+    status: planned
+    modules: [news]
+    notes: User-configured feeds.
+
+  - id: search_api
+    name: Licensed web search API
+    category: social_news
+    access: paid
+    auth: api_key
+    docs_url: ""
+    phase: 9
+    status: planned
+    modules: [news, social, organization, email, phone]
+    notes: >-
+      Provider to be selected when the first module needs it. Search engines
+      are used only through a licensed API, never by scraping result pages.
+
+  # ---------------------------------------------------------------- authorised network discovery tools
+  - id: nmap
+    name: Nmap
+    category: network_tools
+    access: local_tool
+    auth: none
+    docs_url: https://nmap.org/book/man.html
+    phase: 8
+    status: planned
+    modules: [network_topology]
+    notes: >-
+      Nmap Public Source License; never bundled. Active scanning runs only
+      inside an approved scope.
+
+  - id: arp_scan
+    name: arp-scan
+    category: network_tools
+    access: local_tool
+    auth: none
+    docs_url: https://github.com/royhills/arp-scan
+    phase: 8
+    status: planned
+    modules: [network_topology]
+    notes: GPL-3.0. Local network only, inside an approved scope.
+
+  - id: netdiscover
+    name: Netdiscover
+    category: network_tools
+    access: local_tool
+    auth: none
+    docs_url: https://github.com/netdiscover-scanner/netdiscover
+    phase: 8
+    status: planned
+    modules: [network_topology]
+    notes: GPL-3.0. Local network only, inside an approved scope.
+
+  - id: snmp
+    name: SNMP tools
+    category: network_tools
+    access: local_tool
+    auth: none
+    docs_url: http://www.net-snmp.org/
+    phase: 8
+    status: planned
+    modules: [network_topology]
+    notes: Reads devices the user administers, with credentials they supply.
+
+  - id: lldp_cdp
+    name: LLDP and CDP data ingestion
+    category: network_tools
+    access: local_tool
+    auth: none
+    docs_url: ""
+    phase: 8
+    status: planned
+    modules: [network_topology]
+    notes: Imports neighbour tables exported from authorised devices.
+
+  - id: traceroute
+    name: Traceroute
+    category: network_tools
+    access: local_tool
+    auth: none
+    docs_url: ""
+    phase: 8
+    status: planned
+    modules: [network_topology]
+    notes: >-
+      A hop is an observation of a path, not proof of a physical connection.
+
+  - id: tshark
+    name: Wireshark (tshark)
+    category: network_tools
+    access: local_tool
+    auth: none
+    docs_url: https://www.wireshark.org/docs/
+    phase: 8
+    status: planned
+    modules: [network_topology]
+    notes: GPL-2.0. Reads captures the user supplies.
+
+  - id: zeek
+    name: Zeek
+    category: network_tools
+    access: local_tool
+    auth: none
+    docs_url: https://docs.zeek.org/
+    phase: 8
+    status: planned
+    modules: [network_topology]
+    notes: BSD licence. Imports logs the user supplies.
+
+  # ---------------------------------------------------------------- AI models
+  - id: llm_cloud
+    name: Cloud language models
+    category: ai_models
+    access: paid
+    auth: api_key
+    docs_url: ""
+    phase: 10
+    status: planned
+    modules: [ai_investigation]
+    notes: >-
+      Reached through each vendor's official SDK behind one interface. No
+      vendor or model is hard-coded. Disabled entirely in local-only mode.
+
+  - id: llm_local
+    name: Local language models
+    category: ai_models
+    access: self_hosted
+    auth: none
+    docs_url: ""
+    phase: 10
+    status: planned
+    modules: [ai_investigation]
+    notes: >-
+      Any local server with an OpenAI-compatible API (for example Ollama,
+      llama.cpp or LM Studio). Case data stays on the machine.

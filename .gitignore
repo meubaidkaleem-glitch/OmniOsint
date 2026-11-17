@@ -1,0 +1,55 @@
+# --- Secrets and local configuration: never commit ---------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+master.key
+secrets.json
+setup-token.txt
+
+# --- Local data, logs and backups -------------------------------------------
+/.omniosint/
+/data/
+/logs/
+/backups/
+*.log
+omniosint-backup-*.zip
+
+# --- Python -------------------------------------------------------------------
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+/build/
+/dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# --- Node / frontend ----------------------------------------------------------
+node_modules/
+frontend/dist/
+frontend/coverage/
+frontend/test-results/
+frontend/playwright-report/
+frontend/blob-report/
+*.tsbuildinfo
+
+# --- Desktop shell (Tauri / Rust) --------------------------------------------
+desktop/src-tauri/target/
+desktop/src-tauri/gen/
+
+# --- Editors and operating systems -------------------------------------------
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
