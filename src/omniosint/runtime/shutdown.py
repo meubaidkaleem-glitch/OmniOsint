@@ -18,6 +18,7 @@ from omniosint.core.paths import write_private_text
 from omniosint.core.timeutil import isoformat, utcnow
 
 REQUEST_FILE = "shutdown.request"
+RUN_ID_ENV = "OMNIOSINT_RUN_ID"
 _POLL_SECONDS = 0.5
 
 
