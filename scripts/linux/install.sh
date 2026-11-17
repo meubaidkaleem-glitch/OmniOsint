@@ -139,6 +139,17 @@ if [[ $check == 4 ]]; then
 fi
 omni db upgrade
 
+# Lets the desktop shell find this program folder from anywhere.
+"$PY" - "$ROOT" "$PY" <<'PYEOF'
+import datetime, json, sys
+from omniosint.core.paths import AppPaths
+paths = AppPaths.resolve()
+paths.ensure()
+record = {"root": sys.argv[1], "python": sys.argv[2],
+          "installed_at": datetime.datetime.now(datetime.UTC).isoformat()}
+paths.install_file.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+PYEOF
+
 step "Running the installation diagnostics"
 omni doctor || warn "Some checks failed; see above."
 

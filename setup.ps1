@@ -286,6 +286,18 @@ function Initialize-Database {
     return $true
 }
 
+function Write-InstallRecord {
+    # Lets the desktop shell find this program folder from anywhere.
+    $record = [ordered]@{
+        root         = $script:OmniRoot
+        python       = $script:VenvPython
+        installed_at = (Get-Date).ToUniversalTime().ToString('o')
+    }
+    $path = Join-Path (Get-DataDirectory) 'install.json'
+    $json = $record | ConvertTo-Json
+    [System.IO.File]::WriteAllText($path, $json, (New-Object System.Text.UTF8Encoding($false)))
+}
+
 function Show-Diagnostics {
     Write-Step 'Running the installation diagnostics'
     $result = Get-OmniOutput @('doctor')
@@ -312,6 +324,7 @@ try {
     Install-PythonEnvironment $python
     Build-Frontend
     $databaseReady = Initialize-Database
+    Write-InstallRecord
     Show-Diagnostics
     if (-not $databaseReady) { $exitCode = 2 }
 

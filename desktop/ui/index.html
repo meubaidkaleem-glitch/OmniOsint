@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OmniOSINT</title>
+    <link rel="stylesheet" href="status.css" />
+  </head>
+  <body>
+    <main class="card" aria-live="polite">
+      <header>
+        <img src="icon.svg" alt="" width="40" height="40" />
+        <div>
+          <h1>OmniOSINT</h1>
+          <p class="sub">Evidence-driven intelligence platform</p>
+        </div>
+      </header>
+
+      <section id="starting">
+        <div class="bar" aria-hidden="true"><span></span></div>
+        <p class="title">Starting the local service…</p>
+        <p class="muted">Checking the configuration and the database, then starting the API and the background worker.</p>
+      </section>
+
+      <section id="failed" hidden>
+        <p class="title error">OmniOSINT could not start</p>
+        <p id="failed-message"></p>
+        <p id="failed-hint" class="muted"></p>
+        <button id="retry" type="button">Try again</button>
+      </section>
+
+      <section id="stopped" hidden>
+        <p class="title warn">The service stopped</p>
+        <p id="stopped-message" class="muted"></p>
+        <button id="restart" type="button">Start again</button>
+      </section>
+
+      <footer class="muted">
+        Runs on this computer only. Logs are in the OmniOSINT data folder (logs).
+      </footer>
+    </main>
+    <script src="status.js"></script>
+  </body>
+</html>

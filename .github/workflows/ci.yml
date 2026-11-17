@@ -59,6 +59,8 @@ jobs:
         run: pytest -q --cov --cov-report=term
       - name: Dependency audit
         run: pip-audit --strict -r requirements.txt --require-hashes --disable-pip
+      - name: Desktop control library tests
+        run: cargo test --manifest-path desktop/backend-control/Cargo.toml
 
   frontend:
     name: Web interface
@@ -175,6 +177,11 @@ jobs:
         run: |
           $left = Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match 'omniosint (serve|worker)' }
           if ($left) { $left | Format-Table ProcessId, CommandLine; throw 'processes still running' }
+      - name: Desktop shell control library against this installation
+        shell: pwsh
+        env:
+          OMNIOSINT_DESKTOP_TEST_ROOT: ${{ github.workspace }}
+        run: cargo test --manifest-path desktop/backend-control/Cargo.toml -- --nocapture
       - name: backup.bat and restore.bat
         shell: pwsh
         run: |
@@ -203,3 +210,33 @@ jobs:
         run: |
           if (-not (Test-Path "$env:LOCALAPPDATA\OmniOSINT\secrets\secrets.json")) { throw 'data folder was removed' }
           if (Test-Path '.venv') { throw '.venv was not removed' }
+
+  desktop:
+    name: Desktop shell (Windows build)
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.22"
+      - name: Rust toolchain
+        run: rustup toolchain install stable --profile minimal --component clippy,rustfmt && rustup default stable
+      - name: Lint
+        run: |
+          cargo fmt --check --manifest-path desktop/backend-control/Cargo.toml
+          cargo fmt --check --manifest-path desktop/src-tauri/Cargo.toml
+          cargo clippy --manifest-path desktop/backend-control/Cargo.toml --all-targets -- -D warnings
+          cargo clippy --manifest-path desktop/src-tauri/Cargo.toml -- -D warnings
+      - name: Unit tests
+        run: cargo test --manifest-path desktop/backend-control/Cargo.toml
+      - name: Build the executable and installer
+        working-directory: desktop
+        run: |
+          npm ci --no-audit --no-fund
+          npx tauri build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: omniosint-desktop-windows
+          path: |
+            desktop/src-tauri/target/release/omniosint-desktop.exe
+            desktop/src-tauri/target/release/bundle/nsis/*.exe
