@@ -38,7 +38,7 @@ from omniosint.system.health import (
 
 MIN_PYTHON = (3, 12)
 TESTED_PYTHON_MAX = (3, 14)
-MIN_NODE = (20, 19)
+MIN_NODE = (22, 22)
 MIN_MEMORY_BYTES = 4 * 1024**3
 
 
@@ -324,7 +324,7 @@ def check_frontend(settings: Settings) -> list[Check]:
                 "Node.js",
                 status,
                 "Not found (needed only to build the web interface).",
-                None if status is CheckStatus.INFO else "Install Node.js 20.19 or later.",
+                None if status is CheckStatus.INFO else "Install Node.js 22.22 or later.",
             )
         )
     else:

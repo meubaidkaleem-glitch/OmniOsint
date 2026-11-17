@@ -298,7 +298,7 @@ def dependencies_markdown() -> str:
         "|---|---|---|",
         "| PostgreSQL 15+ | System of record | yes |",
         "| pg_dump / pg_restore | Backup and restore | for backups |",
-        "| Node.js 20.19+ | Building the web interface | to build from source |",
+        "| Node.js 22.22+ | Building the web interface | to build from source |",
         "| Rust toolchain, platform WebView | Building the desktop shell | optional |",
         "| Redis 6+ (or compatible) | Shared cache and rate limiting | optional |",
         "| Docker | Running PostgreSQL and Redis in containers | optional |",
