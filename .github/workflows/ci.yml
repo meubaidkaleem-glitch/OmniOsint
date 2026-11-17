@@ -1,0 +1,242 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "phase-*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONUTF8: "1"
+  OMNIOSINT_NO_PAUSE: "1"
+
+jobs:
+  backend:
+    name: Backend (Linux)
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16.15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: omniosint_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 3s --health-retries 20
+      redis:
+        image: redis:7.4.7-alpine
+        ports: ["6379:6379"]
+    env:
+      OMNIOSINT_TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/omniosint_test
+      OMNIOSINT_TEST_ADMIN_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/postgres
+      OMNIOSINT_TEST_REDIS_URL: redis://127.0.0.1:6379/15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install PostgreSQL client tools
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-16
+      - name: Install dependencies
+        run: |
+          python -m pip install --disable-pip-version-check --require-hashes -r requirements-dev.txt
+          python -m pip install --disable-pip-version-check --no-deps --editable .
+      - name: Lint and format
+        run: |
+          ruff check src tests scripts
+          ruff format --check src tests scripts
+      - name: Type check
+        run: mypy
+      - name: Tests
+        run: pytest -q --cov --cov-report=term
+      - name: Dependency audit
+        run: pip-audit --strict -r requirements.txt --require-hashes --disable-pip
+      - name: Desktop control library tests
+        run: cargo test --manifest-path desktop/backend-control/Cargo.toml
+
+  frontend:
+    name: Web interface
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npm audit --omit=dev
+
+  browser:
+    name: Browser end-to-end
+    runs-on: ubuntu-24.04
+    needs: [backend, frontend]
+    services:
+      postgres:
+        image: postgres:16.15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: omniosint_e2e
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      OMNIOSINT_E2E_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/omniosint_e2e
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --disable-pip-version-check --require-hashes -r requirements.txt
+          .venv/bin/python -m pip install --disable-pip-version-check --no-deps --editable .
+          (cd frontend && npm ci --no-audit --no-fund && npx playwright install --with-deps chromium)
+      - name: Browser tests
+        run: scripts/dev/run-e2e.sh --screenshots "${{ runner.temp }}/screenshots"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-screenshots
+          path: |
+            ${{ runner.temp }}/screenshots
+            frontend/test-results
+          if-no-files-found: ignore
+
+  windows:
+    name: Windows install and lifecycle
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.22"
+      - name: Start the runner's PostgreSQL
+        shell: pwsh
+        run: |
+          $service = Get-Service -Name 'postgresql*' -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $service) {
+            choco install postgresql16 --no-progress --params "/Password:root" -y
+            $service = Get-Service -Name 'postgresql*' | Select-Object -First 1
+          }
+          Set-Service -InputObject $service -StartupType Manual
+          Start-Service -InputObject $service
+          $bin = $env:PGBIN
+          if (-not $bin) { $bin = (Get-ChildItem 'C:\Program Files\PostgreSQL\*\bin' | Select-Object -Last 1).FullName }
+          "PG_BIN=$bin" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          & "$bin\pg_isready.exe" -h 127.0.0.1 -p 5432
+      - name: install.bat (non-interactive, creates role and database)
+        shell: cmd
+        env:
+          OMNIOSINT_PG_ADMIN_PASSWORD: root
+        run: install.bat -NonInteractive -Database bootstrap
+      - name: start.bat
+        shell: cmd
+        run: start.bat --no-open
+      - name: health-check.bat
+        shell: cmd
+        run: health-check.bat
+      - name: Readiness over HTTP
+        shell: pwsh
+        run: |
+          $ready = Invoke-RestMethod -Uri 'http://127.0.0.1:8765/api/v1/system/health/ready'
+          $ready | ConvertTo-Json -Depth 5
+          if ($ready.status -notin @('ok', 'degraded')) { throw "not ready: $($ready.status)" }
+          $page = Invoke-WebRequest -Uri 'http://127.0.0.1:8765/' -UseBasicParsing
+          if ($page.Content -notmatch '<div id="root">') { throw 'web interface not served' }
+      - name: stop.bat
+        shell: cmd
+        run: stop.bat
+      - name: No OmniOSINT processes remain
+        shell: pwsh
+        run: |
+          $left = Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match 'omniosint (serve|worker)' }
+          if ($left) { $left | Format-Table ProcessId, CommandLine; throw 'processes still running' }
+      - name: Desktop shell control library against this installation
+        shell: pwsh
+        env:
+          OMNIOSINT_DESKTOP_TEST_ROOT: ${{ github.workspace }}
+        run: cargo test --manifest-path desktop/backend-control/Cargo.toml -- --nocapture
+      - name: backup.bat and restore.bat
+        shell: pwsh
+        run: |
+          cmd /c backup.bat --label ci
+          if ($LASTEXITCODE -ne 0) { throw 'backup failed' }
+          $archive = Get-ChildItem "$env:LOCALAPPDATA\OmniOSINT\backups\omniosint-backup-*-ci.zip" | Select-Object -First 1
+          cmd /c restore.bat "$($archive.FullName)" --yes
+          if ($LASTEXITCODE -ne 0) { throw 'restore failed' }
+      - name: Test suite on Windows (includes DPAPI)
+        shell: pwsh
+        env:
+          PGPASSWORD: root
+        run: |
+          & "$env:PG_BIN\psql.exe" -h 127.0.0.1 -U postgres -c "CREATE ROLE omniosint_ci LOGIN PASSWORD 'ci-password' CREATEDB"
+          & "$env:PG_BIN\psql.exe" -h 127.0.0.1 -U postgres -c "CREATE DATABASE omniosint_test OWNER omniosint_ci"
+          $env:OMNIOSINT_TEST_DATABASE_URL = 'postgresql://omniosint_ci:ci-password@127.0.0.1:5432/omniosint_test'
+          $env:OMNIOSINT_TEST_ADMIN_DATABASE_URL = 'postgresql://postgres:root@127.0.0.1:5432/postgres'
+          $env:Path = "$env:PG_BIN;$env:Path"
+          .\.venv\Scripts\python.exe -m pip install --disable-pip-version-check --require-hashes -r requirements-dev.txt
+          .\.venv\Scripts\python.exe -m pytest -q
+      - name: uninstall.bat keeps user data
+        shell: cmd
+        run: uninstall.bat -Yes
+      - name: Check the data folder survived
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "$env:LOCALAPPDATA\OmniOSINT\secrets\secrets.json")) { throw 'data folder was removed' }
+          if (Test-Path '.venv') { throw '.venv was not removed' }
+
+  desktop:
+    name: Desktop shell (Windows build)
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.22"
+      - name: Rust toolchain
+        run: rustup toolchain install stable --profile minimal --component clippy,rustfmt && rustup default stable
+      - name: Lint
+        run: |
+          cargo fmt --check --manifest-path desktop/backend-control/Cargo.toml
+          cargo fmt --check --manifest-path desktop/src-tauri/Cargo.toml
+          cargo clippy --manifest-path desktop/backend-control/Cargo.toml --all-targets -- -D warnings
+          cargo clippy --manifest-path desktop/src-tauri/Cargo.toml -- -D warnings
+      - name: Unit tests
+        run: cargo test --manifest-path desktop/backend-control/Cargo.toml
+      - name: Build the executable and installer
+        working-directory: desktop
+        run: |
+          npm ci --no-audit --no-fund
+          npx tauri build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: omniosint-desktop-windows
+          path: |
+            desktop/src-tauri/target/release/omniosint-desktop.exe
+            desktop/src-tauri/target/release/bundle/nsis/*.exe
