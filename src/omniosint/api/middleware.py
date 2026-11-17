@@ -14,6 +14,7 @@ from typing import Any
 
 import structlog
 from starlette.datastructures import Headers, MutableHeaders
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from omniosint.api.errors import error_response
@@ -178,8 +179,16 @@ class SecurityHeadersMiddleware:
         await self.app(scope, receive, send_with_headers)
 
 
-class _BodyTooLarge(Exception):
-    pass
+class _BodyTooLarge(StarletteHTTPException):
+    """Raised from ``receive`` once the body exceeds the limit.
+
+    A Starlette ``HTTPException`` on purpose: FastAPI turns any other exception
+    raised while reading a body into a generic 400, but passes this type through,
+    so the client receives the 413 envelope from the normal error handler.
+    """
+
+    def __init__(self) -> None:
+        super().__init__(status_code=413)
 
 
 class BodySizeLimitMiddleware:

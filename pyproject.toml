@@ -93,6 +93,10 @@ filterwarnings = ["error::DeprecationWarning:omniosint.*"]
 [tool.coverage.run]
 source = ["omniosint"]
 branch = true
+# SQLAlchemy's async layer runs code in greenlets; the CLI, supervisor and
+# lifecycle tests run real subprocesses. Both are measured.
+concurrency = ["thread", "greenlet"]
+patch = ["subprocess"]
 omit = ["*/database/migrations/versions/*"]
 
 [tool.coverage.report]
@@ -133,7 +137,9 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S105", "S106", "S107", "S108", "S603", "S607", "T20"]
+# Compound assertions read well in tests; small blocking file reads in async
+# tests are harmless.
+"tests/**" = ["S105", "S106", "S107", "S108", "S603", "S607", "T20", "PT018", "ASYNC240"]
 "src/omniosint/cli/**" = ["T20"]
 "scripts/**" = ["T20", "S603", "S607"]
 "src/omniosint/database/migrations/versions/*" = ["E501"]

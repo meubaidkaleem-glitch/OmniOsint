@@ -45,9 +45,8 @@ async def seed_builtin(session: AsyncSession) -> SeedReport:
     # A permission removed from the code no longer protects anything.
     await session.execute(delete(Permission).where(Permission.code.not_in(codes)))
 
-    permission_ids = dict(
-        (await session.execute(select(Permission.code, Permission.id))).tuples().all()
-    )
+    permission_rows = (await session.execute(select(Permission.code, Permission.id))).all()
+    permission_ids: dict[str, uuid.UUID] = {row.code: row.id for row in permission_rows}
 
     # Roles --------------------------------------------------------------------
     for definition in BUILTIN_ROLES:

@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import socket
 from typing import Any
 
+import asyncpg
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import SQLAlchemyError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from omniosint.core.errors import AuthenticationRequired, OmniError
@@ -136,6 +139,36 @@ async def _handle_http_exception(request: Request, exc: StarletteHTTPException) 
     )
 
 
+# Exception types that may mean "the database cannot be used right now".
+_INFRASTRUCTURE_ERRORS: tuple[type[Exception], ...] = (
+    ConnectionError,
+    TimeoutError,
+    socket.gaierror,
+    SQLAlchemyError,
+    asyncpg.PostgresError,
+    asyncpg.InterfaceError,
+)
+
+
+async def _handle_infrastructure_error(request: Request, exc: Exception) -> JSONResponse:
+    """Answer database outages with a clean 503 instead of a server error.
+
+    Anything that is not clearly a connectivity or schema problem is re-raised
+    and handled as an unexpected error, so real bugs are still reported.
+    """
+    translated = as_omni_error(exc)
+    if translated is None:
+        raise exc
+    log.warning(
+        "request.database_unavailable",
+        method=request.method,
+        path=request.url.path,
+        code=translated.code,
+        error=type(exc).__name__,
+    )
+    return await _handle_omni_error(request, translated)
+
+
 async def _handle_unexpected(request: Request, exc: Exception) -> JSONResponse:
     translated = as_omni_error(exc)
     if translated is not None:
@@ -166,4 +199,6 @@ def install_error_handlers(app: FastAPI) -> None:
     app.add_exception_handler(OmniError, _handle_omni_error)  # type: ignore[arg-type]
     app.add_exception_handler(RequestValidationError, _handle_validation_error)  # type: ignore[arg-type]
     app.add_exception_handler(StarletteHTTPException, _handle_http_exception)  # type: ignore[arg-type]
+    for error_type in _INFRASTRUCTURE_ERRORS:
+        app.add_exception_handler(error_type, _handle_infrastructure_error)
     app.add_exception_handler(Exception, _handle_unexpected)
