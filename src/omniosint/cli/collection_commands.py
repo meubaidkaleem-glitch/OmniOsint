@@ -604,9 +604,15 @@ def evidence_show(
             integrity = await evidence_service.check_integrity(session, item, intel.store)
             body: Any = None
             if raw and item.raw_sha256 and integrity.raw_available:
-                body = evidence_service.raw_view(
-                    intel.store.get(item.raw_sha256), "application/json", redacted=True
-                )
+                body = evidence_service.masked_raw_view(
+                    intel.store.get(item.raw_sha256), "application/json"
+                ) or {
+                    "format": "text",
+                    "body": None,
+                    "redacted": False,
+                    "note": "This response is not JSON, so it cannot be masked; "
+                    "it is not shown here.",
+                }
             return {"evidence": _evidence_dict(item), "integrity": asdict(integrity), "raw": body}
 
     data = run_async(_with_intel(runtime, work))

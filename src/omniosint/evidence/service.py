@@ -235,6 +235,13 @@ async def check_integrity(
     return Integrity(content_ok, True, True, detail)
 
 
+def masked_raw_view(content: bytes, content_type: str) -> dict[str, Any] | None:
+    """The raw response with credential-like fields masked, or ``None`` when it
+    cannot be masked (it is not JSON). A masked view never shows unmasked content."""
+    view = raw_view(content, content_type, redacted=True)
+    return view if view["redacted"] else None
+
+
 def raw_view(content: bytes, content_type: str, *, redacted: bool) -> dict[str, Any]:
     """A raw response prepared for display. Credentials-like fields are masked
     unless ``redacted`` is false; the stored bytes are never changed."""

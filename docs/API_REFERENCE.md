@@ -519,7 +519,7 @@ Responses: `200` `EvidenceDetailOut`, `401` `ErrorResponse`, `403` `ErrorRespons
 
 **The raw response behind evidence**
 
-Credential-like fields are masked. `unmasked=true` needs the `evidence:read_raw` permission and is recorded in the audit trail.
+Credential-like fields are masked. `unmasked=true` needs the `evidence:read_raw` permission and is recorded in the audit trail. A response that is not JSON cannot be masked, so it is shown only unmasked (409 `raw_not_maskable` otherwise).
 
 Requires permission: `evidence:read`
 
@@ -528,7 +528,7 @@ Requires permission: `evidence:read`
 | `evidence_id` | path | yes |  |
 | `unmasked` | query | no |  |
 
-Responses: `200` `RawOut`, `401` `ErrorResponse`, `403` `ErrorResponse`, `404` `ErrorResponse`
+Responses: `200` `RawOut`, `401` `ErrorResponse`, `403` `ErrorResponse`, `404` `ErrorResponse`, `409` `ErrorResponse`
 
 ### `GET /api/v1/entities`
 

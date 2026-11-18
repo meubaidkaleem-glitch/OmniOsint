@@ -526,7 +526,7 @@ export interface paths {
         };
         /**
          * The raw response behind evidence
-         * @description Credential-like fields are masked. `unmasked=true` needs the `evidence:read_raw` permission and is recorded in the audit trail.
+         * @description Credential-like fields are masked. `unmasked=true` needs the `evidence:read_raw` permission and is recorded in the audit trail. A response that is not JSON cannot be masked, so it is shown only unmasked (409 `raw_not_maskable` otherwise).
          */
         get: operations["raw_response_api_v1_evidence__evidence_id__raw_get"];
         put?: never;
@@ -4336,6 +4336,15 @@ export interface operations {
             };
             /** @description Not found. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The change conflicts with the current state. */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -23,7 +23,7 @@ from omniosint.api.schemas.intel import (
 from omniosint.audit.service import record
 from omniosint.auth.permissions import Permission
 from omniosint.auth.service import Principal
-from omniosint.core.errors import NotFound, PermissionDenied
+from omniosint.core.errors import Conflict, NotFound, PermissionDenied
 from omniosint.core.pagination import DEFAULT_LIMIT, MAX_LIMIT
 from omniosint.database.models import CollectionResult, EvidenceSource, RawObject
 from omniosint.evidence import entities as entity_registry
@@ -32,6 +32,12 @@ from omniosint.evidence.objectstore import ObjectStoreError
 from omniosint.indicators.types import EntityType
 
 router = APIRouter(tags=["evidence"])
+
+
+class RawNotMaskable(Conflict):
+    code = "raw_not_maskable"
+    default_message = "This raw response cannot be shown masked."
+
 
 CanRead = Annotated[Principal, Depends(require(Permission.EVIDENCE_READ))]
 LimitQuery = Annotated[int, Query(ge=1, le=MAX_LIMIT)]
@@ -104,10 +110,12 @@ async def get_evidence(
     summary="The raw response behind evidence",
     description=(
         "Credential-like fields are masked. `unmasked=true` needs the "
-        "`evidence:read_raw` permission and is recorded in the audit trail."
+        "`evidence:read_raw` permission and is recorded in the audit trail. A response "
+        "that is not JSON cannot be masked, so it is shown only unmasked (409 "
+        "`raw_not_maskable` otherwise)."
     ),
     openapi_extra=permission_doc(Permission.EVIDENCE_READ),
-    responses=_ONE,
+    responses={**_ONE, 409: ERROR_RESPONSES[409]},
 )
 async def raw_response(
     evidence_id: uuid.UUID,
@@ -146,6 +154,17 @@ async def raw_response(
         content = intel.store.get(item.raw_sha256)
     except ObjectStoreError as error:
         raise NotFound(str(error)) from error
+    view = (
+        evidence_service.raw_view(content, content_type, redacted=False)
+        if unmasked
+        else evidence_service.masked_raw_view(content, content_type)
+    )
+    if view is None:
+        raise RawNotMaskable(
+            "This raw response is not JSON, so credential-like values in it cannot be "
+            "masked. Viewing it unmasked needs the evidence:read_raw permission and is "
+            "recorded in the audit trail."
+        )
     if unmasked:
         record(
             session,
@@ -157,7 +176,6 @@ async def raw_response(
             details={"raw_sha256": item.raw_sha256, "unmasked": True},
         )
         await session.commit()
-    view = evidence_service.raw_view(content, content_type, redacted=not unmasked)
     return RawOut(
         sha256=item.raw_sha256,
         content_type=content_type,

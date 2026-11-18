@@ -6989,7 +6989,7 @@
     },
     "/api/v1/evidence/{evidence_id}/raw": {
       "get": {
-        "description": "Credential-like fields are masked. `unmasked=true` needs the `evidence:read_raw` permission and is recorded in the audit trail.",
+        "description": "Credential-like fields are masked. `unmasked=true` needs the `evidence:read_raw` permission and is recorded in the audit trail. A response that is not JSON cannot be masked, so it is shown only unmasked (409 `raw_not_maskable` otherwise).",
         "operationId": "raw_response_api_v1_evidence__evidence_id__raw_get",
         "parameters": [
           {
@@ -7053,6 +7053,16 @@
               }
             },
             "description": "Not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The change conflicts with the current state."
           },
           "422": {
             "content": {

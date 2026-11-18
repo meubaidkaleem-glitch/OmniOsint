@@ -17,6 +17,7 @@ from tests.helpers import (
     USER_PASSWORD,
     ApiUser,
     create_user,
+    execute_sql,
     fetch_all,
     login_bearer,
     make_settings,
@@ -136,7 +137,7 @@ async def test_ambiguous_input_needs_a_choice(client: httpx.AsyncClient, admin: 
 
 
 async def test_collection_end_to_end(
-    client: httpx.AsyncClient, admin: ApiUser, app: FastAPI
+    client: httpx.AsyncClient, admin: ApiUser, app: FastAPI, clean_database: str
 ) -> None:
     submitted = await post(client, admin, "/collection/requests", {"input": "example.org"})
     assert submitted.status_code == 201, submitted.text
@@ -172,6 +173,17 @@ async def test_collection_end_to_end(
         await get(client, admin, f"/evidence/{evidence[0]['id']}/raw", unmasked="true")
     ).json()
     assert unmasked["redacted"] is False
+
+    # A response that cannot be masked is never shown as if it were.
+    await execute_sql(clean_database, "UPDATE collection_results SET content_type = 'text/plain'")
+    plain = await get(client, admin, f"/evidence/{evidence[0]['id']}/raw")
+    assert plain.status_code == 409 and plain.json()["error"]["code"] == "raw_not_maskable"
+    shown = await get(client, admin, f"/evidence/{evidence[0]['id']}/raw", unmasked="true")
+    assert shown.status_code == 200 and shown.json()["format"] == "text"
+    views = await fetch_all(
+        clean_database, "SELECT count(*) FROM audit_events WHERE action = 'evidence.raw_viewed'"
+    )
+    assert views == [(2,)]
 
     entities = (await get(client, admin, "/entities", type="domain", search="example")).json()[
         "items"
