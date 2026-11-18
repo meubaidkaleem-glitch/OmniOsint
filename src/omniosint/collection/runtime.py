@@ -40,7 +40,7 @@ class IntelRuntime:
     def store(self) -> ObjectStore:
         """The object store, opened (and its key created) on first use."""
         if self._store is None:
-            self._store = ObjectStore.open(self.paths.storage_dir / "objects", self.secrets)
+            self._store = ObjectStore.open(self.paths.objects_dir, self.secrets)
         return self._store
 
     @classmethod

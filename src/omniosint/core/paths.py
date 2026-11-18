@@ -96,6 +96,11 @@ class AppPaths:
         return self.data_dir / "storage"
 
     @property
+    def objects_dir(self) -> Path:
+        """Encrypted raw responses (the evidence object store)."""
+        return self.storage_dir / "objects"
+
+    @property
     def logs_dir(self) -> Path:
         return self.home / "logs"
 

@@ -19,7 +19,9 @@ import base64
 import hashlib
 import hmac
 import os
+import re
 import zlib
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -30,6 +32,7 @@ from omniosint.core.secrets import OBJECT_STORE_KEY, SecretStore
 ENCRYPTION = "aes-256-gcm"
 _COMPRESSED = b"z"
 _PLAIN = b"r"
+_FILE_NAME = re.compile(r"^[0-9a-f]{64}$")
 
 
 class ObjectStoreError(Exception):
@@ -53,6 +56,15 @@ class StoredObject:
 
 def sha256_hex(content: bytes) -> str:
     return hashlib.sha256(content).hexdigest()
+
+
+def object_files(root: Path) -> Iterator[Path]:
+    """The object files under ``root``. Needs no key: names are opaque."""
+    if not root.is_dir():
+        return
+    for path in root.glob("??/??/*"):
+        if _FILE_NAME.fullmatch(path.name) and path.is_file():
+            yield path
 
 
 def object_key(secrets: SecretStore) -> bytes:
@@ -85,10 +97,13 @@ class ObjectStore:
     def exists(self, sha256: str) -> bool:
         return self._path(sha256).is_file()
 
-    def put(self, content: bytes) -> StoredObject:
+    def put(self, content: bytes, *, overwrite: bool = False) -> StoredObject:
+        """Store ``content`` under its hash. An object already present is kept
+        as it is, unless ``overwrite`` asks for it to be written again (a
+        restore does that, so a damaged local copy is replaced)."""
         digest = sha256_hex(content)
         path = self._path(digest)
-        if path.is_file():
+        if path.is_file() and not overwrite:
             return StoredObject(digest, len(content), created=False)
         compressed = zlib.compress(content, level=6)
         body = _COMPRESSED + compressed if len(compressed) < len(content) else _PLAIN + content
@@ -135,3 +150,23 @@ class ObjectStore:
         except FileNotFoundError:
             return False
         return True
+
+    def files(self) -> Iterator[Path]:
+        """Every object file in the store (not temporary files of a write in progress)."""
+        return object_files(self._root)
+
+    def prune(self, keep: Iterable[str]) -> int:
+        """Delete every object except those whose hashes are in ``keep``.
+
+        Used after a restore, so the store holds exactly what the restored
+        database refers to: raw responses that nothing refers to any more
+        would otherwise escape the retention period. Returns the number of
+        files removed.
+        """
+        wanted = {self._path(sha256).name for sha256 in keep}
+        removed = 0
+        for path in list(self.files()):
+            if path.name not in wanted:
+                path.unlink(missing_ok=True)
+                removed += 1
+        return removed

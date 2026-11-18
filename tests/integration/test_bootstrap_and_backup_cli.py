@@ -123,8 +123,13 @@ def test_backup_commands(tmp_path: Path, clean_database: str) -> None:
     bad_label = run_cli("backup", "create", "--label", "no spaces!", env=env)
     assert bad_label.returncode == 1
 
+    without_raw = run_cli("backup", "create", "--label", "noraw", "--no-raw-responses", env=env)
+    assert without_raw.returncode == 0, without_raw.stdout + without_raw.stderr
+    assert "Raw responses left out" in without_raw.stdout
+
     declined = run_cli("backup", "restore", str(archive), env=env, stdin="n\n")
     assert declined.returncode == 2 and "Nothing was changed" in declined.stdout
     restored = run_cli("backup", "restore", str(archive), "--yes", "--no-safety-backup", env=env)
     assert restored.returncode == 0, restored.stdout + restored.stderr
     assert "Restore complete" in restored.stdout
+    assert "Raw responses: 0 restored" in restored.stdout

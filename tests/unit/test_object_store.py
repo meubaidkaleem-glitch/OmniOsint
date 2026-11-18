@@ -85,3 +85,30 @@ def test_the_object_key_is_created_once_across_processes(tmp_path: Path) -> None
     keys = {results.get(timeout=5) for _ in workers}
     assert len(keys) == 1
     assert SecretStore(paths).names() == [OBJECT_STORE_KEY]
+
+
+def test_overwrite_replaces_a_damaged_copy(tmp_path: Path) -> None:
+    store = ObjectStore(tmp_path, generate_key())
+    stored = store.put(CONTENT)
+    (path,) = store.files()
+    path.write_bytes(b"damaged")
+    assert not store.put(CONTENT).created, "kept as it is by default"
+    with pytest.raises(ObjectCorrupted):
+        store.get(stored.sha256)
+    assert store.put(CONTENT, overwrite=True).created
+    assert store.get(stored.sha256) == CONTENT
+
+
+def test_listing_and_pruning(tmp_path: Path) -> None:
+    store = ObjectStore(tmp_path, generate_key())
+    kept = store.put(b"kept").sha256
+    dropped = store.put(b"dropped").sha256
+    (tmp_path / "unrelated.txt").write_text("not an object", encoding="utf-8")
+    in_progress = next(store.files()).with_name(".partial.123.tmp")
+    in_progress.write_bytes(b"a write in progress")
+    assert len(list(store.files())) == 2
+    assert store.prune([kept]) == 1
+    assert store.exists(kept) and not store.exists(dropped)
+    assert (tmp_path / "unrelated.txt").is_file() and in_progress.is_file()
+    assert store.prune([]) == 1 and list(store.files()) == []
+    assert list(ObjectStore(tmp_path / "absent", generate_key()).files()) == []
