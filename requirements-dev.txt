@@ -3,26 +3,22 @@ alembic==1.20.1 \
     --hash=sha256:83490def1f723413db5096591f7609ac52544805be93849170088ed04f5a2e0b \
     --hash=sha256:9970712cfb81ea26c8658d378aaa5b8f6ff9146e5bb111d70497c164016cf598
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)
 annotated-doc==0.0.6 \
     --hash=sha256:361ca0950cc7082f53fa69e9328409f40a62c61e57e0a47e1825a08078a58a53 \
     --hash=sha256:7969bb69912085b2285849c0dcac0b4b374fd180c13cf10a87f284ffcf347bbf
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   fastapi
     #   typer
 annotated-types==0.8.0 \
     --hash=sha256:13b2beaad985e05e2d6407ee4c4f35590b11f8d693a258a561055cac8f64cab7 \
     --hash=sha256:f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   pydantic
 anyio==4.16.0 \
     --hash=sha256:59bb03251907983d1603d27c3087ddb1e93299ea2163adcdba37899a4fb12ffb \
     --hash=sha256:c66ae634e0b8228396b801741beb3294326d4b6102f7bba4041c0dfb58c29026
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   fastapi
     #   httpx
     #   starlette
@@ -30,7 +26,6 @@ argon2-cffi==25.1.0 \
     --hash=sha256:694ae5cc8a42f4c4e2bf2ca0e64e51e23a040c6a517a85074683d3959e1346c1 \
     --hash=sha256:fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)
 argon2-cffi-bindings==26.2.0 \
     --hash=sha256:02086528488a85d374655e2f2f83fea03f49764587ac49d8e10bf6471df9f163 \
@@ -75,7 +70,6 @@ argon2-cffi-bindings==26.2.0 \
     --hash=sha256:f90145787e89100f924220ba267caef3a3b53b5b59cc2971f3ef7ff45d2f7c9f \
     --hash=sha256:ff8b35ca2033049f1d0f70c5b046d7dee7d94bbf8c3987b032692ac0d0620c4d
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   argon2-cffi
 ast-serialize==0.13.1 \
     --hash=sha256:02686b281ec9b8e9614f6f0db27e12e4cac515f336c5d05b678bc9eb73ff2af5 \
@@ -136,7 +130,6 @@ ast-serialize==0.13.1 \
     --hash=sha256:f8b17e2921e56621bcb46792bd3e0b82ca3b85de78d5936e7b8174ba1758b0aa \
     --hash=sha256:fb8021f4dc3296de18737e3b8b34994411da725374d74a0b9eb32a738f2a23d0
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   mypy
 asyncpg==0.32.0 \
     --hash=sha256:0549af18b697221d1992b7def18aa61652a85ecbe6e19ba2a75277560efe6016 \
@@ -222,25 +215,21 @@ asyncpg==0.32.0 \
     --hash=sha256:fd5adfb01cea16908d617af55b00a84c9e581964b77d4301c29fd735bb7850c3 \
     --hash=sha256:fe3036fb6e7b61159f554af153824786999142b69fea081acf8cb0958603ea26
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)
 boolean-py==5.0 \
     --hash=sha256:60cbc4bad079753721d32649545505362c754e121570ada4658b852a3a318d95 \
     --hash=sha256:ef28a70bd43115208441b53a045d1549e2f0ec6e3d08a9d142cbc41c1938e8d9
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   license-expression
 cachecontrol==0.14.4 \
     --hash=sha256:b7ac014ff72ee199b5f8af1de29d60239954f223e948196fa3d84adaffc71d2b \
     --hash=sha256:e6220afafa4c22a47dd0badb319f84475d79108100d04e26e8542ef7d3ab05a1
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   pip-audit
 certifi==2026.10.23 \
     --hash=sha256:a9895e6e2758b371e0545e321a3a8fd1fcfd9829ada8824a936dfb16aaaf36cd \
     --hash=sha256:e9b54de76e530bb6cf0ccd036787103acb58fd42ba930ea8bf948ddbaa2f61d1
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   httpcore
     #   httpx
     #   requests
@@ -346,7 +335,6 @@ cffi==2.1.1 \
     --hash=sha256:fb92203a88b3d3053034db775110081c49d28be6551923805e039924093761e4 \
     --hash=sha256:fcd22650c908d7b7da162bbfaab594a1227a15d1643a98c68b122ac642fa2264
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   argon2-cffi-bindings
     #   cryptography
 charset-normalizer==3.5.2 \
@@ -523,13 +511,11 @@ charset-normalizer==3.5.2 \
     --hash=sha256:fd1fbe0f116b6e55da77aca2c6ddcddcfac2186cbf78bdebf40fc156efca389d \
     --hash=sha256:fe9753dfee015c570d73df76f899f18444d41388bffcde097deba51c4fadbb9f
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   requests
 click==8.5.1 \
     --hash=sha256:8bb5376d2006950386f8c6427613334a2acadc5f559cb80e638d00b4df957e37 \
     --hash=sha256:9bbfada76703fd1d784b83eea012e3e8c6a001a876543ef104fa56aaaeb072b4
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   uvicorn
 colorama==0.4.6 ; sys_platform == 'win32' \
     --hash=sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44 \
@@ -658,7 +644,6 @@ coverage==7.17.3 \
     --hash=sha256:ff273110e4e1505ef7a642523ba43f58eb6770ae9e8f869d72efea816cb4bc2c \
     --hash=sha256:ff5069e99039739c2fade5dd12cf8df7dc1b1217a0b915110605e0bbdddf1187
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   pytest-cov
 cryptography==50.0.2 \
     --hash=sha256:0ddc924c04591c2811ca024d62ecad4f7f6f08af8939c211438f48a16bd23602 \
@@ -721,43 +706,36 @@ cryptography==50.0.2 \
     --hash=sha256:fa8f5efb344d6908a1ce62f4a24e2e5780f825d6f53f5f50ec5ffacac72936cb \
     --hash=sha256:fdd28f912fccfec1846a94e2e1e8f9b0012f557f0c46fe4f3eb0d7a87afcf90b
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)
 cyclonedx-python-lib==11.12.0 \
     --hash=sha256:0e807521a921a5c3cb8ce1153f8a61d29eedfe76a46aac2796b7c6b573391a54 \
     --hash=sha256:16767c4039de90c04e9f03348f8f0ed4b8ff842eaa7eefcad3a95685f970dacf
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   pip-audit
 defusedxml==0.7.1 \
     --hash=sha256:1bb3032db185915b62d7c6209c5a8792be6a32ab2fedacc84e01b52c51aa3e69 \
     --hash=sha256:a352e7e428770286cc899e2542b6cdaedb2b4953ff269a210103ec58f6198a61
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   py-serializable
 dnspython==2.9.2 \
     --hash=sha256:8d4d39a513e649d634004ce4d39ade2352efcea472a0247535a5c2d18a9d7ba9 \
     --hash=sha256:af15f7d385a6ae2fb35a796fde2138004c8c42c7389090e2addc83e3b3340fd8
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   email-validator
 email-validator==2.4.0 \
     --hash=sha256:4454e41c4e1c6b6caee34a1dc71d5e736791562be8fd179b02e298f796522684 \
     --hash=sha256:be487bc50bc3bd832a98515a55a15649d9bec06d954fa178663190714b6c4ee1
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)
 fastapi==0.163.1 \
     --hash=sha256:3d364b02a68b67292e833ff2dfed3b8dc3aeadf73e271c15316c6c166668792f \
     --hash=sha256:68f2d8050f5c3583121c0d203046cc7def5c16a7d6c43a0e7707a8ea610fe2d3
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)
 filelock==4.2.10 \
     --hash=sha256:9479aaeb4db20b5a53e3da28493edd24720b66b8a0b84030aa56ccdf243d6857 \
     --hash=sha256:fcc3c0cb8bfe7f4b3bb0e231c04b15dbad068cb3c2515f343d8fde4dce93bd5d
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   cachecontrol
 greenlet==3.5.6 \
     --hash=sha256:0616b8f878098c5681fd8f0dc92d887551717402342a70f0abcbfea5f5ad8a44 \
@@ -840,32 +818,27 @@ greenlet==3.5.6 \
     --hash=sha256:fe3170a69fe039b18ad18171e66faa9a75f6fe9d78f968fd9b54e09fbd714d81 \
     --hash=sha256:fea4427d1ffdb3b523d7daa6712038428a4c16c450b9777bdd1221cfee0eab49
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   sqlalchemy
 h11==0.16.0 \
     --hash=sha256:4e35b956cf45792e4caa5885e69fba00bdbc6ffafbfa020300e549b208ee5ff1 \
     --hash=sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   httpcore
     #   uvicorn
 httpcore==1.0.9 \
     --hash=sha256:2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55 \
     --hash=sha256:6e34463af53fd2ab5d807f399a9b45ea31c3dfa2276f15a2c3f00afff6e176e8
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   httpx
 httpx==0.28.1 \
     --hash=sha256:75e98c5f16b0f35b567856f597f06ff2270a374470a5c2392242528e3e3e42fc \
     --hash=sha256:d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)
 idna==3.20 \
     --hash=sha256:a7db850025b95ded1eae8a46181a1a6c56c92c96f0e2b005d9ff8dc0210cab44 \
     --hash=sha256:ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   anyio
     #   email-validator
     #   httpx
@@ -874,7 +847,6 @@ iniconfig==2.3.1 \
     --hash=sha256:67f4b9c50da0dedf52af349e7749a80a9057a5031199791b906c3bb3ae878960 \
     --hash=sha256:9121e2c1fdb355232495be3194c8dfe87ccc2d5dee45947b78e68f499790d7a7
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   pytest
 librt==0.16.0 ; platform_python_implementation != 'PyPy' \
     --hash=sha256:001bfd59a7d45b17e3e75f2a8c6405280b35e7b84471792778e718c4f368950e \
@@ -1015,25 +987,21 @@ librt==0.16.0 ; platform_python_implementation != 'PyPy' \
     --hash=sha256:fe52bf4641069e7978a14253b036cb9002def1926317e710f2e249f8a8c47742 \
     --hash=sha256:ff7baa55f8e7c69851419e50a666015d02a74198716fd45c0125a2112e0a389f
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   mypy
 license-expression==30.4.4 \
     --hash=sha256:421788fdcadb41f049d2dc934ce666626265aeccefddd25e162a26f23bcbf8a4 \
     --hash=sha256:73448f0aacd8d0808895bdc4b2c8e01a8d67646e4188f887375398c761f340fd
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   cyclonedx-python-lib
 mako==1.4.3 \
     --hash=sha256:723296007c870bfd6b3f0c3230dba7198096e5269297ebf5e4eff9e7ffa39d4f \
     --hash=sha256:cd6537fe88d5fec315c55c2f8529bc4ce7a9a352ad7db3eeaa6a66e2dd4ec37a
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   alembic
 markdown-it-py==4.3.0 \
     --hash=sha256:7aa1511a46c39138de78d9eba92ce47e63124d8003fc98b3a351909e04239efa \
     --hash=sha256:91a58fa5b72c71a40cf7177250fd767480d7a2bb3ac426ccfb76fb90305fdaaa
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   rich
 markupsafe==3.0.4 \
     --hash=sha256:007e1ffd9bf65bb6ee96df7b258fc632a4868dd5566037986c64781f35a36e98 \
@@ -1188,13 +1156,11 @@ markupsafe==3.0.4 \
     --hash=sha256:fd9f8797427910198f95bced71ddfed61130d7e349213bfb8466c9c99e2c46a8 \
     --hash=sha256:fdb4ca07ab75ffadab4a8b135ad59cdbb3156b99310f3d565370da74a15d6bd3
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   mako
 mdurl==0.1.2 \
     --hash=sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8 \
     --hash=sha256:bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   markdown-it-py
 msgpack==1.2.4 \
     --hash=sha256:0221748c30ace75fde0dec8c470abe65fb5374cd4f37adb9db6aca7a3c362c0a \
@@ -1289,7 +1255,6 @@ msgpack==1.2.4 \
     --hash=sha256:fb811ac3d463a75013b234d2aae56b9f0bdb0105caf4dd2ee65305b6a8a6078d \
     --hash=sha256:fb9ddbf23b8c6e89752af399fcf4daed60055e239cda44c6acfaa76d19331e8c
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   cachecontrol
 mypy==2.4.1 \
     --hash=sha256:01b7718552d017f88d1151f3cc9d6556d778a90bd58060a2c3d87d070f9099fb \
@@ -1345,31 +1310,26 @@ mypy==2.4.1 \
     --hash=sha256:f44dd4c5ab22df21206dd926c98381ebdbf5bfd696df37dd38ded2d23143fcb6 \
     --hash=sha256:f9118a3f50de264b614861bb11814833a742138ac3c8e2e49a860b6977fb2704
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)
 mypy-extensions==1.2.0 \
     --hash=sha256:993e7a20aa5671eb41a7132cf555af30062da99729601601b9a8382b11cae768 \
     --hash=sha256:c6e275a07f1c2fc096b62940452d0eaa3f3af7de45d704787866240a7c6d5a51
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   mypy
 opentelemetry-api==1.45.2 \
     --hash=sha256:2cbd737377e710ee740d261c94e93fa0f08e6d037c18f17513cc0a2d94479a34 \
     --hash=sha256:d7b0008e21e5fd61cbe7a7f34ca3b6905a78ab677d9bc395e299359c75cda6b4
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   fastapi
 packageurl-python==0.17.6 \
     --hash=sha256:1252ce3a102372ca6f86eb968e16f9014c4ba511c5c37d95a7f023e2ca6e5c25 \
     --hash=sha256:31a85c2717bc41dd818f3c62908685ff9eebcb68588213745b14a6ee9e7df7c9
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   cyclonedx-python-lib
 packaging==26.3 \
     --hash=sha256:94edc256424af38762eb31306eed28beb9f0efc50a8837492c9d6fd6004aed79 \
     --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   pip-audit
     #   pip-requirements-parser
     #   pytest
@@ -1377,44 +1337,42 @@ pathspec==1.1.1 \
     --hash=sha256:17db5ecd524104a120e173814c90367a96a98d07c45b2e10c2f3919fff91bf5a \
     --hash=sha256:a00ce642f577bf7f473932318056212bc4f8bfdf53128c78bbd5af0b9b20b189
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   mypy
+phonenumbers==9.0.42 \
+    --hash=sha256:321c92d9734bfb4adc64575f940da26463f09fc79ac692b43a35f9306e4ecc7d \
+    --hash=sha256:83ddc20edea93814f5bb2ee8d365b3ef64fa274c8a4f6d06bd8b2c7996030564
+    # via
+    #   omniosint (pyproject.toml)
 pip==26.3 \
     --hash=sha256:6c36ae7da8695be67e3cd9f7d87919667ced53f57ce2ede75d89b5912ed2bc4c \
     --hash=sha256:f3b60b20ffaadd4415ed7957212a38ac63fa4c5fa375bd0f4a797777940fad13
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   pip-api
 pip-api==0.0.35 \
     --hash=sha256:14dea05d7b3b68f4c7582213e3ae8932bbba8e1f754bf06b95263d5fa6ab4363 \
     --hash=sha256:66990d0da25378555cbb538db79384bab92d4617c6350dfd7a2126ba2a3a9894
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   pip-audit
 pip-audit==2.10.1 \
     --hash=sha256:1eb4565d19ebe5d48996f4b770b4d2b32887e12cb12cfa637f1a064011b55ffc \
     --hash=sha256:99ef3f600a317c1945f1e89e227ef26e1c2d618429b8bd3fa6f4f7c440c4611a
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)
 pip-requirements-parser==32.0.1 \
     --hash=sha256:4659bc2a667783e7a15d190f6fccf8b2486685b6dba4c19c3876314769c57526 \
     --hash=sha256:b4fa3a7a0be38243123cf9d1f3518da10c51bdb165a2b2985566247f9155a7d3
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   pip-audit
 platformdirs==4.14.5 \
     --hash=sha256:32e9921db7385aa8169bee4fe9501923e5715ba9fb7ea3b9c69b0d8e0639f7a1 \
     --hash=sha256:8e778c6fa421516f4d3369449f8df3b0e1b72c0e0005fe88e3ec772d0a14e750
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)
     #   pip-audit
 pluggy==1.7.0 \
     --hash=sha256:7dd7b0d8832ba3cb632c306926ded123429211b83641b35dc5c41ad2d34f9bec \
     --hash=sha256:d1eaa46ebb595891b860ab086b4d09c8588af65ebd4361b8e8f4bb8920b90ba8
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   pytest
     #   pytest-cov
 psutil==7.2.2 \
@@ -1440,25 +1398,26 @@ psutil==7.2.2 \
     --hash=sha256:eed63d3b4d62449571547b60578c5b2c4bcccc5387148db46e0c2313dad0ee00 \
     --hash=sha256:fd04ef36b4a6d599bbdb225dd1d3f51e00105f6d48a28f006da7f9822f2606d8
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
+    #   omniosint (pyproject.toml)
+publicsuffixlist==1.1.2.20261101 \
+    --hash=sha256:1ff49a8d6fae759a90cda23eb2e972d6f28f378049f9d1e51df8ffc3cabfed87 \
+    --hash=sha256:46fe6b57d992baad7b1914f21e886fe36a2ffd95d84500bfdebc95ca4371eb39
+    # via
     #   omniosint (pyproject.toml)
 py-serializable==2.2.0 \
     --hash=sha256:2cce775abc5aac12115f9ff572a145c7276d04a770090334bd4e51ed9c782415 \
     --hash=sha256:8e4fa02e8de819c0488ccdb69c2d3109274adcf224c02357fd8729cb12727aab
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   cyclonedx-python-lib
 pycparser==3.12 ; implementation_name != 'PyPy' \
     --hash=sha256:a076f3f489b39b43ed13563a1dafe42447445bec2e294154ec5c57fcdda4c85e \
     --hash=sha256:f03387877eab82ce01bbdfd0ba7252ee55a90b1c708d5129e2ce915475cf1db6
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   cffi
 pydantic==2.14.3 \
     --hash=sha256:1054f237f4d4733e5a30e1e2333bd33a2004ab9ab1510bd053a9a31bb48e232d \
     --hash=sha256:3f7b347782ab7e4cf4c798496ae3a82787d9f21ec12676a9c564355eeef8daa8
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)
     #   fastapi
     #   pydantic-settings
@@ -1605,32 +1564,27 @@ pydantic-core==2.50.4 \
     --hash=sha256:fc04affef30be98c1f36f0c422a4061ef618fdc1dde79f5ad5458dd496fecffa \
     --hash=sha256:ffb616d8d55965839670301dc3bae3abacff560a7e137a89056058a8a9da4d96
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   pydantic
 pydantic-settings==2.16.3 \
     --hash=sha256:10e36f616623ebb586c05ca3d3cd22927146869db413d4f14c20c514442a1337 \
     --hash=sha256:d1db16a2d34006323a1b42c0640898da58adfbad7ec30baaa9e2b18aafc08999
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)
 pygments==2.21.0 \
     --hash=sha256:2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9 \
     --hash=sha256:610ca751c9bc2492b38eb9a38a7fbc93edbbb2d7182edaf34e66ae493dee5c8c
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   pytest
     #   rich
 pyparsing==3.3.3 \
     --hash=sha256:928ae7e20211f3b6f3915a72f06a0cfd29ab9d24279dd6346b6b1a7146397d36 \
     --hash=sha256:ece8c00a69cf01b45d0b1dedabb469c90d8caf996d4fda40f147627a122849a4
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   pip-requirements-parser
 pytest==9.2.0 \
     --hash=sha256:07acdcf88ec174f907dc01af70bf52d49b014bbab03faeeade31c96b18c2e588 \
     --hash=sha256:97c4f3b1f3c7414aa36465e09b8220f1d03627993bd51b1282e193753c80557b
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)
     #   pytest-asyncio
     #   pytest-cov
@@ -1638,19 +1592,16 @@ pytest-asyncio==1.5.0 \
     --hash=sha256:557f255ee03cc84f84a8d5f438bc9c6e0f714bf86970ae743c7ecb5a38d7e07d \
     --hash=sha256:92c8fa83ca419fd0d4bd6a34df6520dae435841d3733c319343249492adf37f7
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)
 pytest-cov==7.1.0 \
     --hash=sha256:30674f2b5f6351aa09702a9c8c364f6a01c27aae0c1366ae8016160d1efc56b2 \
     --hash=sha256:a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)
 python-dotenv==1.2.4 \
     --hash=sha256:42269a8a5b3fd54ffa6f3d84b18abed50064717576b4ecf03dc4a55d8aa04fdc \
     --hash=sha256:f0d53e69935a851c0dcc78f3ab7aaccd8cabef0b92382b576b824212902873c0
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   pydantic-settings
 pyyaml==6.0.3 \
     --hash=sha256:00c4bdeba853cc34e7dd471f16b4114f4162dc03e6b7afcc2128711f0eca823c \
@@ -1727,26 +1678,22 @@ pyyaml==6.0.3 \
     --hash=sha256:fa160448684b4e94d80416c0fa4aac48967a969efe22931448d853ada8baf926 \
     --hash=sha256:fc09d0aa354569bc501d4e787133afc08552722d3ab34836a80547331bb5d4a0
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)
 redis==8.1.0 \
     --hash=sha256:6e1a19beef9225c83efd689c7e6b7da2d5215b1f42cd13b7fc3714d0a09c7b25 \
     --hash=sha256:a4fe1aac3d3b3cc791d4b3d5931c5a956045dc951ee74d1c913ee3ac4d2ee9fb
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)
 requests==2.34.2 \
     --hash=sha256:2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0 \
     --hash=sha256:f288924cae4e29463698d6d60bc6a4da69c89185ad1e0bcc4104f584e960b9ed
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   cachecontrol
     #   pip-audit
 rich==15.0.0 \
     --hash=sha256:33bd4ef74232fb73fe9279a257718407f169c09b78a87ad3d296f548e27de0bb \
     --hash=sha256:edd07a4824c6b40189fb7ac9bc4c52536e9780fbbfbddf6f1e2502c31b068c36
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   pip-audit
     #   typer
 ruff==0.17.5 \
@@ -1769,19 +1716,16 @@ ruff==0.17.5 \
     --hash=sha256:ec4ecf40fb4d6e1265b009dbe551727920926fc0f769070c452d6d84b422a74d \
     --hash=sha256:f93d2b7d449ed9545304f6923699ca20d13c675b69f258481709a08ae61076db
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)
 shellingham==1.5.4 \
     --hash=sha256:7ecfff8f2fd72616f7481040475a65b2bf8af90a56c89140852d1120324e8686 \
     --hash=sha256:8dbca0739d487e5bd35ab3ca4b36e11c4078f3a234bfce294b0a0291363404de
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   typer
 sortedcontainers==2.4.0 \
     --hash=sha256:25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88 \
     --hash=sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   cyclonedx-python-lib
 sqlalchemy==2.1.8 \
     --hash=sha256:06ba41b90d1cf018cbe9a5474958dbdd2a72ec946ace8d314021d24e42ae2f39 \
@@ -1857,20 +1801,17 @@ sqlalchemy==2.1.8 \
     --hash=sha256:f50e34ebdf4ad7c96d89cfb05418e11ed23d3ac46f1f59f3d2e1d8da8091a0eb \
     --hash=sha256:ffe69b75459d90529f603d9594255c41d6a503f69220740510373374198735f6
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)
     #   alembic
 starlette==1.10.0 \
     --hash=sha256:478c0ab3b4ced6e82719849c118fa406f0278a3499c1a898cd15cd31bdc38ce4 \
     --hash=sha256:b8399098d4c1e3522734f7235dc79b1fc967f96cf139c81e0fa30479e0685f9b
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   fastapi
 structlog==26.1.0 \
     --hash=sha256:e081a26d6c373e6d201eca24eede26d8ffab07f88f477822e679183428d3d91e \
     --hash=sha256:f63a716cbd1b1291cf7661de7794b455acfa4c43c5bcf1630e6ad5ddc1adb3b7
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)
 tomli==2.5.0 \
     --hash=sha256:069435bd5480429b98c5e5afb02ab21c219b6f0064680671c6dc0d46817346ea \
@@ -1939,37 +1880,31 @@ tomli==2.5.0 \
     --hash=sha256:f79203b3965b4000e91808aaa7c040206093f2b8bf86f455982f2274c9ccf442 \
     --hash=sha256:fd4dc129784e0c5335bd4e61dfcc4487499a013419e655cf2da1d091b7e0efdc
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   pip-audit
 tomli-w==1.2.0 \
     --hash=sha256:188306098d013b691fcadc011abd66727d3c414c571bb01b1a174ba8c983cf90 \
     --hash=sha256:2dd14fac5a47c27be9cd4c976af5a12d87fb1f0b4512f81d69cce3b35ae25021
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   pip-audit
 typer==0.29.1 \
     --hash=sha256:00dbc549c13428bec1be55fe1f4d0fb8c6637a310e4f178ef14abe9534ee7b58 \
     --hash=sha256:ab6eb3880bf67ce96147734717f9ec333c06f66e361f3ea947d0be43da39f242
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)
 types-psutil==7.2.2.20261111 \
     --hash=sha256:054f7b635fc908d3d27e49e8d274fbfed115a1a859f2edeae17519c0238286a1 \
     --hash=sha256:d677119c44fb80cc9be41d8ac731f08bf89974bb1daa49b6688665a9d7224f42
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)
 types-pyyaml==6.0.12.20261113 \
     --hash=sha256:0828be2580fd94151182364f4d0158e4de62fdbeeb8d4296f7f7d2b6c22bb640 \
     --hash=sha256:3600749e613748afdc4327f0b17c3296cf880cdbc7335f320007abd9dd815f67
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)
 typing-extensions==4.16.0 \
     --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8 \
     --hash=sha256:dc983d19a509c94dba722ee6abd33940f7c05a89e243c47e907eb4db6f1a43e5
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   alembic
     #   anyio
     #   cyclonedx-python-lib
@@ -1987,7 +1922,6 @@ typing-inspection==0.4.5 \
     --hash=sha256:7f16c411e7930dc79596d42ab44672a3fe5f60eb34b781a1647e7872363120c7 \
     --hash=sha256:bc210535442b39e1bf2805e0c7a17dfd6a4ace760c84c7f7d16245d23a6b1c39
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   fastapi
     #   pydantic
     #   pydantic-settings
@@ -1995,11 +1929,9 @@ urllib3==2.8.0 \
     --hash=sha256:0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3 \
     --hash=sha256:63bf2ead4c879426ebf22ef2a781eeb4aa3b4ae798a0435506f8687fd5bb9b63
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   requests
 uvicorn==0.54.0 \
     --hash=sha256:505bdb0f318731d45f1f712071fc781a8981f6847a31c902c9f5e652d4f67faf \
     --hash=sha256:a2e33cbfaa0306f8e6b0c13e0cb89d7d7a2da3e62b90c66e18c33d9807b28620
     # via
-    #   -c /tmp/claude-0/-home-user-omniosint/3a2efb25-6c96-571e-bd9a-a13b9da42805/scratchpad/tested-constraints.txt
     #   omniosint (pyproject.toml)

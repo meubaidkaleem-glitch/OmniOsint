@@ -31,8 +31,10 @@ dependencies = [
     "email-validator>=2.2",
     "fastapi>=0.115",
     "httpx>=0.28",
+    "phonenumbers>=9.0",
     "platformdirs>=4.3",
     "psutil>=6.1",
+    "publicsuffixlist>=1.0",
     "pydantic>=2.10",
     "pydantic-settings>=2.7",
     "pyyaml>=6.0.2",
@@ -129,6 +131,8 @@ select = [
     "DTZ",      # naive datetimes
     "T20",      # stray print()
     "PT",       # pytest style
+    # Invisible and text-direction characters in source code (Trojan Source).
+    "PLE2502", "PLE2510", "PLE2512", "PLE2513", "PLE2514", "PLE2515",
 ]
 ignore = [
     "S101",     # assert is fine in tests and for invariants
