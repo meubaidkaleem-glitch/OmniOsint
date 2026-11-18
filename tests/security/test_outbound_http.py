@@ -171,6 +171,11 @@ def test_policy_scopes() -> None:
         "224.0.0.1",
         "::ffff:127.0.0.1",
         "fe80::1",
+        "64:ff9b::a00:1",  # NAT64 of 10.0.0.1
+        "2002:7f00:1::1",  # 6to4 through 127.0.0.1
+        "2002:c0a8:101::1",  # 6to4 through 192.168.1.1
+        "2001:0:4136:e378:8000:63bf:f5ff:fffe",  # Teredo to client 10.0.0.1
+        "64:ff9b:1::1",
     ):
         with pytest.raises(DestinationBlocked):
             policy.check(ipaddress.ip_address(blocked))

@@ -95,6 +95,7 @@ def _ranges() -> tuple[SpecialRange, ...]:
         ("fec0::/10", AddressScope.RESERVED, "Deprecated site-local (RFC 3879)"),
         ("ff00::/8", AddressScope.MULTICAST, "Multicast (RFC 4291)"),
         ("::/96", AddressScope.RESERVED, "Deprecated IPv4-compatible (RFC 4291)"),
+        ("64:ff9b:1::/48", AddressScope.RESERVED, "Local-use IPv4/IPv6 translation (RFC 8215)"),
     ]
     return tuple(
         SpecialRange(ipaddress.ip_network(cidr), scope, name) for cidr, scope, name in table
@@ -107,12 +108,18 @@ def special_ranges() -> tuple[SpecialRange, ...]:
 
 
 def embedded_ipv4(address: IPAddress) -> ipaddress.IPv4Address | None:
-    """The IPv4 address carried inside an IPv4-mapped or NAT64 IPv6 address."""
+    """The IPv4 address an IPv6 address carries and leads to: IPv4-mapped, NAT64
+    (RFC 6052), 6to4 (RFC 3056; the tunnel endpoint) or Teredo (RFC 4380; the
+    client the traffic is relayed to)."""
     if isinstance(address, ipaddress.IPv6Address):
         if address.ipv4_mapped is not None:
             return address.ipv4_mapped
         if address in ipaddress.IPv6Network("64:ff9b::/96"):
             return ipaddress.IPv4Address(int(address) & 0xFFFFFFFF)
+        if address.sixtofour is not None:
+            return address.sixtofour
+        if address.teredo is not None:
+            return address.teredo[1]
     return None
 
 
@@ -133,7 +140,8 @@ class AddressInfo:
 
 
 def classify_address(address: IPAddress) -> AddressInfo:
-    """Scope of ``address``. IPv4 inside IPv6 (mapped, NAT64) is judged by the IPv4 part."""
+    """Scope of ``address``. IPv4 inside IPv6 (mapped, NAT64, 6to4, Teredo) is
+    judged by the IPv4 part."""
     inner = embedded_ipv4(address)
     if inner is not None:
         info = classify_address(inner)
