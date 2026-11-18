@@ -27,6 +27,8 @@ class SeedReport:
     permissions: int
     roles: int
     instance_id: str
+    sources: int = 0
+    providers: int = 0
 
 
 async def seed_builtin(session: AsyncSession) -> SeedReport:
@@ -86,8 +88,19 @@ async def seed_builtin(session: AsyncSession) -> SeedReport:
         session.add(instance)
     await session.flush()
 
+    # Source registry and providers --------------------------------------------
+    # Imported here: the provider registry imports the models of this package.
+    from omniosint.evidence.sources import sync_sources
+    from omniosint.providers.catalog import load_catalogue
+    from omniosint.providers.registry import BUILTIN_ADAPTERS
+
+    sync = await sync_sources(session, load_catalogue(), [cls() for cls in BUILTIN_ADAPTERS])
+    await session.flush()
+
     return SeedReport(
         permissions=len(codes),
         roles=len(BUILTIN_ROLES),
         instance_id=str(instance.value["id"]),
+        sources=sync.sources,
+        providers=sync.providers,
     )

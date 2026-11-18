@@ -83,6 +83,8 @@ class ProviderEntry(BaseModel):
     phase: int = Field(ge=1, le=14)
     status: ProviderStatus
     modules: tuple[str, ...] = ()
+    # Sources this one derives its data from: they are not independent evidence.
+    upstream: tuple[str, ...] = ()
     notes: str = ""
 
     @field_validator("category")
@@ -130,6 +132,13 @@ class ProviderCatalogue(BaseModel):
         ]
         if duplicates:
             raise ValueError(f"duplicate provider id(s): {', '.join(sorted(duplicates))}")
+        known = {provider.id for provider in self.providers}
+        for provider in self.providers:
+            unknown = [source for source in provider.upstream if source not in known]
+            if unknown or provider.id in provider.upstream:
+                raise ValueError(
+                    f"{provider.id}: unknown or circular upstream {unknown or [provider.id]}"
+                )
         return self
 
     def get(self, provider_id: str) -> ProviderEntry | None:

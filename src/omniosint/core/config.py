@@ -143,6 +143,25 @@ class RuntimeSettings(_Section):
     shutdown_timeout_seconds: int = Field(default=30, ge=1, le=600)
 
 
+class CollectionSettings(_Section):
+    # The simulated provider generates labelled test data; never enable it for real work.
+    enable_simulated_provider: bool = False
+    # ISO 3166 region assumed for phone numbers written without a country code.
+    default_phone_region: str | None = Field(default=None, pattern=r"^[A-Z]{2}$")
+    raw_retention_days: int = Field(default=90, ge=1, le=3650)
+    max_concurrent_jobs: int = Field(default=4, ge=1, le=32)
+    job_lease_seconds: int = Field(default=120, ge=30, le=3600)
+    max_attempts: int = Field(default=3, ge=1, le=10)
+    retry_base_seconds: float = Field(default=5.0, ge=0.1, le=300)
+    retry_max_seconds: float = Field(default=300.0, ge=0.1, le=3600)
+    # Paid calls estimated above this many credits wait for approval (0: every paid call).
+    approval_credit_threshold: float = Field(default=0.0, ge=0)
+    rate_limit_max_wait_seconds: float = Field(default=30.0, ge=0, le=600)
+    http_timeout_seconds: float = Field(default=30.0, gt=0, le=300)
+    http_max_response_bytes: int = Field(default=10_485_760, ge=1024, le=104_857_600)
+    poll_interval_seconds: float = Field(default=1.0, ge=0.05, le=60)
+
+
 class _MappingSource(PydanticBaseSettingsSource):
     """Feeds an already-loaded mapping into the settings pipeline."""
 
@@ -173,6 +192,7 @@ class Settings(BaseSettings):
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
     worker: WorkerSettings = Field(default_factory=WorkerSettings)
     runtime: RuntimeSettings = Field(default_factory=RuntimeSettings)
+    collection: CollectionSettings = Field(default_factory=CollectionSettings)
 
     @classmethod
     def settings_customise_sources(

@@ -115,3 +115,23 @@ class AdapterFailed(ProviderError):
 
     code = "adapter_failed"
     default_message = "The adapter failed unexpectedly; the details are in the log."
+
+
+class WorkerLost(ProviderError):
+    """The worker running a job stopped renewing its lease (it crashed or was killed)."""
+
+    code = "worker_lost"
+    retryable = True
+    default_message = "The worker running this job stopped before finishing."
+
+
+class ScopeDenied(ProviderError):
+    """An active operation was refused by the scope manager just before running."""
+
+    code = "scope_denied"
+    default_message = "The scope does not permit this operation."
+
+
+class InternalCollectionError(ProviderError):
+    code = "internal_error"
+    default_message = "The job failed because of an internal error; the details are in the log."

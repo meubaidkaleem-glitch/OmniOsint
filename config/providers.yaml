@@ -53,6 +53,7 @@ providers:
     phase: 5
     status: planned
     modules: [ip, internet_assets]
+    upstream: [shodan]
     notes: >-
       Keyless per-IP summary (ports, hostnames, product identifiers,
       vulnerability identifiers). Intended for non-commercial use. Preferred

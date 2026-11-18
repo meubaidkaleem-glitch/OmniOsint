@@ -73,7 +73,9 @@ class Provider(Base):
     config: Mapped[dict[str, Any]] = mapped_column(
         JSONB, nullable=False, server_default=text("'{}'::jsonb")
     )
-    last_health: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
+    last_health: Mapped[dict[str, Any] | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
     last_health_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
@@ -195,8 +197,8 @@ class CollectionJob(Base):
     progress: Mapped[dict[str, Any]] = mapped_column(
         JSONB, nullable=False, server_default=text("'{}'::jsonb")
     )
-    error: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
-    outcome: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
+    error: Mapped[dict[str, Any] | None] = mapped_column(JSONB(none_as_null=True), nullable=True)
+    outcome: Mapped[dict[str, Any] | None] = mapped_column(JSONB(none_as_null=True), nullable=True)
     cost: Mapped[dict[str, Any]] = mapped_column(
         JSONB, nullable=False, server_default=text("'{}'::jsonb")
     )
@@ -280,9 +282,13 @@ class CollectionResult(Base):
     raw_size: Mapped[int] = mapped_column(BigInteger, nullable=False)
     content_type: Mapped[str] = mapped_column(String(128), nullable=False)
     status_code: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    normalized: Mapped[list[dict[str, Any]] | None] = mapped_column(JSONB, nullable=True)
+    normalized: Mapped[list[dict[str, Any]] | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
     item_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
-    normalization_error: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
+    normalization_error: Mapped[dict[str, Any] | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
     from_cache: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
     reused_result_id: Mapped[uuid.UUID | None] = mapped_column(
         Uuid, ForeignKey("collection_results.id", ondelete="SET NULL"), nullable=True

@@ -9,10 +9,12 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
 from omniosint.core.crypto import DecryptionError, SecretBox
+from omniosint.core.filelock import exclusive_lock
 from omniosint.core.keystore import KeyProtectionError, MasterKeyStore
 from omniosint.core.paths import AppPaths, write_private_text
 from omniosint.core.timeutil import isoformat, utcnow
@@ -20,6 +22,7 @@ from omniosint.core.timeutil import isoformat, utcnow
 _NAME_PATTERN = re.compile(r"^[a-z0-9][a-z0-9._-]{0,127}$")
 
 DATABASE_PASSWORD = "database.password"  # noqa: S105 - the name of a secret, not a secret
+OBJECT_STORE_KEY = "storage.object-key"
 
 
 class SecretStoreError(Exception):
@@ -38,6 +41,7 @@ def validate_secret_name(name: str) -> str:
 class SecretStore:
     def __init__(self, paths: AppPaths, key_store: MasterKeyStore | None = None) -> None:
         self._file = paths.secrets_dir / "secrets.json"
+        self._lock = paths.secrets_dir / ".secrets.lock"
         self._keys = key_store or MasterKeyStore(paths.secrets_dir)
 
     @property
@@ -99,18 +103,43 @@ class SecretStore:
         validate_secret_name(name)
         if not value:
             raise ValueError("A secret value must not be empty.")
-        secrets = self._read()
-        secrets[name] = {
-            "value": self._box().encrypt_text(value, aad=name),
-            "updated_at": isoformat(utcnow()),
-        }
-        self._write(secrets)
+        # The API, the worker and the CLI may write at once; the lock keeps
+        # one writer from undoing another's change.
+        with exclusive_lock(self._lock):
+            secrets = self._read()
+            secrets[name] = {
+                "value": self._box().encrypt_text(value, aad=name),
+                "updated_at": isoformat(utcnow()),
+            }
+            self._write(secrets)
+
+    def get_or_create(self, name: str, factory: Callable[[], str]) -> str:
+        """The secret ``name``, created with ``factory`` if it does not exist yet.
+        Safe when several processes ask at the same time: all get the same value."""
+        existing = self.get(name)
+        if existing is not None:
+            return existing
+        with exclusive_lock(self._lock):
+            existing = self.get(name)
+            if existing is not None:
+                return existing
+            value = factory()
+            if not value:
+                raise ValueError("A secret value must not be empty.")
+            secrets = self._read()
+            secrets[name] = {
+                "value": self._box().encrypt_text(value, aad=name),
+                "updated_at": isoformat(utcnow()),
+            }
+            self._write(secrets)
+            return value
 
     def delete(self, name: str) -> bool:
         validate_secret_name(name)
-        secrets = self._read()
-        if name not in secrets:
-            return False
-        del secrets[name]
-        self._write(secrets)
-        return True
+        with exclusive_lock(self._lock):
+            secrets = self._read()
+            if name not in secrets:
+                return False
+            del secrets[name]
+            self._write(secrets)
+            return True
