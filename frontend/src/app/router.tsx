@@ -10,16 +10,22 @@ import { AccountPage } from "@/pages/admin/AccountPage";
 import { AdminLayout } from "@/pages/admin/AdminLayout";
 import { AuditPage } from "@/pages/admin/AuditPage";
 import { RolesPage } from "@/pages/admin/RolesPage";
+import { ScopesPage } from "@/pages/admin/ScopesPage";
 import { SystemPage } from "@/pages/admin/SystemPage";
 import { UsersPage } from "@/pages/admin/UsersPage";
 import { ChangePasswordPage } from "@/pages/auth/ChangePasswordPage";
 import { LoginPage } from "@/pages/auth/LoginPage";
 import { SetupPage } from "@/pages/auth/SetupPage";
+import { EvidencePage } from "@/pages/search/EvidencePage";
+import { RequestPage } from "@/pages/search/RequestPage";
+import { RequestsPage } from "@/pages/search/RequestsPage";
+import { SearchLayout } from "@/pages/search/SearchLayout";
+import { SearchRoute } from "@/pages/search/SearchPage";
 
 import { RequireAuth } from "./RequireAuth";
 
 /** Sections with their own page; every other section shows the planned page. */
-const BUILT_SECTIONS = new Set(["dashboard", "integrations", "administration"]);
+const BUILT_SECTIONS = new Set(["dashboard", "universal_search", "integrations", "administration"]);
 
 function AdminIndex() {
   const { me } = useShell();
@@ -36,6 +42,16 @@ export const routes: RouteObject[] = [
       { index: true, element: <DashboardPage /> },
       { path: "integrations", element: <IntegrationsPage /> },
       {
+        path: "search",
+        element: <SearchLayout />,
+        children: [
+          { index: true, element: <SearchRoute /> },
+          { path: "history", element: <RequestsPage /> },
+          { path: "requests/:requestId", element: <RequestPage /> },
+          { path: "evidence/:evidenceId", element: <EvidencePage /> },
+        ],
+      },
+      {
         path: "admin",
         element: <AdminLayout />,
         children: [
@@ -43,6 +59,7 @@ export const routes: RouteObject[] = [
           { path: "account", element: <AccountPage /> },
           { path: "users", element: <UsersPage /> },
           { path: "roles", element: <RolesPage /> },
+          { path: "scopes", element: <ScopesPage /> },
           { path: "audit", element: <AuditPage /> },
           { path: "system", element: <SystemPage /> },
         ],

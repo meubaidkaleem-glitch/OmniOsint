@@ -31,7 +31,14 @@ export function user(overrides: Partial<UserOut> = {}): UserOut {
 
 export const ADMIN_PERMISSIONS = [
   "audit:read",
+  "collection:approve",
+  "collection:read",
+  "collection:run",
+  "evidence:read",
+  "evidence:read_raw",
   "roles:read",
+  "scopes:manage",
+  "scopes:read",
   "system:manage",
   "system:read",
   "users:manage",
@@ -51,6 +58,7 @@ export function authState(
 
 const BUILT = new Map<string, FeatureOut["status"]>([
   ["dashboard", "partial"],
+  ["universal_search", "partial"],
   ["integrations", "partial"],
   ["administration", "available"],
 ]);
@@ -68,9 +76,12 @@ export function featureList(): FeatureList {
     limitations: null,
   }));
   return {
-    current_phase: 1,
-    phases: [{ number: 1, title: "Project foundation" }],
-    counts: { available: 1, partial: 2, planned: 17 },
+    current_phase: 2,
+    phases: [
+      { number: 1, title: "Project foundation" },
+      { number: 2, title: "Core intelligence foundation" },
+    ],
+    counts: { available: 1, partial: 3, planned: 16 },
     features,
   };
 }

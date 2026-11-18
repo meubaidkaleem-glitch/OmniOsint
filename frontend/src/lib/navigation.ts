@@ -43,7 +43,14 @@ export interface NavSection {
 
 export const NAV_SECTIONS: NavSection[] = [
   { key: "dashboard", title: "Dashboard", path: "/", icon: LayoutDashboard, group: null },
-  { key: "universal_search", title: "Universal Search", path: "/search", icon: Search, group: null },
+  {
+    key: "universal_search",
+    title: "Universal Search",
+    path: "/search",
+    icon: Search,
+    group: null,
+    permission: "collection:read",
+  },
   {
     key: "investigations",
     title: "Investigations",
@@ -172,6 +179,7 @@ export const ADMIN_PAGES: AdminPage[] = [
   { path: "/admin/account", title: "My account" },
   { path: "/admin/users", title: "Users", permission: "users:read" },
   { path: "/admin/roles", title: "Roles", permission: "roles:read" },
+  { path: "/admin/scopes", title: "Scopes", permission: "scopes:read" },
   { path: "/admin/audit", title: "Audit log", permission: "audit:read" },
   { path: "/admin/system", title: "System status", permission: "system:read" },
 ];

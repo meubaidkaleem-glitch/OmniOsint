@@ -83,7 +83,7 @@ describe("planned sections", () => {
     renderApp("/threat");
     const nav = await screen.findByRole("navigation", { name: "Main navigation" });
     await waitFor(() =>
-      expect(within(nav).getByRole("link", { name: /Universal Search/ })).toHaveAttribute(
+      expect(within(nav).getByRole("link", { name: /Investigations/ })).toHaveAttribute(
         "data-feature-status",
         "planned",
       ),
@@ -94,10 +94,14 @@ describe("planned sections", () => {
 
 describe("integrations", () => {
   it("lists the catalogue with real statuses and filters it", async () => {
-    mockApi({ ...shellHandlers(), "GET /providers": { body: providerList() } });
+    mockApi({
+      ...shellHandlers(),
+      "GET /providers": { body: providerList() },
+      "GET /providers/adapters": { body: { items: [] } },
+    });
     renderApp("/integrations");
     expect(await screen.findByText("Shodan")).toBeInTheDocument();
-    expect(screen.getByText("No provider integration is implemented yet")).toBeInTheDocument();
+    expect(screen.getByText("No real provider integration is implemented yet")).toBeInTheDocument();
     await userEvent.selectOptions(screen.getByLabelText("Status"), "excluded");
     expect(screen.queryByText("Shodan")).toBeNull();
     expect(screen.getByText("Cisco Talos")).toBeInTheDocument();
@@ -110,10 +114,23 @@ describe("command palette", () => {
     const { router } = renderApp("/");
     await screen.findByText("Active user accounts");
     await userEvent.keyboard("{Control>}k{/Control}");
-    const input = await screen.findByPlaceholderText("Type a section or action…");
+    const input = await screen.findByPlaceholderText(/section/);
     await userEvent.type(input, "vulnerab");
     await userEvent.keyboard("{Enter}");
     await waitFor(() => expect(router.state.location.pathname).toBe("/vulnerability"));
+  });
+
+  it("searches for an indicator that matches no section", async () => {
+    mockApi({ ...shellHandlers(), "GET /dashboard": { body: dashboard() } });
+    const { router } = renderApp("/");
+    await screen.findByText("Active user accounts");
+    await userEvent.keyboard("{Control>}k{/Control}");
+    const input = await screen.findByPlaceholderText(/indicator/);
+    await userEvent.type(input, "198.51.100.7");
+    expect(screen.getByRole("option", { name: /Search for 198.51.100.7/ })).toBeInTheDocument();
+    await userEvent.keyboard("{Enter}");
+    await waitFor(() => expect(router.state.location.pathname).toBe("/search"));
+    expect(router.state.location.search).toBe("?q=198.51.100.7");
   });
 
   it("hides administration pages the user may not open", async () => {
@@ -121,7 +138,7 @@ describe("command palette", () => {
     renderApp("/");
     await screen.findByText("Active user accounts");
     await userEvent.keyboard("{Control>}k{/Control}");
-    await screen.findByPlaceholderText("Type a section or action…");
+    await screen.findByPlaceholderText(/section/);
     expect(screen.getByRole("option", { name: /My account/ })).toBeInTheDocument();
     expect(screen.queryByRole("option", { name: /^Users$/ })).toBeNull();
     expect(screen.queryByRole("option", { name: /Audit log/ })).toBeNull();

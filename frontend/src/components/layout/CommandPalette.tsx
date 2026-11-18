@@ -1,7 +1,7 @@
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Command } from "cmdk";
-import { CornerDownLeft, LogOut, Moon, Settings, Sun } from "lucide-react";
-import { useEffect } from "react";
+import { CornerDownLeft, LogOut, Moon, Search, Settings, Sun } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 import { useLogout } from "@/api/queries";
@@ -41,11 +41,19 @@ export function CommandPalette({
     action();
   }
 
+  const [query, setQuery] = useState("");
+  const canSearch = permissions.includes("collection:read");
   const sections = NAV_SECTIONS.filter((section) => canSee(section.permission, permissions));
   const adminPages = ADMIN_PAGES.filter((page) => canSee(page.permission, permissions));
 
   return (
-    <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
+    <DialogPrimitive.Root
+      open={open}
+      onOpenChange={(value) => {
+        setOpen(value);
+        if (!value) setQuery("");
+      }}
+    >
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-black/50" />
         <DialogPrimitive.Content
@@ -56,7 +64,9 @@ export function CommandPalette({
           <Command label="Command palette" loop>
             <Command.Input
               autoFocus
-              placeholder="Type a section or action…"
+              value={query}
+              onValueChange={setQuery}
+              placeholder={canSearch ? "Type an indicator, a section or an action…" : "Type a section or action…"}
               className="h-12 w-full border-b border-line bg-transparent px-4 text-sm text-fg placeholder:text-fg-subtle focus:outline-none"
             />
             <Command.List className="max-h-[50vh] overflow-y-auto p-2">
@@ -119,6 +129,25 @@ export function CommandPalette({
                   Sign out
                 </Command.Item>
               </Command.Group>
+              {canSearch && query.trim() ? (
+                <Command.Group
+                  forceMount
+                  heading="Universal Search"
+                  className="[&_[cmdk-group-heading]]:px-2.5 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-fg-subtle"
+                >
+                  <Command.Item
+                    forceMount
+                    value="universal-search-entry"
+                    onSelect={() => run(() => navigate(`/search?q=${encodeURIComponent(query.trim())}`))}
+                    className={ITEM}
+                  >
+                    <Search className="size-4 shrink-0" aria-hidden />
+                    <span className="min-w-0 flex-1 truncate">
+                      Search for <span className="text-fg">{query.trim()}</span>
+                    </span>
+                  </Command.Item>
+                </Command.Group>
+              ) : null}
             </Command.List>
             <div className="flex items-center gap-3 border-t border-line px-4 py-2 text-[11px] text-fg-subtle">
               <span className="flex items-center gap-1">
@@ -126,7 +155,7 @@ export function CommandPalette({
               </span>
               <span>↑↓ move</span>
               <span>Esc close</span>
-              <span className="ml-auto">Indicator search arrives in Phase 2</span>
+              {canSearch ? <span className="ml-auto">Type an indicator to search for it</span> : null}
             </div>
           </Command>
         </DialogPrimitive.Content>

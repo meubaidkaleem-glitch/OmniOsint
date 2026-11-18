@@ -1,8 +1,10 @@
 import { ExternalLink } from "lucide-react";
 import { useDeferredValue, useMemo, useState } from "react";
 
-import { useProviders } from "@/api/queries";
-import type { ProviderOut } from "@/api/types";
+import { useAdapters, useHealthCheck, useProviders } from "@/api/queries";
+import type { AdapterOut, HealthOut, ProviderOut } from "@/api/types";
+import { useCan } from "@/app/context";
+import { Button } from "@/components/ui/button";
 import { EmptyState, ErrorState, Notice } from "@/components/ui/feedback";
 import { Input, Select } from "@/components/ui/form";
 import { Badge, PageHeader, Panel, Skeleton } from "@/components/ui/surface";
@@ -15,6 +17,7 @@ const STATUS_TONE: Record<ProviderOut["status"], "ok" | "neutral" | "danger"> = 
 };
 
 export function IntegrationsPage() {
+  const can = useCan();
   const providers = useProviders();
   const [category, setCategory] = useState("");
   const [status, setStatus] = useState("");
@@ -39,11 +42,12 @@ export function IntegrationsPage() {
         title="Integrations"
         description="The provider control centre. In this phase it lists the data sources and tools OmniOSINT is designed to use, with the real status of each."
       />
-      <Notice tone="info" title="No provider integration is implemented yet" className="mb-4">
-        Credentials, health checks, quota and usage tracking arrive with the provider framework
-        (Phase 2) and the first integrations (Phases 4 to 6). Access terms below are as publicly
-        documented and are re-verified when each adapter is built.
+      <Notice tone="info" title="No real provider integration is implemented yet" className="mb-4">
+        The provider framework is in place: adapters below are what can collect. The first real
+        integrations arrive in Phases 4 to 6 and credentials are managed from Phase 5. Access terms
+        in the catalogue are as publicly documented and are re-verified when each adapter is built.
       </Notice>
+      {can("collection:read") ? <AdaptersPanel /> : null}
 
       {providers.isPending ? (
         <Skeleton className="h-96" />
@@ -142,5 +146,96 @@ export function IntegrationsPage() {
         </Panel>
       )}
     </>
+  );
+}
+
+const ADAPTER_TONE: Record<AdapterOut["status"], "ok" | "warn" | "neutral"> = {
+  available: "ok",
+  not_configured: "warn",
+  disabled: "neutral",
+};
+
+function AdaptersPanel() {
+  const can = useCan();
+  const adapters = useAdapters();
+  const check = useHealthCheck();
+  const [results, setResults] = useState<Record<string, HealthOut>>({});
+
+  if (adapters.isPending) return <Skeleton className="mb-4 h-24" />;
+  if (adapters.isError) return <ErrorState error={adapters.error} />;
+  return (
+    <Panel
+      title="Installed adapters"
+      description="The code that can collect, with its real state. Real providers start in Phase 4."
+      className="mb-4"
+      bodyClassName="p-0"
+    >
+      <Table>
+        <THead>
+          <tr>
+            <TH>Adapter</TH>
+            <TH>Status</TH>
+            <TH>Capabilities</TH>
+            <TH>Today</TH>
+            <TH>Health</TH>
+          </tr>
+        </THead>
+        <TBody>
+          {adapters.data.items.map((adapter) => (
+            <TR key={adapter.id}>
+              <TD>
+                <div className="font-medium text-fg">{adapter.name}</div>
+                <div className="text-xs text-fg-muted">{adapter.description}</div>
+                {adapter.simulated ? (
+                  <Badge tone="warn" className="mt-1">
+                    Simulated test data
+                  </Badge>
+                ) : null}
+              </TD>
+              <TD>
+                <Badge tone={ADAPTER_TONE[adapter.status]}>{adapter.status.replace("_", " ")}</Badge>
+                <div className="mt-1 text-xs text-fg-subtle">{adapter.message}</div>
+                {adapter.circuit !== "closed" ? (
+                  <div className="text-xs text-warn">Circuit {adapter.circuit.replace("_", "-")}</div>
+                ) : null}
+              </TD>
+              <TD className="text-xs text-fg-muted">
+                {adapter.capabilities.map((capability) => (
+                  <div key={capability.id}>
+                    {capability.name}
+                    {capability.active ? " (active, needs a scope)" : ""}
+                    {capability.cost.kind !== "free" ? ` (${capability.cost.kind})` : ""}
+                  </div>
+                ))}
+              </TD>
+              <TD className="tabular whitespace-nowrap text-xs text-fg-muted">
+                {String(adapter.usage_today.requests ?? 0)} calls, {String(adapter.usage_today.failures ?? 0)} failed,{" "}
+                {String(adapter.usage_today.cache_hits ?? 0)} cached
+              </TD>
+              <TD className="text-xs">
+                {can("collection:run") && adapter.status === "available" ? (
+                  <Button
+                    size="sm"
+                    loading={check.isPending && check.variables === adapter.id}
+                    onClick={() =>
+                      check.mutate(adapter.id, {
+                        onSuccess: (result) => setResults((current) => ({ ...current, [adapter.id]: result })),
+                      })
+                    }
+                  >
+                    Check
+                  </Button>
+                ) : null}
+                {results[adapter.id] ? (
+                  <div className="mt-1 text-fg-muted">
+                    {results[adapter.id]?.status}: {results[adapter.id]?.detail}
+                  </div>
+                ) : null}
+              </TD>
+            </TR>
+          ))}
+        </TBody>
+      </Table>
+    </Panel>
   );
 }

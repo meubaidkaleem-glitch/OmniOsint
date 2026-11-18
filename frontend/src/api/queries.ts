@@ -9,7 +9,30 @@ import {
 
 import { api, ApiError, setCsrfToken } from "./client";
 import type {
+  AdapterList,
   AuditEventList,
+  ClassificationOut,
+  EvidenceDetailOut,
+  EvidenceList,
+  HealthOut,
+  HistoryList,
+  InputTypeList,
+  JobDetailOut,
+  JobOut,
+  PlanOut,
+  PlanRequest,
+  RawOut,
+  RequestDetailOut,
+  RequestList,
+  RequestOut,
+  SavedSearchIn,
+  SavedSearchList,
+  SavedSearchOut,
+  ScopeDecisionOut,
+  ScopeDetailOut,
+  ScopeIn,
+  ScopeList,
+  ScopeRuleIn,
   AuthState,
   ChangePasswordResponse,
   DashboardResponse,
@@ -45,6 +68,18 @@ export const queryKeys = {
   usersAll: ["admin", "users"] as const,
   roles: ["admin", "roles"] as const,
   audit: (filters: AuditFilters) => ["admin", "audit", filters] as const,
+  inputTypes: ["search", "types"] as const,
+  history: ["search", "history"] as const,
+  saved: ["search", "saved"] as const,
+  requests: ["collection", "requests"] as const,
+  request: (id: string) => ["collection", "requests", id] as const,
+  job: (id: string) => ["collection", "jobs", id] as const,
+  jobEvidence: (id: string) => ["evidence", "job", id] as const,
+  evidence: (id: string) => ["evidence", id] as const,
+  raw: (id: string, unmasked: boolean) => ["evidence", id, "raw", unmasked] as const,
+  scopes: ["scopes"] as const,
+  scope: (id: string) => ["scopes", id] as const,
+  adapters: ["providers", "adapters"] as const,
 };
 
 // --------------------------------------------------------------------------- session
@@ -276,5 +311,227 @@ export function useAuditEvents(filters: AuditFilters) {
     initialPageParam: null as string | null,
     getNextPageParam: (last) => last.next_cursor,
     placeholderData: keepPreviousData,
+  });
+}
+
+// --------------------------------------------------------------------------- universal search
+export function useClassify() {
+  return useMutation({
+    mutationFn: (payload: { input: string; remember?: boolean }) =>
+      api.post<ClassificationOut>("/search/classify", payload),
+  });
+}
+
+export function useInputTypes() {
+  return useQuery({
+    queryKey: queryKeys.inputTypes,
+    queryFn: ({ signal }) => api.get<InputTypeList>("/search/types", undefined, signal),
+    staleTime: Infinity,
+  });
+}
+
+export function useSearchHistory() {
+  return useQuery({
+    queryKey: queryKeys.history,
+    queryFn: ({ signal }) => api.get<HistoryList>("/search/history", { limit: 20 }, signal),
+  });
+}
+
+export function useClearHistory() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.delete("/search/history"),
+    onSuccess: () => client.invalidateQueries({ queryKey: queryKeys.history }),
+  });
+}
+
+export function useSavedSearches() {
+  return useQuery({
+    queryKey: queryKeys.saved,
+    queryFn: ({ signal }) => api.get<SavedSearchList>("/search/saved", undefined, signal),
+  });
+}
+
+export function useSaveSearch() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: SavedSearchIn) => api.post<SavedSearchOut>("/search/saved", payload),
+    onSuccess: () => client.invalidateQueries({ queryKey: queryKeys.saved }),
+  });
+}
+
+export function useDeleteSavedSearch() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/search/saved/${id}`),
+    onSuccess: () => client.invalidateQueries({ queryKey: queryKeys.saved }),
+  });
+}
+
+// --------------------------------------------------------------------------- collection
+export function usePlan() {
+  return useMutation({
+    mutationFn: (payload: PlanRequest) => api.post<PlanOut>("/collection/plan", payload),
+  });
+}
+
+export function useSubmitCollection() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: PlanRequest) => api.post<RequestOut>("/collection/requests", payload),
+    onSuccess: async () => {
+      await client.invalidateQueries({ queryKey: queryKeys.requests });
+      await client.invalidateQueries({ queryKey: queryKeys.history });
+      await client.invalidateQueries({ queryKey: queryKeys.dashboard });
+    },
+  });
+}
+
+export function useCollectionRequests() {
+  return useInfiniteQuery({
+    queryKey: queryKeys.requests,
+    queryFn: ({ pageParam, signal }) =>
+      api.get<RequestList>("/collection/requests", { cursor: pageParam, limit: 50 }, signal),
+    initialPageParam: null as string | null,
+    getNextPageParam: (last) => last.next_cursor,
+    refetchInterval: 5_000,
+  });
+}
+
+const UNSETTLED = new Set(["queued", "running"]);
+
+export function useCollectionRequest(id: string) {
+  return useQuery({
+    queryKey: queryKeys.request(id),
+    queryFn: ({ signal }) => api.get<RequestDetailOut>(`/collection/requests/${id}`, undefined, signal),
+    // Poll while any job is still waiting to run or running.
+    refetchInterval: (query) =>
+      query.state.data?.jobs.some((job) => UNSETTLED.has(job.status)) ? 1_500 : false,
+  });
+}
+
+export function useJob(id: string | null) {
+  return useQuery({
+    queryKey: queryKeys.job(id ?? ""),
+    queryFn: ({ signal }) => api.get<JobDetailOut>(`/collection/jobs/${id}`, undefined, signal),
+    enabled: id !== null,
+    refetchInterval: (query) => (query.state.data && UNSETTLED.has(query.state.data.job.status) ? 1_500 : false),
+  });
+}
+
+export function useJobAction() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, action }: { id: string; action: "approve" | "cancel" | "retry" }) =>
+      api.post<JobOut>(`/collection/jobs/${id}/${action}`),
+    onSuccess: async (job) => {
+      await client.invalidateQueries({ queryKey: queryKeys.request(job.request_id) });
+      await client.invalidateQueries({ queryKey: queryKeys.job(job.id) });
+      await client.invalidateQueries({ queryKey: queryKeys.requests });
+    },
+  });
+}
+
+export function useCancelRequest() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.post<RequestOut>(`/collection/requests/${id}/cancel`),
+    onSuccess: (request) => client.invalidateQueries({ queryKey: queryKeys.request(request.id) }),
+  });
+}
+
+// --------------------------------------------------------------------------- evidence
+export function useJobEvidence(jobId: string | null) {
+  return useQuery({
+    queryKey: queryKeys.jobEvidence(jobId ?? ""),
+    queryFn: ({ signal }) => api.get<EvidenceList>("/evidence", { job_id: jobId, limit: 200 }, signal),
+    enabled: jobId !== null,
+  });
+}
+
+export function useEvidence(id: string) {
+  return useQuery({
+    queryKey: queryKeys.evidence(id),
+    queryFn: ({ signal }) => api.get<EvidenceDetailOut>(`/evidence/${id}`, undefined, signal),
+  });
+}
+
+export function useRawEvidence(id: string, unmasked: boolean, enabled: boolean) {
+  return useQuery({
+    queryKey: queryKeys.raw(id, unmasked),
+    queryFn: ({ signal }) =>
+      api.get<RawOut>(`/evidence/${id}/raw`, unmasked ? { unmasked: true } : undefined, signal),
+    enabled,
+    retry: false,
+  });
+}
+
+// --------------------------------------------------------------------------- scopes
+export function useScopes(enabled = true) {
+  return useQuery({
+    queryKey: queryKeys.scopes,
+    queryFn: ({ signal }) => api.get<ScopeList>("/scopes", undefined, signal),
+    enabled,
+  });
+}
+
+export function useScope(id: string | null) {
+  return useQuery({
+    queryKey: queryKeys.scope(id ?? ""),
+    queryFn: ({ signal }) => api.get<ScopeDetailOut>(`/scopes/${id}`, undefined, signal),
+    enabled: id !== null,
+  });
+}
+
+function useScopeMutation<TVariables>(mutationFn: (variables: TVariables) => Promise<ScopeDetailOut>) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: async (detail) => {
+      client.setQueryData(queryKeys.scope(detail.scope.id), detail);
+      await client.invalidateQueries({ queryKey: queryKeys.scopes });
+    },
+  });
+}
+
+export const useCreateScope = () =>
+  useScopeMutation((payload: ScopeIn) => api.post<ScopeDetailOut>("/scopes", payload));
+
+export const useAddScopeRule = () =>
+  useScopeMutation(({ id, rule }: { id: string; rule: ScopeRuleIn }) =>
+    api.post<ScopeDetailOut>(`/scopes/${id}/rules`, rule),
+  );
+
+export const useRemoveScopeRule = () =>
+  useScopeMutation(({ id, ruleId }: { id: string; ruleId: string }) =>
+    api.delete<ScopeDetailOut>(`/scopes/${id}/rules/${ruleId}`),
+  );
+
+export const useRevokeScope = () =>
+  useScopeMutation(({ id, reason }: { id: string; reason: string }) =>
+    api.post<ScopeDetailOut>(`/scopes/${id}/revoke`, { reason }),
+  );
+
+export function useCheckScope() {
+  return useMutation({
+    mutationFn: ({ id, input, operation }: { id: string; input: string; operation: "discovery" | "assessment" }) =>
+      api.post<ScopeDecisionOut>(`/scopes/${id}/check`, { input, operation }),
+  });
+}
+
+// --------------------------------------------------------------------------- adapters
+export function useAdapters(enabled = true) {
+  return useQuery({
+    queryKey: queryKeys.adapters,
+    queryFn: ({ signal }) => api.get<AdapterList>("/providers/adapters", undefined, signal),
+    enabled,
+  });
+}
+
+export function useHealthCheck() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.post<HealthOut>(`/providers/${id}/health`),
+    onSuccess: () => client.invalidateQueries({ queryKey: queryKeys.adapters }),
   });
 }
