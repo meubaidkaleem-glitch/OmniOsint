@@ -23,6 +23,9 @@ PORT="$("$PYTHON" -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0));
 export OMNIOSINT_HOME="$HOME_DIR"
 export OMNIOSINT_DATABASE__URL="$OMNIOSINT_E2E_DATABASE_URL"
 export OMNIOSINT_SERVER__PORT="$PORT"
+# The Phase 2 journey runs collection end to end against the simulated
+# provider, which only ever generates documentation-range test data.
+export OMNIOSINT_COLLECTION__ENABLE_SIMULATED_PROVIDER="${OMNIOSINT_COLLECTION__ENABLE_SIMULATED_PROVIDER:-true}"
 
 cleanup() {
   "$PYTHON" -m omniosint stop >/dev/null 2>&1 || true
