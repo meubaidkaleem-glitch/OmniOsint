@@ -1,0 +1,113 @@
+# Temporary diagnostics for the Windows install hang. Not part of the product.
+name: Windows debug
+
+on:
+  push:
+    branches: ["debug/**"]
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUTF8: "1"
+  OMNIOSINT_NO_PAUSE: "1"
+
+jobs:
+  probe:
+    runs-on: windows-2025
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.22"
+      - name: Start the runner's PostgreSQL
+        shell: pwsh
+        run: |
+          $service = Get-Service -Name 'postgresql*' | Select-Object -First 1
+          Set-Service -InputObject $service -StartupType Manual
+          Start-Service -InputObject $service
+          $bin = $env:PGBIN
+          if (-not $bin) { $bin = (Get-ChildItem 'C:\Program Files\PostgreSQL\*\bin' | Select-Object -Last 1).FullName }
+          "PG_BIN=$bin" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          & "$bin\pg_isready.exe" -h 127.0.0.1 -p 5432
+      - name: install.bat with the database skipped
+        shell: cmd
+        timeout-minutes: 15
+        continue-on-error: true
+        run: install.bat -NonInteractive -Database skip
+      - name: Probe config set under a watchdog
+        shell: powershell
+        timeout-minutes: 6
+        continue-on-error: true
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $python = Join-Path $PWD '.venv\Scripts\python.exe'
+          $probe = Join-Path $env:RUNNER_TEMP 'probe.py'
+          Set-Content -Path $probe -Encoding ASCII -Value @(
+            'import faulthandler, runpy, sys',
+            'faulthandler.dump_traceback_later(25, exit=True)',
+            'sys.argv = ["omniosint"] + sys.argv[1:]',
+            'runpy.run_module("omniosint", run_name="__main__", alter_sys=True)'
+          )
+          function Show-Tree([int]$RootId) {
+            $all = @(Get-CimInstance Win32_Process)
+            $queue = New-Object System.Collections.Queue
+            $queue.Enqueue($RootId)
+            while ($queue.Count -gt 0) {
+              $id = $queue.Dequeue()
+              foreach ($p in ($all | Where-Object { $_.ParentProcessId -eq $id })) {
+                "  child of ${id}: $($p.ProcessId) $($p.Name) :: $($p.CommandLine)"
+                $queue.Enqueue([int]$p.ProcessId)
+              }
+            }
+          }
+          function Invoke-Probe([string]$Label, [string]$Arguments, [bool]$RedirectInput) {
+            "=== $Label"
+            $psi = New-Object System.Diagnostics.ProcessStartInfo
+            $psi.FileName = $python
+            $psi.Arguments = "-X faulthandler `"$probe`" $Arguments"
+            $psi.UseShellExecute = $false
+            $psi.RedirectStandardOutput = $true
+            $psi.RedirectStandardError = $true
+            $psi.RedirectStandardInput = $RedirectInput
+            $watch = [Diagnostics.Stopwatch]::StartNew()
+            $p = [System.Diagnostics.Process]::Start($psi)
+            if ($RedirectInput) { $p.StandardInput.Close() }
+            $out = $p.StandardOutput.ReadToEndAsync()
+            $err = $p.StandardError.ReadToEndAsync()
+            if ($p.WaitForExit(40000)) { "exited with $($p.ExitCode) after $($watch.ElapsedMilliseconds) ms" }
+            else { 'still running after 40 s'; Show-Tree $p.Id }
+            if ($out.Wait(5000)) { "stdout: $($out.Result)" } else { 'stdout still open after exit' }
+            if ($err.Wait(5000)) { "stderr: $($err.Result)" } else { 'stderr still open after exit' }
+            Show-Tree $p.Id
+            Get-CimInstance Win32_Process -Filter "Name = 'python.exe'" | Format-Table -AutoSize ProcessId, ParentProcessId, CommandLine | Out-String -Width 400
+          }
+          Invoke-Probe 'version' '--version' $true
+          Invoke-Probe 'config set, stdin closed' 'config set database.pg_bin_dir C:/x' $true
+          Invoke-Probe 'config set, stdin inherited' 'config set database.pg_bin_dir C:/x' $false
+          Invoke-Probe 'db check, stdin inherited' 'db check --json' $false
+      - name: Probe through Out-Host in Windows PowerShell 5.1
+        shell: powershell
+        timeout-minutes: 3
+        continue-on-error: true
+        run: |
+          $PSVersionTable.PSVersion
+          & .\.venv\Scripts\python.exe -m omniosint --version | Out-Host
+          "version exit=$LASTEXITCODE"
+          & .\.venv\Scripts\python.exe -m omniosint config set database.pg_bin_dir 'C:\x' | Out-Host
+          "config set exit=$LASTEXITCODE"
+      - name: Traced setup with bootstrap
+        shell: cmd
+        timeout-minutes: 6
+        continue-on-error: true
+        env:
+          OMNIOSINT_PG_ADMIN_PASSWORD: root
+        run: powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -Command "Set-PSDebug -Trace 1; & .\setup.ps1 -NonInteractive -Database bootstrap -SkipFrontend; exit $LASTEXITCODE"
+      - name: Python processes left behind
+        if: always()
+        shell: powershell
+        run: Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python|psql|pg_' } | Format-Table -AutoSize ProcessId, ParentProcessId, Name, CommandLine | Out-String -Width 400
