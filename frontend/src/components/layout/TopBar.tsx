@@ -53,7 +53,9 @@ export function TopBar({ me }: { me: AuthState }) {
         className="flex h-8 w-full max-w-md items-center gap-2 rounded-md border border-line-strong bg-surface-2 px-3 text-sm text-fg-subtle transition-colors hover:border-accent/50 hover:text-fg-muted"
       >
         <Search className="size-4" aria-hidden />
-        <span className="flex-1 text-left">Jump to a section or action…</span>
+        <span className="flex-1 text-left">
+          {me.permissions.includes("collection:read") ? "Search or jump to a section…" : "Jump to a section or action…"}
+        </span>
         <Kbd>Ctrl K</Kbd>
       </button>
 
