@@ -6,10 +6,10 @@ import uuid
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
 
 from omniosint.indicators.classifier import MAX_INPUT_LENGTH
-from omniosint.indicators.types import EntityType, IndicatorType
+from omniosint.indicators.types import ENTITY_LABELS, EntityType, IndicatorType
 
 
 class _Out(BaseModel):
@@ -324,6 +324,9 @@ class RawOut(BaseModel):
     simulated: bool
 
 
+_ENTITY_LABELS: dict[str, str] = {kind.value: label for kind, label in ENTITY_LABELS.items()}
+
+
 class EntityOut(_Out):
     id: uuid.UUID
     type: str
@@ -334,6 +337,12 @@ class EntityOut(_Out):
     last_observed_at: datetime | None
     is_simulated: bool
     created_at: datetime
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def label(self) -> str:
+        """The entity type's name, for display ("IP address")."""
+        return _ENTITY_LABELS.get(self.type, self.type.replace("_", " "))
 
 
 class EntityList(BaseModel):

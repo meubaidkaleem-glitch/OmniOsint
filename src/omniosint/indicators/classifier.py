@@ -28,6 +28,7 @@ from omniosint.indicators.web import (
     parse_ssh_repository,
     parse_url,
 )
+from omniosint.indicators.wording import in_sentence, with_article
 
 MAX_INPUT_LENGTH = 2000
 MAX_MENTIONS = 20
@@ -191,16 +192,12 @@ def _message(status: str, items: list[Candidate]) -> str:
         return "Not recognised as any supported input type."
     top = items[0]
     if status == "recognized":
-        message = f"Recognised as {_article(top.label)} {top.label.lower()}."
+        message = f"Recognised as {with_article(top.label)}."
         if len(items) > 1:
-            others = ", ".join(item.label.lower() for item in items[1:4])
+            others = ", ".join(in_sentence(item.label) for item in items[1:4])
             message += f" Also possible: {others}."
         return message
     return f"This input can be read in {len(items)} ways. Choose the one you mean."
-
-
-def _article(label: str) -> str:
-    return "an" if label[:1].lower() in "aeiou" or label.startswith(("IP", "URL", "ASN")) else "a"
 
 
 def _hints(text: str) -> list[str]:

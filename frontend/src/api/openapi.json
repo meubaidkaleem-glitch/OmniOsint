@@ -920,6 +920,12 @@
             "title": "Is Simulated",
             "type": "boolean"
           },
+          "label": {
+            "description": "The entity type's name, for display (\"IP address\").",
+            "readOnly": true,
+            "title": "Label",
+            "type": "string"
+          },
           "last_observed_at": {
             "anyOf": [
               {
@@ -946,7 +952,8 @@
           "first_observed_at",
           "last_observed_at",
           "is_simulated",
-          "created_at"
+          "created_at",
+          "label"
         ],
         "title": "EntityOut",
         "type": "object"

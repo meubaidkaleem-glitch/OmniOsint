@@ -1,5 +1,7 @@
 /** Labels and tones for plan steps, jobs and requests. */
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+
+import { useInputTypes } from "@/api/queries";
 
 export type Tone = "neutral" | "accent" | "ok" | "warn" | "danger";
 
@@ -79,4 +81,18 @@ export function useDebouncedValue<T>(value: T, delay: number): T {
     return () => window.clearTimeout(timer);
   }, [value, delay]);
   return settled;
+}
+
+/** "1 observation", "3 observations". */
+export function plural(count: number, noun: string): string {
+  return `${count} ${noun}${count === 1 ? "" : "s"}`;
+}
+
+/** The display name of an input type ("IPv4 address"), from the server's list of types. */
+export function useTypeLabel(): (type: string) => string {
+  const types = useInputTypes();
+  return useCallback(
+    (type: string) => types.data?.items.find((item) => item.type === type)?.label ?? type.replaceAll("_", " "),
+    [types.data],
+  );
 }

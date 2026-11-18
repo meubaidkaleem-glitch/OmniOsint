@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorState, FormError, Notice } from "@/components/ui/feedback";
 import { Badge, DefinitionList, Panel, Skeleton } from "@/components/ui/surface";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
-import { JOB_STATUS, REQUEST_STATUS, STEP_STATUS, statusOf } from "@/lib/collection";
+import { JOB_STATUS, REQUEST_STATUS, STEP_STATUS, plural, statusOf, useTypeLabel } from "@/lib/collection";
 import { cn, formatDateTime } from "@/lib/format";
 
 const FINISHED = new Set(["succeeded", "failed", "cancelled", "skipped"]);
@@ -36,6 +36,7 @@ export function RequestPage() {
   const detail = useCollectionRequest(requestId);
   const cancel = useCancelRequest();
   const can = useCan();
+  const typeLabel = useTypeLabel();
   const [open, setOpen] = useState<string | null>(null);
 
   if (detail.isPending) return <Skeleton className="h-64" />;
@@ -54,7 +55,7 @@ export function RequestPage() {
             <Badge tone={status.tone}>{status.label}</Badge>
           </span>
         }
-        description={`${request.indicator_type.replaceAll("_", " ")} · ${request.mode} mode · started ${formatDateTime(request.created_at)}`}
+        description={`${typeLabel(request.indicator_type)} · ${request.mode} mode · started ${formatDateTime(request.created_at)}`}
         actions={
           unfinished && can("collection:run") ? (
             <Button size="sm" variant="danger" onClick={() => cancel.mutate(request.id)} loading={cancel.isPending}>
@@ -66,8 +67,8 @@ export function RequestPage() {
       >
         {request.is_simulated ? (
           <Notice tone="warn" title="Simulated data">
-            Everything collected for this request came from the simulated provider. It is test data and
-            describes nothing real.
+            This request used the simulated provider. Whatever it collected is test data and describes
+            nothing real.
           </Notice>
         ) : null}
         <FormError error={cancel.error} />
@@ -104,6 +105,7 @@ export function RequestPage() {
                 return (
                   <TR key={`${step.provider_id}:${step.capability_id ?? "catalogue"}`}>
                     <TD className="whitespace-nowrap">{step.provider_name}</TD>
+                    <TD className="text-fg-muted">{step.capability_name ?? "-"}</TD>
                     <TD>
                       <Badge tone={stepStatus.tone}>{stepStatus.label}</Badge>
                     </TD>
@@ -125,9 +127,9 @@ export function RequestPage() {
 function resultText(job: JobOut): string {
   if (job.error) return String(job.error.message ?? job.error.code ?? "Failed");
   if (job.outcome) {
-    if (job.outcome.from_cache) return `Reused a fresh earlier result (${String(job.outcome.items)} items)`;
+    if (job.outcome.from_cache) return `Reused a fresh earlier result (${plural(Number(job.outcome.items), "item")})`;
     const truncated = job.outcome.truncated ? " (incomplete)" : "";
-    return `${String(job.outcome.items)} observations, ${String(job.outcome.evidence)} evidence records${truncated}`;
+    return `${plural(Number(job.outcome.items), "observation")}, ${plural(Number(job.outcome.evidence), "evidence record")}${truncated}`;
   }
   if (job.status === "awaiting_approval") return "Waiting for approval";
   return "";

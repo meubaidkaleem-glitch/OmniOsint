@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { Badge, Panel, Skeleton } from "@/components/ui/surface";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
-import { REQUEST_STATUS, statusOf } from "@/lib/collection";
+import { REQUEST_STATUS, statusOf, useTypeLabel } from "@/lib/collection";
 import { formatDateTime } from "@/lib/format";
 
 export function RequestsPage() {
   const requests = useCollectionRequests();
+  const typeLabel = useTypeLabel();
   if (requests.isPending) return <Skeleton className="h-64" />;
   if (requests.isError) return <ErrorState error={requests.error} onRetry={() => void requests.refetch()} />;
   const items = requests.data.pages.flatMap((page) => page.items);
@@ -49,7 +50,7 @@ export function RequestsPage() {
                       </Badge>
                     ) : null}
                   </TD>
-                  <TD className="text-fg-muted">{item.indicator_type.replaceAll("_", " ")}</TD>
+                  <TD className="text-fg-muted">{typeLabel(item.indicator_type)}</TD>
                   <TD className="text-fg-muted">{item.mode}</TD>
                   <TD>
                     <Badge tone={status.tone}>{status.label}</Badge>

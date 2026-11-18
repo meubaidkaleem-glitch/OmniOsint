@@ -315,15 +315,22 @@ function PlanPanel({
       bodyClassName="space-y-4"
     >
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Field label="Mode">
+        <Field
+          label="Mode"
+          hint={
+            options.mode === "passive"
+              ? "The target is not contacted."
+              : "May contact the target: needs a scope and an approval."
+          }
+        >
           {(props) => (
             <Select
               {...props}
               value={options.mode}
               onChange={(event) => onOptions({ ...options, mode: event.target.value as PlanOptions["mode"] })}
             >
-              <option value="passive">Passive (target not contacted)</option>
-              <option value="active">Active (needs a scope)</option>
+              <option value="passive">Passive</option>
+              <option value="active">Active</option>
             </Select>
           )}
         </Field>
@@ -479,7 +486,7 @@ function SidePanels({
             ))}
           </ul>
         ) : (
-          <p className="px-2 py-1 text-sm text-fg-muted">Searches you classify appear here.</p>
+          <p className="px-2 py-1 text-sm text-fg-muted">Searches you classify or run appear here.</p>
         )}
       </Panel>
       <Panel title="Saved searches" bodyClassName="space-y-3 p-3">

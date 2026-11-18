@@ -66,6 +66,10 @@ def worker_identity() -> str:
     return f"{socket.gethostname()}:{os.getpid()}:{uuid.uuid4().hex[:8]}"
 
 
+def _count(number: int, noun: str) -> str:
+    return f"{number} {noun}{'' if number == 1 else 's'}"
+
+
 def indicator_of(job: CollectionJob) -> Indicator:
     stored = job.options.get("indicator", {})
     entity_type = stored.get("entity_type")
@@ -529,7 +533,8 @@ class Collector:
             queue.finish(session, job, "failed", message, outcome=outcome, error=error.as_dict())
         else:
             message = (
-                f"Collected {len(observations)} observation(s) on {len(result.raw.pages)} page(s)."
+                f"Collected {_count(len(observations), 'observation')} on "
+                f"{_count(len(result.raw.pages), 'page')}."
             )
             if result.truncated:
                 message += f" Incomplete: {result.truncation_reason}"

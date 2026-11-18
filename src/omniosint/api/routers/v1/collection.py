@@ -127,7 +127,10 @@ async def submit(
         actor=principal.actor,
         request=info,
     )
-    return RequestOut.model_validate(created)
+    response = RequestOut.model_validate(created)
+    if principal.user_id is not None:  # a search that was run belongs in the history
+        await collection.record_search(session, principal.user_id, result)
+    return response
 
 
 @router.get(

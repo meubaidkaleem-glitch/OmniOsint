@@ -1280,6 +1280,11 @@ export interface components {
             id: string;
             /** Is Simulated */
             is_simulated: boolean;
+            /**
+             * Label
+             * @description The entity type's name, for display ("IP address").
+             */
+            readonly label: string;
             /** Last Observed At */
             last_observed_at: string | null;
             /** Type */

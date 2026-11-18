@@ -6,6 +6,7 @@ import re
 
 from omniosint.indicators.model import Candidate, candidate
 from omniosint.indicators.types import IndicatorType
+from omniosint.indicators.wording import with_article
 
 # Common ways of "defanging" an indicator so that it cannot be clicked.
 _REFANG_RULES: tuple[tuple[re.Pattern[str], str], ...] = (
@@ -106,8 +107,8 @@ def as_threat_indicator(item: Candidate) -> Candidate:
         display=item.display,
         rank="plausible",
         reason=(
-            f"Written defanged, as indicators of compromise usually are; underneath it is a "
-            f"{item.label.lower()}."
+            "Written defanged, as indicators of compromise usually are; underneath it is "
+            f"{with_article(item.label)}."
         ),
         notes=["Defanging was removed to read the indicator. Nothing was contacted."],
         details={"form": "defanged_indicator", "indicator_type": item.type.value},

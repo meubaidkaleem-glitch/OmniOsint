@@ -151,7 +151,12 @@ async def test_collection_end_to_end(
 
     job_detail = (await get(client, admin, f"/collection/jobs/{job['id']}")).json()
     assert [event["kind"] for event in job_detail["events"]] == ["created", "started", "succeeded"]
+    assert job_detail["events"][-1]["message"] == "Collected 3 observations on 1 page."
     assert job_detail["evidence_count"] == 3 and len(job_detail["results"]) == 1
+
+    # A search that was run is in the user's history, like one that was classified.
+    history = (await get(client, admin, "/search/history")).json()["items"]
+    assert [entry["query"] for entry in history] == ["example.org"]
 
     evidence = (await get(client, admin, "/evidence", job_id=job["id"])).json()["items"]
     assert len(evidence) == 3 and all(item["is_simulated"] for item in evidence)
@@ -159,6 +164,7 @@ async def test_collection_end_to_end(
     assert one["integrity"]["content_hash_valid"] and one["integrity"]["raw_hash_valid"]
     assert one["source"]["id"] == "simulated" and one["source"]["is_simulated"]
     assert one["entity"]["canonical_key"] == "example.org"
+    assert one["entity"]["label"] == "Domain"
 
     raw = (await get(client, admin, f"/evidence/{evidence[0]['id']}/raw")).json()
     assert raw["format"] == "json" and raw["redacted"] and raw["simulated"]

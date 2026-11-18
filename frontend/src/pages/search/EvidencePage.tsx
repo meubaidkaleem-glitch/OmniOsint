@@ -42,7 +42,7 @@ export function EvidencePage() {
         <Panel title="Observation" description={evidence.observation_kind}>
           <DefinitionList
             items={[
-              ["Entity", `${entity.type.replaceAll("_", " ")}: ${entity.display_name}`],
+              ["Entity", `${entity.label}: ${entity.display_name}`],
               ...Object.entries(attributes).map(([key, value]): [string, string] => [
                 key.replaceAll("_", " "),
                 typeof value === "object" ? JSON.stringify(value) : String(value),

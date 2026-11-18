@@ -231,7 +231,7 @@ describe("collection requests", () => {
       },
     });
     renderApp("/search/requests/00000000-0000-7000-8000-0000000000r1");
-    expect(await screen.findByText(/Everything collected for this request came from the simulated provider/)).toBeInTheDocument();
+    expect(await screen.findByText(/This request used the simulated provider/)).toBeInTheDocument();
     const row = screen.getByText("simulated.probe").closest("tr");
     expect(within(row as HTMLElement).getByText("Active")).toBeInTheDocument();
     await userEvent.click(row as HTMLElement);

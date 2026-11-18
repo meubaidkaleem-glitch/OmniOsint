@@ -422,3 +422,27 @@ def test_misleading_extension_is_reported() -> None:
     top = result.candidates[0]
     assert top.type is T.FILE
     assert any(".pdf" in note and "misleading" in note for note in top.notes)
+
+
+@pytest.mark.parametrize(
+    ("text", "message"),
+    [
+        ("192.0.2.10", "Recognised as an IPv4 address."),
+        ("example.com", "Recognised as a domain."),
+        ("CVE-2024-3094", "Recognised as a CVE identifier."),
+        ("someone@example.com", "Recognised as an email address."),
+    ],
+)
+def test_messages_read_naturally(text: str, message: str) -> None:
+    assert classify(text).message == message
+
+
+def test_every_type_label_reads_naturally_in_a_sentence() -> None:
+    from omniosint.indicators.wording import with_article
+
+    phrases = {info.label: with_article(info.label) for info in TYPE_INFO.values()}
+    assert phrases["Username"] == "a username"
+    assert phrases["URL"] == "a URL"
+    assert phrases["IPv6 address"] == "an IPv6 address"
+    assert phrases["Geographic coordinates"] == "geographic coordinates"
+    assert all(" an u" not in f" {phrase}" for phrase in phrases.values())

@@ -12,7 +12,7 @@ export function AdminLayout() {
     <>
       <PageHeader
         title="Administration and Settings"
-        description="Accounts, roles, the audit trail, system status and your own account."
+        description="Accounts, roles, authorised scopes, the audit trail, system status and your own account."
       />
       <nav aria-label="Administration" className="mb-5 flex gap-1 overflow-x-auto border-b border-line">
         {pages.map((page) => (

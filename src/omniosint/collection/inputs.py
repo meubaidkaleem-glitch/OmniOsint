@@ -10,6 +10,7 @@ from omniosint.core.errors import ValidationFailed
 from omniosint.indicators import classify
 from omniosint.indicators.model import Classification
 from omniosint.indicators.types import TYPE_INFO, IndicatorType
+from omniosint.indicators.wording import with_article
 from omniosint.providers.base import Indicator
 
 _FILE_TYPES = frozenset({IndicatorType.FILE, IndicatorType.IMAGE, IndicatorType.DOCUMENT})
@@ -27,7 +28,7 @@ def resolve(
         candidate = result.find(wanted)
         if candidate is None:
             raise ValidationFailed(
-                f"The input cannot be read as {TYPE_INFO[wanted].label.lower()}.",
+                f"The input cannot be read as {with_article(TYPE_INFO[wanted].label)}.",
                 details=readings or [{"field": "input", "message": result.message}],
             )
     else:
