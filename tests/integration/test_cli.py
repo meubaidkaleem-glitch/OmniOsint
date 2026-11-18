@@ -59,8 +59,6 @@ def test_version_and_help(tmp_path: Path):
         ("cases", "list"),
         ("reports", "list"),
         ("monitoring", "list"),
-        ("search", "--input", "example.com"),
-        ("investigate", "--input", "example.com"),
         ("graph", "export", "--case", "C-1", "--format", "graphml"),
         ("report", "generate", "--case", "C-1", "--format", "pdf"),
     ],

@@ -18,7 +18,7 @@ import typer
 from rich.table import Table
 
 from omniosint import __version__
-from omniosint.cli import backup_commands, db_commands, providers_commands
+from omniosint.cli import backup_commands, collection_commands, db_commands, providers_commands
 from omniosint.cli.admin_commands import (
     admin_app,
     config_app,
@@ -61,6 +61,7 @@ app.add_typer(secrets_app, name="secrets")
 app.add_typer(config_app, name="config")
 app.add_typer(backup_commands.app, name="backup")
 app.add_typer(providers_commands.app, name="providers")
+collection_commands.register(app)
 
 
 def _version_callback(value: bool) -> None:
@@ -307,22 +308,6 @@ def export_openapi(
 
 
 # --------------------------------------------------------------------------- planned
-@app.command(rich_help_panel=PLANNED_PANEL)
-def search(
-    input_value: Annotated[str | None, typer.Option("--input", help="Indicator.")] = None,
-) -> None:
-    """Classify an indicator and preview a collection plan (Phase 2)."""
-    planned("Universal search", 2)
-
-
-@app.command(rich_help_panel=PLANNED_PANEL)
-def investigate(
-    input_value: Annotated[str | None, typer.Option("--input", help="Indicator.")] = None,
-) -> None:
-    """Run an investigation on an indicator (Phases 2 to 4)."""
-    planned("Investigations", 3)
-
-
 cases_app = typer.Typer(help="Investigation cases (Phase 3).", no_args_is_help=True)
 reports_app = typer.Typer(help="Reports (Phase 13).", no_args_is_help=True)
 report_app = typer.Typer(help="Report generation (Phase 13).", no_args_is_help=True)
