@@ -108,8 +108,9 @@ records who approved it and on what authority.
   the backup was taken are kept only in the automatic pre-restore backup.
 * On Linux the secret store's master key is protected by file permissions only;
   `omniosint doctor` reports this.
-* The login throttle is per process and in memory; it becomes shared when Redis
-  is configured in Phase 2.
+* The sign-in throttle is kept in memory by the API. OmniOSINT runs a single API
+  process, so it covers every attempt, but it starts empty when the API
+  restarts. Account lockout is stored in the database and is not affected.
 * TLS is not terminated by OmniOSINT. It is designed for loopback use; anyone
   placing it behind a reverse proxy is responsible for TLS and must set
   `auth.cookie_secure`.

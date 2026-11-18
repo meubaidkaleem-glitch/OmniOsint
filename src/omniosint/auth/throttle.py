@@ -1,7 +1,10 @@
 """In-process attempt throttling.
 
-Used for sign-in and first-run setup attempts. State is per process; when Redis
-is configured (Phase 2) the same interface is backed by shared state.
+Used for sign-in and first-run setup attempts. State is kept in memory by the
+API process. OmniOSINT runs one API process, so the throttle sees every
+attempt; it starts empty after a restart, which is why account lockout (stored
+in the database) backs it up. Sharing it through Redis would only matter with
+several API processes, which the architecture does not use.
 """
 
 from __future__ import annotations
