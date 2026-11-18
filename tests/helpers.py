@@ -81,7 +81,11 @@ async def fetch_all(database_url: str, statement: str, **params: Any) -> list[An
 
 CLEAN_STATEMENTS = (
     "SET LOCAL omniosint.audit_purge = 'on'",
-    "TRUNCATE users, user_roles, user_sessions, audit_events, service_instances CASCADE",
+    "SET LOCAL omniosint.evidence_purge = 'on'",
+    "TRUNCATE users, user_roles, user_sessions, audit_events, service_instances, "
+    "evidence, collection_results, collection_job_events, collection_jobs, "
+    "collection_requests, entities, raw_objects, scope_rules, scopes, search_history, "
+    "saved_searches, provider_usage CASCADE",
     "DELETE FROM system_settings WHERE key <> 'instance'",
 )
 
