@@ -37,8 +37,10 @@ platforms (for example `colorama` on Windows) are not listed here.
 | MarkupSafe | 3.0.4 | BSD-3-Clause |
 | mdurl | 0.1.2 | MIT License |
 | opentelemetry-api | 1.45.2 | Apache-2.0 |
+| phonenumbers | 9.0.42 | Apache-2.0 |
 | platformdirs | 4.14.5 | MIT |
 | psutil | 7.2.2 | BSD-3-Clause |
+| publicsuffixlist | 1.1.2.20261101 | MPL-2.0 |
 | pycparser | 3.12 | BSD-3-Clause |
 | pydantic | 2.14.3 | MIT |
 | pydantic-settings | 2.16.3 | MIT |

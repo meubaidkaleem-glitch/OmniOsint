@@ -21,6 +21,13 @@ class Permission(StrEnum):
     AUDIT_READ = "audit:read"
     SYSTEM_READ = "system:read"
     SYSTEM_MANAGE = "system:manage"
+    COLLECTION_READ = "collection:read"
+    COLLECTION_RUN = "collection:run"
+    COLLECTION_APPROVE = "collection:approve"
+    EVIDENCE_READ = "evidence:read"
+    EVIDENCE_READ_RAW = "evidence:read_raw"
+    SCOPES_READ = "scopes:read"
+    SCOPES_MANAGE = "scopes:manage"
 
 
 PERMISSION_DESCRIPTIONS: dict[Permission, str] = {
@@ -30,6 +37,21 @@ PERMISSION_DESCRIPTIONS: dict[Permission, str] = {
     Permission.AUDIT_READ: "View the audit trail.",
     Permission.SYSTEM_READ: "View detailed system and service status.",
     Permission.SYSTEM_MANAGE: "Change system settings and run maintenance operations.",
+    Permission.COLLECTION_READ: (
+        "Classify indicators, preview collection plans, and view collection requests and jobs."
+    ),
+    Permission.COLLECTION_RUN: "Submit collection plans, and cancel or retry jobs.",
+    Permission.COLLECTION_APPROVE: (
+        "Approve jobs that wait for approval: active operations and paid calls."
+    ),
+    Permission.EVIDENCE_READ: (
+        "View evidence, entities and sources, and raw responses with credentials masked."
+    ),
+    Permission.EVIDENCE_READ_RAW: "View raw responses unmasked (each view is audited).",
+    Permission.SCOPES_READ: "View scopes and check targets against them.",
+    Permission.SCOPES_MANAGE: (
+        "Record scopes of written authorisation, change their rules and revoke them."
+    ),
 }
 
 
@@ -53,8 +75,18 @@ BUILTIN_ROLES: tuple[RoleDefinition, ...] = (
     ),
     RoleDefinition(
         name=ANALYST,
-        description=("Investigation work. Receives permissions as intelligence modules are added."),
-        permissions=frozenset(),
+        description=(
+            "Investigation work: classification, collection and evidence. Approving active "
+            "operations and recording scopes stay with administrators."
+        ),
+        permissions=frozenset(
+            {
+                Permission.COLLECTION_READ,
+                Permission.COLLECTION_RUN,
+                Permission.EVIDENCE_READ,
+                Permission.SCOPES_READ,
+            }
+        ),
     ),
     RoleDefinition(
         name=AUDITOR,
@@ -65,6 +97,9 @@ BUILTIN_ROLES: tuple[RoleDefinition, ...] = (
                 Permission.ROLES_READ,
                 Permission.AUDIT_READ,
                 Permission.SYSTEM_READ,
+                Permission.COLLECTION_READ,
+                Permission.EVIDENCE_READ,
+                Permission.SCOPES_READ,
             }
         ),
     ),

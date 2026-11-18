@@ -263,6 +263,172 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/collection/jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List jobs (the job history) */
+        get: operations["list_jobs_api_v1_collection_jobs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/collection/jobs/{job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a job with its history and results */
+        get: operations["get_job_api_v1_collection_jobs__job_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/collection/jobs/{job_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve a job that waits for approval
+         * @description Active operations are checked against their scope again before approval.
+         */
+        post: operations["approve_job_api_v1_collection_jobs__job_id__approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/collection/jobs/{job_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel a job */
+        post: operations["cancel_job_api_v1_collection_jobs__job_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/collection/jobs/{job_id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Retry a failed or cancelled job
+         * @description An active operation goes back to waiting for approval.
+         */
+        post: operations["retry_job_api_v1_collection_jobs__job_id__retry_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/collection/plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview a collection plan
+         * @description What would run for the input, and why each provider would or would not be used. Nothing is collected. An ambiguous input needs `type`.
+         */
+        post: operations["plan_api_v1_collection_plan_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/collection/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List collection requests */
+        get: operations["list_requests_api_v1_collection_requests_get"];
+        put?: never;
+        /**
+         * Submit a collection request
+         * @description Computes the plan again and queues every step that can run. Active operations and paid calls above the threshold wait for approval.
+         */
+        post: operations["submit_api_v1_collection_requests_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/collection/requests/{request_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a collection request, its plan and its jobs */
+        get: operations["get_request_api_v1_collection_requests__request_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/collection/requests/{request_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel every unfinished job of a request */
+        post: operations["cancel_request_api_v1_collection_requests__request_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/dashboard": {
         parameters: {
             query?: never;
@@ -272,6 +438,97 @@ export interface paths {
         };
         /** Dashboard data */
         get: operations["dashboard_api_v1_dashboard_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/entities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List entities */
+        get: operations["list_entities_api_v1_entities_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/entities/{entity_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get an entity */
+        get: operations["get_entity_api_v1_entities__entity_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/evidence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List evidence
+         * @description Newest first. Simulated evidence is included and flagged unless excluded.
+         */
+        get: operations["list_evidence_api_v1_evidence_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/evidence/{evidence_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get evidence with its entity, source and integrity */
+        get: operations["get_evidence_api_v1_evidence__evidence_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/evidence/{evidence_id}/raw": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The raw response behind evidence
+         * @description Credential-like fields are masked. `unmasked=true` needs the `evidence:read_raw` permission and is recorded in the audit trail.
+         */
+        get: operations["raw_response_api_v1_evidence__evidence_id__raw_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -300,6 +557,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/providers/adapters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List installed adapters and their state
+         * @description Adapters are the code that can collect. Each has its real status, circuit breaker state, capabilities and today's usage.
+         */
+        get: operations["list_adapters_api_v1_providers_adapters_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/providers/{provider_id}": {
         parameters: {
             query?: never;
@@ -309,6 +586,248 @@ export interface paths {
         };
         /** Get one catalogue entry */
         get: operations["get_provider_api_v1_providers__provider_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/providers/{provider_id}/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run a provider's health check
+         * @description Only adapters can be checked; catalogue entries report their planned status.
+         */
+        post: operations["health_check_api_v1_providers__provider_id__health_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scopes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List scopes */
+        get: operations["list_scopes_api_v1_scopes_get"];
+        put?: never;
+        /**
+         * Record a scope of written authorisation
+         * @description Creating a scope states that written authorisation exists for every target it lists (`authorization_confirmed` must be true). It is recorded in the audit trail.
+         */
+        post: operations["create_scope_api_v1_scopes_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scopes/{scope_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a scope and its rules */
+        get: operations["get_scope_api_v1_scopes__scope_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scopes/{scope_id}/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Check whether a target is in scope
+         * @description Answers what the scope manager would decide now. Nothing is run.
+         */
+        post: operations["check_api_v1_scopes__scope_id__check_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scopes/{scope_id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Revoke a scope
+         * @description Scopes are never deleted, so the authority behind past operations stays on record.
+         */
+        post: operations["revoke_scope_api_v1_scopes__scope_id__revoke_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scopes/{scope_id}/rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a target or an exclusion */
+        post: operations["add_rule_api_v1_scopes__scope_id__rules_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scopes/{scope_id}/rules/{rule_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a rule */
+        delete: operations["remove_rule_api_v1_scopes__scope_id__rules__rule_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/search/classify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Classify an input
+         * @description Detects which of the 24 input types the input is, validates and normalises it. An ambiguous input returns every reading with `status` = `ambiguous`; nothing is guessed. Nothing is collected and no provider is contacted.
+         */
+        post: operations["classify_input_api_v1_search_classify_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/search/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your search history */
+        get: operations["history_api_v1_search_history_get"];
+        put?: never;
+        post?: never;
+        /** Clear your search history */
+        delete: operations["clear_history_api_v1_search_history_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/search/saved": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your saved searches */
+        get: operations["saved_api_v1_search_saved_get"];
+        put?: never;
+        /** Save a search */
+        post: operations["save_api_v1_search_saved_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/search/saved/{saved_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a saved search */
+        delete: operations["delete_saved_api_v1_search_saved__saved_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/search/types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the supported input types */
+        get: operations["input_types_api_v1_search_types_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The source registry
+         * @description Every source evidence can be attributed to, with its lineage.
+         */
+        get: operations["list_sources_api_v1_sources_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -435,6 +954,51 @@ export interface components {
             /** Target Type */
             target_type: string | null;
         };
+        /** AdapterList */
+        AdapterList: {
+            /** Items */
+            items: components["schemas"]["AdapterOut"][];
+        };
+        /** AdapterOut */
+        AdapterOut: {
+            /** Capabilities */
+            capabilities: components["schemas"]["CapabilityOut"][];
+            /** Category */
+            category: string;
+            /** Circuit */
+            circuit: string;
+            /** Description */
+            description: string;
+            /** Id */
+            id: string;
+            /** Message */
+            message: string;
+            /** Missing Credentials */
+            missing_credentials: string[];
+            /** Name */
+            name: string;
+            /** Rate Limit */
+            rate_limit: {
+                [key: string]: unknown;
+            };
+            /** Requires Credentials */
+            requires_credentials: boolean;
+            /** Simulated */
+            simulated: boolean;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "available" | "not_configured" | "disabled";
+            /** Usage Today */
+            usage_today: {
+                [key: string]: unknown;
+            };
+            /** Verified Live */
+            verified_live: boolean;
+            /** Version */
+            version: string;
+        };
         /** AuditEventList */
         AuditEventList: {
             /** Items */
@@ -491,6 +1055,57 @@ export interface components {
             session: components["schemas"]["SessionInfo"];
             user: components["schemas"]["UserOut"];
         };
+        /** CandidateOut */
+        CandidateOut: {
+            /** Details */
+            details: {
+                [key: string]: unknown;
+            };
+            /** Display */
+            display: string;
+            entity_type: components["schemas"]["EntityType"] | null;
+            /** Label */
+            label: string;
+            /** Modules */
+            modules: string[];
+            /** Notes */
+            notes: string[];
+            /**
+             * Rank
+             * @enum {string}
+             */
+            rank: "strong" | "plausible" | "weak";
+            /** Reason */
+            reason: string;
+            type: components["schemas"]["IndicatorType"];
+            /** Value */
+            value: string;
+        };
+        /** CapabilityOut */
+        CapabilityOut: {
+            /** Accepts */
+            accepts: components["schemas"]["IndicatorType"][];
+            /** Active */
+            active: boolean;
+            /** Cache Ttl Seconds */
+            cache_ttl_seconds: number;
+            /** Cost */
+            cost: {
+                [key: string]: unknown;
+            };
+            /** Description */
+            description: string;
+            /** Id */
+            id: string;
+            /** Max Pages */
+            max_pages: number;
+            /** Name */
+            name: string;
+            /** Operation */
+            operation: string;
+            /** Timeout Seconds */
+            timeout_seconds: number;
+        };
         /** CategoryOut */
         CategoryOut: {
             /** Count */
@@ -511,6 +1126,37 @@ export interface components {
         ChangePasswordResponse: {
             /** Other Sessions Ended */
             other_sessions_ended: number;
+        };
+        /** ClassificationOut */
+        ClassificationOut: {
+            /** Candidates */
+            candidates: components["schemas"]["CandidateOut"][];
+            /** Hints */
+            hints: string[];
+            /** Input */
+            input: string;
+            /** Mentions */
+            mentions: components["schemas"]["CandidateOut"][];
+            /** Message */
+            message: string;
+            /** Refanged */
+            refanged: boolean;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "recognized" | "ambiguous" | "unrecognized";
+        };
+        /** ClassifyRequest */
+        ClassifyRequest: {
+            /** Input */
+            input: string;
+            /**
+             * Remember
+             * @description Add the search to your search history.
+             * @default true
+             */
+            remember: boolean;
         };
         /** ComponentDetail */
         ComponentDetail: {
@@ -603,6 +1249,47 @@ export interface components {
             /** Recent Activity */
             recent_activity: components["schemas"]["ActivityItem"][];
         };
+        /** EntityList */
+        EntityList: {
+            /** Items */
+            items: components["schemas"]["EntityOut"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** EntityOut */
+        EntityOut: {
+            /** Attributes */
+            attributes: {
+                [key: string]: unknown;
+            };
+            /** Canonical Key */
+            canonical_key: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Display Name */
+            display_name: string;
+            /** First Observed At */
+            first_observed_at: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Is Simulated */
+            is_simulated: boolean;
+            /** Last Observed At */
+            last_observed_at: string | null;
+            /** Type */
+            type: string;
+        };
+        /**
+         * EntityType
+         * @enum {string}
+         */
+        EntityType: "person_reference" | "email" | "phone" | "username" | "domain" | "subdomain" | "url" | "ip_address" | "network_prefix" | "asn" | "organization" | "router" | "switch" | "firewall" | "server" | "access_point" | "endpoint" | "cloud_asset" | "certificate" | "image" | "document" | "file_hash" | "repository" | "package" | "vulnerability" | "threat_indicator" | "malware_sample" | "public_event" | "geographic_location";
         /** ErrorBody */
         ErrorBody: {
             /** Code */
@@ -624,6 +1311,79 @@ export interface components {
         /** ErrorResponse */
         ErrorResponse: {
             error: components["schemas"]["ErrorBody"];
+        };
+        /** EvidenceDetailOut */
+        EvidenceDetailOut: {
+            entity: components["schemas"]["EntityOut"];
+            evidence: components["schemas"]["EvidenceOut"];
+            integrity: components["schemas"]["IntegrityOut"];
+            source: components["schemas"]["SourceOut"] | null;
+        };
+        /** EvidenceList */
+        EvidenceList: {
+            /** Items */
+            items: components["schemas"]["EvidenceOut"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** EvidenceOut */
+        EvidenceOut: {
+            /**
+             * Collected At
+             * Format: date-time
+             */
+            collected_at: string;
+            /** Collection Result Id */
+            collection_result_id: string | null;
+            /** Content Hash */
+            content_hash: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Entity Id
+             * Format: uuid
+             */
+            entity_id: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Is Redacted */
+            is_redacted: boolean;
+            /** Is Simulated */
+            is_simulated: boolean;
+            /** Job Id */
+            job_id: string | null;
+            /** Normalized */
+            normalized: {
+                [key: string]: unknown;
+            };
+            /** Observation Kind */
+            observation_kind: string;
+            /** Observed At */
+            observed_at: string | null;
+            /** Provider Id */
+            provider_id: string | null;
+            /** Provider Object Id */
+            provider_object_id: string | null;
+            /** Raw Pointer */
+            raw_pointer: string | null;
+            /** Raw Sha256 */
+            raw_sha256: string | null;
+            /** Source Id */
+            source_id: string;
+            /** Source Url */
+            source_url: string | null;
+            /** Transformation History */
+            transformation_history: {
+                [key: string]: unknown;
+            }[];
+            /** Verification Status */
+            verification_status: string;
         };
         /** FeatureCounts */
         FeatureCounts: {
@@ -672,6 +1432,187 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** HealthOut */
+        HealthOut: {
+            /** Detail */
+            detail: string;
+            /** Latency Ms */
+            latency_ms: number | null;
+            /** Quota */
+            quota: {
+                [key: string]: unknown;
+            } | null;
+            /** Status */
+            status: string;
+        };
+        /** HistoryEntryOut */
+        HistoryEntryOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Query */
+            query: string;
+            /** Status */
+            status: string;
+            /** Types */
+            types: string[];
+        };
+        /** HistoryList */
+        HistoryList: {
+            /** Items */
+            items: components["schemas"]["HistoryEntryOut"][];
+        };
+        /**
+         * IndicatorType
+         * @enum {string}
+         */
+        IndicatorType: "email" | "phone" | "username" | "domain" | "url" | "ipv4" | "ipv6" | "ip_range" | "asn" | "network_prefix" | "organization" | "business_name" | "file_hash" | "file" | "image" | "document" | "certificate_fingerprint" | "social_profile_url" | "repository_url" | "package" | "cve" | "malware_indicator" | "coordinates" | "question";
+        /** InputTypeList */
+        InputTypeList: {
+            /** Items */
+            items: components["schemas"]["InputTypeOut"][];
+        };
+        /** InputTypeOut */
+        InputTypeOut: {
+            /** Description */
+            description: string;
+            entity_type: components["schemas"]["EntityType"] | null;
+            /** Example */
+            example: string;
+            /**
+             * Input Kind
+             * @enum {string}
+             */
+            input_kind: "text" | "file";
+            /** Label */
+            label: string;
+            /** Modules */
+            modules: string[];
+            type: components["schemas"]["IndicatorType"];
+        };
+        /** IntegrityOut */
+        IntegrityOut: {
+            /** Content Hash Valid */
+            content_hash_valid: boolean;
+            /** Detail */
+            detail: string;
+            /** Raw Available */
+            raw_available: boolean;
+            /** Raw Hash Valid */
+            raw_hash_valid: boolean | null;
+        };
+        /** JobDetailOut */
+        JobDetailOut: {
+            /** Events */
+            events: components["schemas"]["JobEventOut"][];
+            /** Evidence Count */
+            evidence_count: number;
+            job: components["schemas"]["JobOut"];
+            /** Results */
+            results: components["schemas"]["ResultOut"][];
+        };
+        /** JobEventOut */
+        JobEventOut: {
+            /** Details */
+            details: {
+                [key: string]: unknown;
+            };
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Kind */
+            kind: string;
+            /** Message */
+            message: string;
+            /**
+             * Occurred At
+             * Format: date-time
+             */
+            occurred_at: string;
+        };
+        /** JobList */
+        JobList: {
+            /** Items */
+            items: components["schemas"]["JobOut"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** JobOut */
+        JobOut: {
+            /** Approved At */
+            approved_at: string | null;
+            /** Attempt */
+            attempt: number;
+            /** Cancel Requested At */
+            cancel_requested_at: string | null;
+            /** Capability */
+            capability: string;
+            /** Cost */
+            cost: {
+                [key: string]: unknown;
+            };
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Error */
+            error: {
+                [key: string]: unknown;
+            } | null;
+            /** Finished At */
+            finished_at: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Indicator Type */
+            indicator_type: string;
+            /** Indicator Value */
+            indicator_value: string;
+            /** Is Active */
+            is_active: boolean;
+            /** Is Simulated */
+            is_simulated: boolean;
+            /** Max Attempts */
+            max_attempts: number;
+            /** Outcome */
+            outcome: {
+                [key: string]: unknown;
+            } | null;
+            /** Progress */
+            progress: {
+                [key: string]: unknown;
+            };
+            /** Provider Id */
+            provider_id: string;
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+            /**
+             * Scheduled At
+             * Format: date-time
+             */
+            scheduled_at: string;
+            /** Scope Id */
+            scope_id: string | null;
+            /** Started At */
+            started_at: string | null;
+            /** Status */
+            status: string;
         };
         /** LiveResponse */
         LiveResponse: {
@@ -763,6 +1704,142 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** PlanIndicatorOut */
+        PlanIndicatorOut: {
+            /** Display */
+            display: string;
+            entity_type: components["schemas"]["EntityType"] | null;
+            /** Label */
+            label: string;
+            type: components["schemas"]["IndicatorType"];
+            /** Value */
+            value: string;
+        };
+        /** PlanModuleOut */
+        PlanModuleOut: {
+            /** Id */
+            id: string;
+            /** Phase */
+            phase: number;
+            /** Title */
+            title: string;
+        };
+        /** PlanOut */
+        PlanOut: {
+            /** Force Refresh */
+            force_refresh: boolean;
+            indicator: components["schemas"]["PlanIndicatorOut"];
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "passive" | "active";
+            /** Modules */
+            modules: components["schemas"]["PlanModuleOut"][];
+            /** Providers */
+            providers: string[] | null;
+            scope: components["schemas"]["PlanScopeOut"] | null;
+            /** Steps */
+            steps: components["schemas"]["PlanStepOut"][];
+            /**
+             * Strategy
+             * @enum {string}
+             */
+            strategy: "free_first" | "include_paid";
+            /** Summary */
+            summary: {
+                [key: string]: number;
+            };
+            /** Warnings */
+            warnings: string[];
+        };
+        /** PlanRequest */
+        PlanRequest: {
+            /**
+             * Force Refresh
+             * @default false
+             */
+            force_refresh: boolean;
+            /** Input */
+            input: string;
+            /**
+             * Mode
+             * @default passive
+             * @enum {string}
+             */
+            mode: "passive" | "active";
+            /**
+             * Provider Options
+             * @description Options for the simulated provider only (for example simulate=timeout).
+             */
+            provider_options?: {
+                [key: string]: unknown;
+            };
+            /** Providers */
+            providers?: string[] | null;
+            /** Scope Id */
+            scope_id?: string | null;
+            /**
+             * Strategy
+             * @default free_first
+             * @enum {string}
+             */
+            strategy: "free_first" | "include_paid";
+            /** @description The reading to use. Required when the input is ambiguous. */
+            type?: components["schemas"]["IndicatorType"] | null;
+        };
+        /** PlanScopeOut */
+        PlanScopeOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string | null;
+        };
+        /** PlanStepOut */
+        PlanStepOut: {
+            /** Active */
+            active: boolean;
+            /** Cache Fresh Until */
+            cache_fresh_until: string | null;
+            /** Cached Result Id */
+            cached_result_id: string | null;
+            /** Capability Id */
+            capability_id: string | null;
+            /** Capability Name */
+            capability_name: string | null;
+            /** Cost */
+            cost: {
+                [key: string]: unknown;
+            };
+            /** Description */
+            description: string | null;
+            /** Message */
+            message: string;
+            /** Operation */
+            operation: string | null;
+            /** Phase */
+            phase: number | null;
+            /** Provider Id */
+            provider_id: string;
+            /** Provider Name */
+            provider_name: string;
+            /** Scope Decision */
+            scope_decision: {
+                [key: string]: unknown;
+            } | null;
+            /** Selected */
+            selected: boolean;
+            /** Simulated */
+            simulated: boolean;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "ready" | "cached" | "needs_approval" | "blocked" | "skipped" | "unavailable" | "planned" | "excluded";
+        };
         /** ProviderCounts */
         ProviderCounts: {
             /** Available */
@@ -814,6 +1891,26 @@ export interface components {
             /** Status Message */
             status_message: string;
         };
+        /** RawOut */
+        RawOut: {
+            /** Body */
+            body: unknown;
+            /** Content Type */
+            content_type: string;
+            /**
+             * Format
+             * @enum {string}
+             */
+            format: "json" | "text";
+            /** Redacted */
+            redacted: boolean;
+            /** Sha256 */
+            sha256: string;
+            /** Simulated */
+            simulated: boolean;
+            /** Size */
+            size: number;
+        };
         /** ReadyResponse */
         ReadyResponse: {
             /**
@@ -828,6 +1925,100 @@ export interface components {
              * @enum {string}
              */
             status: "ok" | "degraded" | "unavailable" | "not_configured";
+        };
+        /** RequestDetailOut */
+        RequestDetailOut: {
+            /** Jobs */
+            jobs: components["schemas"]["JobOut"][];
+            /** Plan */
+            plan: {
+                [key: string]: unknown;
+            };
+            request: components["schemas"]["RequestOut"];
+        };
+        /** RequestList */
+        RequestList: {
+            /** Items */
+            items: components["schemas"]["RequestOut"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** RequestOut */
+        RequestOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Created By */
+            created_by: string | null;
+            /** Entity Id */
+            entity_id: string | null;
+            /** Finished At */
+            finished_at: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Indicator Type */
+            indicator_type: string;
+            /** Indicator Value */
+            indicator_value: string;
+            /** Input Text */
+            input_text: string;
+            /** Is Simulated */
+            is_simulated: boolean;
+            /** Mode */
+            mode: string;
+            /** Scope Id */
+            scope_id: string | null;
+            /** Status */
+            status: string;
+            /** Strategy */
+            strategy: string;
+        };
+        /** ResultOut */
+        ResultOut: {
+            /** Content Type */
+            content_type: string;
+            /** Expires At */
+            expires_at: string | null;
+            /** From Cache */
+            from_cache: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Is Simulated */
+            is_simulated: boolean;
+            /** Item Count */
+            item_count: number;
+            /** Normalization Error */
+            normalization_error: {
+                [key: string]: unknown;
+            } | null;
+            /** Page */
+            page: number;
+            /** Raw Sha256 */
+            raw_sha256: string;
+            /** Raw Size */
+            raw_size: number;
+            /**
+             * Received At
+             * Format: date-time
+             */
+            received_at: string;
+            /** Reused Result Id */
+            reused_result_id: string | null;
+            /** Status Code */
+            status_code: number | null;
+        };
+        /** RevokeIn */
+        RevokeIn: {
+            /** Reason */
+            reason: string;
         };
         /** RoleList */
         RoleList: {
@@ -860,6 +2051,211 @@ export interface components {
             platform: string;
             /** Python */
             python: string;
+        };
+        /** SavedSearchIn */
+        SavedSearchIn: {
+            indicator_type?: components["schemas"]["IndicatorType"] | null;
+            /** Name */
+            name: string;
+            /** Options */
+            options?: {
+                [key: string]: unknown;
+            };
+            /** Query */
+            query: string;
+        };
+        /** SavedSearchList */
+        SavedSearchList: {
+            /** Items */
+            items: components["schemas"]["SavedSearchOut"][];
+        };
+        /** SavedSearchOut */
+        SavedSearchOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Indicator Type */
+            indicator_type: string | null;
+            /** Name */
+            name: string;
+            /** Options */
+            options: {
+                [key: string]: unknown;
+            };
+            /** Query */
+            query: string;
+        };
+        /** ScopeCheckIn */
+        ScopeCheckIn: {
+            /** Input */
+            input: string;
+            /**
+             * Operation
+             * @default discovery
+             * @enum {string}
+             */
+            operation: "discovery" | "assessment";
+            /** Ports */
+            ports?: number[];
+            type?: components["schemas"]["IndicatorType"] | null;
+        };
+        /** ScopeDecisionOut */
+        ScopeDecisionOut: {
+            /** Allowed */
+            allowed: boolean;
+            /** Code */
+            code: string;
+            /** Matched Rules */
+            matched_rules: string[];
+            /** Reason */
+            reason: string;
+            /** Scope Id */
+            scope_id: string | null;
+            /** Target */
+            target: string | null;
+        };
+        /** ScopeDetailOut */
+        ScopeDetailOut: {
+            /** Rules */
+            rules: components["schemas"]["ScopeRuleOut"][];
+            scope: components["schemas"]["ScopeOut"];
+        };
+        /** ScopeIn */
+        ScopeIn: {
+            /**
+             * Authorization Confirmed
+             * @description Must be true: written authorisation exists for every target listed.
+             */
+            authorization_confirmed: boolean;
+            /** Authorization Note */
+            authorization_note?: string | null;
+            /** Authorization Reference */
+            authorization_reference?: string | null;
+            /**
+             * Authorized By
+             * @description Who gave the written authorisation.
+             */
+            authorized_by: string;
+            /** Description */
+            description?: string | null;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "passive" | "authorized_discovery" | "active_assessment";
+            /** Name */
+            name: string;
+            /** Rules */
+            rules?: components["schemas"]["ScopeRuleIn"][];
+            /** Valid From */
+            valid_from?: string | null;
+            /**
+             * Valid Until
+             * Format: date-time
+             */
+            valid_until: string;
+        };
+        /** ScopeList */
+        ScopeList: {
+            /** Items */
+            items: components["schemas"]["ScopeOut"][];
+        };
+        /** ScopeOut */
+        ScopeOut: {
+            /** Approved At */
+            approved_at: string | null;
+            /** Approved By */
+            approved_by: string | null;
+            /** Authorization Note */
+            authorization_note: string | null;
+            /** Authorization Reference */
+            authorization_reference: string | null;
+            /** Authorized By */
+            authorized_by: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Created By */
+            created_by: string | null;
+            /** Description */
+            description: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Mode */
+            mode: string;
+            /** Name */
+            name: string;
+            /** Revoke Reason */
+            revoke_reason: string | null;
+            /** Revoked At */
+            revoked_at: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "not_approved" | "not_yet_valid" | "expired" | "revoked";
+            /**
+             * Valid From
+             * Format: date-time
+             */
+            valid_from: string;
+            /**
+             * Valid Until
+             * Format: date-time
+             */
+            valid_until: string;
+        };
+        /** ScopeRuleIn */
+        ScopeRuleIn: {
+            /**
+             * Is Exclusion
+             * @default false
+             */
+            is_exclusion: boolean;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "domain" | "wildcard" | "ip" | "cidr" | "url_prefix";
+            /** Ports */
+            ports?: number[] | null;
+            /** Value */
+            value: string;
+        };
+        /** ScopeRuleOut */
+        ScopeRuleOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Is Exclusion */
+            is_exclusion: boolean;
+            /** Kind */
+            kind: string;
+            /** Restrictions */
+            restrictions: {
+                [key: string]: unknown;
+            };
+            /** Value */
+            value: string;
         };
         /** ServerInfo */
         ServerInfo: {
@@ -952,6 +2348,32 @@ export interface components {
              * @description Where the one-time setup token is stored on this machine.
              */
             token_file?: string | null;
+        };
+        /** SourceList */
+        SourceList: {
+            /** Items */
+            items: components["schemas"]["SourceOut"][];
+        };
+        /** SourceOut */
+        SourceOut: {
+            /** Homepage Url */
+            homepage_url: string | null;
+            /** Id */
+            id: string;
+            /** Is Simulated */
+            is_simulated: boolean;
+            /** Kind */
+            kind: string;
+            /** Name */
+            name: string;
+            /** Provider Id */
+            provider_id: string | null;
+            /** Reliability */
+            reliability: string;
+            /** Terms Note */
+            terms_note: string | null;
+            /** Upstream Source Ids */
+            upstream_source_ids: string[];
         };
         /** SystemInfo */
         SystemInfo: {
@@ -1939,6 +3361,684 @@ export interface operations {
             };
         };
     };
+    list_jobs_api_v1_collection_jobs_get: {
+        parameters: {
+            query?: {
+                status?: ("queued" | "awaiting_approval" | "running" | "succeeded" | "failed" | "cancelled" | "skipped") | null;
+                provider?: string | null;
+                limit?: number;
+                cursor?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobList"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description A required service is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_job_api_v1_collection_jobs__job_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobDetailOut"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description A required service is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    approve_job_api_v1_collection_jobs__job_id__approve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobOut"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The change conflicts with the current state. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description A required service is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    cancel_job_api_v1_collection_jobs__job_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobOut"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The change conflicts with the current state. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description A required service is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    retry_job_api_v1_collection_jobs__job_id__retry_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobOut"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The change conflicts with the current state. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description A required service is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    plan_api_v1_collection_plan_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanOut"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The request contains invalid values. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description A required service is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_requests_api_v1_collection_requests_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                cursor?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestList"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description A required service is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    submit_api_v1_collection_requests_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestOut"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The request contains invalid values. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description A required service is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_request_api_v1_collection_requests__request_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestDetailOut"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description A required service is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    cancel_request_api_v1_collection_requests__request_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestOut"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The change conflicts with the current state. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description A required service is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     dashboard_api_v1_dashboard_get: {
         parameters: {
             query?: never;
@@ -1964,6 +4064,287 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_entities_api_v1_entities_get: {
+        parameters: {
+            query?: {
+                type?: components["schemas"]["EntityType"] | null;
+                search?: string | null;
+                limit?: number;
+                cursor?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EntityList"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_entity_api_v1_entities__entity_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EntityOut"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_evidence_api_v1_evidence_get: {
+        parameters: {
+            query?: {
+                entity_id?: string | null;
+                job_id?: string | null;
+                include_simulated?: boolean;
+                limit?: number;
+                cursor?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvidenceList"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_evidence_api_v1_evidence__evidence_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                evidence_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvidenceDetailOut"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    raw_response_api_v1_evidence__evidence_id__raw_get: {
+        parameters: {
+            query?: {
+                unmasked?: boolean;
+            };
+            header?: never;
+            path: {
+                evidence_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RawOut"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -2007,6 +4388,53 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_adapters_api_v1_providers_adapters_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdapterList"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description A required service is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };
@@ -2056,6 +4484,867 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    health_check_api_v1_providers__provider_id__health_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HealthOut"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description A required service is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_scopes_api_v1_scopes_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScopeList"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    create_scope_api_v1_scopes_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScopeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScopeDetailOut"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The change conflicts with the current state. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The request contains invalid values. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_scope_api_v1_scopes__scope_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scope_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScopeDetailOut"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_api_v1_scopes__scope_id__check_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scope_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScopeCheckIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScopeDecisionOut"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The request contains invalid values. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    revoke_scope_api_v1_scopes__scope_id__revoke_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scope_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RevokeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScopeDetailOut"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The change conflicts with the current state. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The request contains invalid values. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    add_rule_api_v1_scopes__scope_id__rules_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scope_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScopeRuleIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScopeDetailOut"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The change conflicts with the current state. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The request contains invalid values. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    remove_rule_api_v1_scopes__scope_id__rules__rule_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scope_id: string;
+                rule_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScopeDetailOut"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The change conflicts with the current state. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The request contains invalid values. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    classify_input_api_v1_search_classify_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClassifyRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClassificationOut"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The request contains invalid values. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    history_api_v1_search_history_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HistoryList"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    clear_history_api_v1_search_history_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    saved_api_v1_search_saved_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavedSearchList"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    save_api_v1_search_saved_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SavedSearchIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavedSearchOut"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The change conflicts with the current state. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The request contains invalid values. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    delete_saved_api_v1_search_saved__saved_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                saved_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    input_types_api_v1_search_types_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InputTypeList"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_sources_api_v1_sources_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceList"];
+                };
+            };
+            /** @description Not signed in, or the session has ended. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not permitted. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };

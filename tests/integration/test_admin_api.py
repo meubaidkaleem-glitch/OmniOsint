@@ -3,6 +3,7 @@ from __future__ import annotations
 import httpx
 import pytest
 
+from omniosint.auth.permissions import Permission
 from tests.helpers import (
     ADMIN_PASSWORD,
     USER_PASSWORD,
@@ -319,6 +320,8 @@ async def test_roles_listing(client: httpx.AsyncClient, admin: ApiUser):
     }
     assert set(roles) == {"administrator", "analyst", "auditor", "viewer"}
     assert all(role["is_system"] for role in roles.values())
-    assert len(roles["administrator"]["permissions"]) == 6
+    assert len(roles["administrator"]["permissions"]) == len(Permission)
     assert roles["administrator"]["member_count"] == 1
-    assert roles["analyst"]["permissions"] == []
+    analyst = {permission["code"] for permission in roles["analyst"]["permissions"]}
+    assert analyst == {"collection:read", "collection:run", "evidence:read", "scopes:read"}
+    assert roles["viewer"]["permissions"] == []

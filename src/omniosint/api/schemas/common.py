@@ -30,4 +30,7 @@ ERROR_RESPONSES: dict[int | str, dict[str, Any]] = {
     401: {"model": ErrorResponse, "description": "Not signed in, or the session has ended."},
     403: {"model": ErrorResponse, "description": "Not permitted."},
     422: {"model": ErrorResponse, "description": "The request contains invalid values."},
+    404: {"model": ErrorResponse, "description": "Not found."},
+    409: {"model": ErrorResponse, "description": "The change conflicts with the current state."},
+    503: {"model": ErrorResponse, "description": "A required service is unavailable."},
 }

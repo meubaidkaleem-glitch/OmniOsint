@@ -14,11 +14,13 @@ from omniosint.audit.service import RequestInfo, record
 from omniosint.auth.permissions import Permission
 from omniosint.auth.service import Principal
 from omniosint.auth.tokens import derive_csrf_token, tokens_equal
+from omniosint.collection.runtime import IntelRuntime
 from omniosint.core.errors import (
     AuthenticationRequired,
     CsrfFailed,
     PasswordChangeRequired,
     PermissionDenied,
+    ServiceUnavailable,
 )
 
 _SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
@@ -31,6 +33,15 @@ def get_context(request: Request) -> AppContext:
 
 
 ContextDep = Annotated[AppContext, Depends(get_context)]
+
+
+def get_intel(context: ContextDep) -> IntelRuntime:
+    if context.intel is None:
+        raise ServiceUnavailable("Collection is not available: the service is still starting.")
+    return context.intel
+
+
+IntelDep = Annotated[IntelRuntime, Depends(get_intel)]
 
 
 async def get_session(context: ContextDep) -> AsyncIterator[AsyncSession]:

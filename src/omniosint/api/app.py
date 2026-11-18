@@ -18,8 +18,19 @@ from omniosint.api.middleware import (
     RequestContextMiddleware,
     SecurityHeadersMiddleware,
 )
-from omniosint.api.routers.v1 import admin, auth, dashboard, providers, system
+from omniosint.api.routers.v1 import (
+    admin,
+    auth,
+    collection,
+    dashboard,
+    evidence,
+    providers,
+    scopes,
+    search,
+    system,
+)
 from omniosint.api.static import mount_frontend
+from omniosint.collection.runtime import IntelRuntime
 from omniosint.core.config import Settings, load_settings
 from omniosint.core.logging import get_logger
 from omniosint.core.paths import AppPaths
@@ -95,6 +106,11 @@ def _lifespan(context: AppContext):  # type: ignore[no-untyped-def]
                 hint="The API keeps running and reports not ready until the database is usable.",
             )
 
+        try:
+            context.intel = await IntelRuntime.build(settings, context.paths, context.db)
+        except Exception as exc:
+            log.error("api.collection_unavailable", error=type(exc).__name__)
+
         heartbeat = ServiceHeartbeat(context.db, "api", settings.worker.heartbeat_seconds)
         context.heartbeat = heartbeat
         await heartbeat.start()
@@ -102,6 +118,9 @@ def _lifespan(context: AppContext):  # type: ignore[no-untyped-def]
             yield
         finally:
             await heartbeat.stop()
+            if context.intel is not None:
+                await context.intel.aclose()
+                context.intel = None
             await context.db.dispose()
             log.info("api.stopped")
 
@@ -143,6 +162,10 @@ def create_app(
     v1.include_router(system.router)
     v1.include_router(dashboard.router)
     v1.include_router(providers.router)
+    v1.include_router(search.router)
+    v1.include_router(collection.router)
+    v1.include_router(evidence.router)
+    v1.include_router(scopes.router)
     app.include_router(v1)
 
     if resolved_settings.server.serve_frontend:

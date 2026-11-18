@@ -113,6 +113,66 @@ class Collector:
             await asyncio.gather(*(self._guarded(job.id) for job in jobs))
         return len(jobs)
 
+    async def run_forever(self, stop: asyncio.Event, *, recovery_interval: float = 30.0) -> None:
+        """Keep up to ``max_concurrent_jobs`` jobs running until ``stop`` is set.
+
+        Running jobs are allowed to finish on shutdown, up to the shutdown
+        timeout; jobs cut short then are recovered from their expired lease.
+        """
+        loop = asyncio.get_running_loop()
+        running: set[asyncio.Task[None]] = set()
+        next_recovery = loop.time()
+        limit = self._collection.max_concurrent_jobs
+        try:
+            while not stop.is_set():
+                if loop.time() >= next_recovery:
+                    try:
+                        async with self._db.session() as session:
+                            recovered = await queue.recover_expired_leases(
+                                session, self._collection
+                            )
+                        if recovered:
+                            log.warning("collection.leases_recovered", jobs=recovered)
+                    except Exception as error:
+                        log.warning("collection.recovery_failed", error=type(error).__name__)
+                    next_recovery = loop.time() + recovery_interval
+                leased: list[CollectionJob] = []
+                free = limit - len(running)
+                if free > 0:
+                    try:
+                        async with self._db.session() as session:
+                            leased = await queue.lease_jobs(
+                                session,
+                                owner=self.owner,
+                                lease_seconds=self._collection.job_lease_seconds,
+                                limit=free,
+                            )
+                    except Exception as error:
+                        log.warning("collection.lease_failed", error=type(error).__name__)
+                for job in leased:
+                    task = asyncio.create_task(self._guarded(job.id))
+                    running.add(task)
+                    task.add_done_callback(running.discard)
+                if leased and len(running) < limit:
+                    continue  # more may be due
+                waiters: set[asyncio.Future[Any]] = {asyncio.ensure_future(stop.wait())}
+                waiters |= set(running)
+                await asyncio.wait(
+                    waiters,
+                    timeout=self._collection.poll_interval_seconds,
+                    return_when=asyncio.FIRST_COMPLETED,
+                )
+                for waiter in waiters - set(running):
+                    if not waiter.done():
+                        waiter.cancel()
+        finally:
+            if running:
+                grace = self._settings.runtime.shutdown_timeout_seconds / 2
+                _done, unfinished = await asyncio.wait(running, timeout=grace)
+                for task in unfinished:
+                    task.cancel()
+                await asyncio.gather(*unfinished, return_exceptions=True)
+
     async def drain(self, *, max_rounds: int = 50) -> int:
         """Run until no job is due (used by the CLI and tests). Returns jobs run."""
         total = 0

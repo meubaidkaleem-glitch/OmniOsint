@@ -1,8 +1,8 @@
 """Background worker process.
 
-In this phase the worker keeps a heartbeat and runs housekeeping. The collection
-job runner, the monitoring scheduler and report rendering are added to the same
-process in later phases.
+Keeps a heartbeat, runs the collection job queue and housekeeping. The
+monitoring scheduler and report rendering join the same process in later
+phases.
 """
 
 from __future__ import annotations
@@ -14,6 +14,8 @@ import signal
 from datetime import timedelta
 
 from omniosint import __version__
+from omniosint.collection.executor import Collector
+from omniosint.collection.runtime import IntelRuntime
 from omniosint.core.config import Settings
 from omniosint.core.logging import configure_logging, get_logger
 from omniosint.core.paths import AppPaths
@@ -37,6 +39,7 @@ class Worker:
         )
         self._owns_db = db is None
         self.heartbeat = ServiceHeartbeat(self._db, "worker", settings.worker.heartbeat_seconds)
+        self._intel: IntelRuntime | None = None
 
     async def run_housekeeping(self) -> dict[str, int]:
         """Run every maintenance task once. Failures are logged, not raised."""
@@ -51,6 +54,11 @@ class Worker:
                 results["instances_reaped"] = await registry.reap_stale(
                     session, timedelta(seconds=max(60, worker_settings.heartbeat_seconds * 4))
                 )
+            if self._intel is not None:
+                async with self._db.session() as session:
+                    results["raw_objects_purged"] = await housekeeping.purge_raw_objects(
+                        session, self._intel.store
+                    )
         except Exception as exc:
             log.warning("housekeeping.failed", error=type(exc).__name__)
         else:
@@ -63,6 +71,14 @@ class Worker:
         await self.heartbeat.start()
         loop = asyncio.get_running_loop()
         next_housekeeping = loop.time()
+        collecting: asyncio.Task[None] | None = None
+        try:
+            self._intel = await IntelRuntime.build(self._settings, self._paths, self._db)
+            collector = Collector(self._db, self._settings, self._intel.manager, self._intel.store)
+            collecting = asyncio.create_task(collector.run_forever(stop))
+            log.info("worker.collecting", worker=collector.owner)
+        except Exception as exc:
+            log.error("worker.collection_unavailable", error=type(exc).__name__)
         try:
             while not stop.is_set():
                 if loop.time() >= next_housekeeping:
@@ -75,6 +91,12 @@ class Worker:
                 except TimeoutError:
                     continue
         finally:
+            stop.set()
+            if collecting is not None:
+                with contextlib.suppress(Exception):
+                    await collecting
+            if self._intel is not None:
+                await self._intel.aclose()
             await self.heartbeat.stop()
             if self._owns_db:
                 await self._db.dispose()

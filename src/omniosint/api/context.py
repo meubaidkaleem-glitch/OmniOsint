@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from omniosint.auth.passwords import PasswordHasher
 from omniosint.auth.service import AuthService
@@ -13,6 +14,9 @@ from omniosint.core.timeutil import utcnow
 from omniosint.database.engine import Database
 from omniosint.system.registry import ServiceHeartbeat
 from omniosint.users.service import UserService
+
+if TYPE_CHECKING:
+    from omniosint.collection.runtime import IntelRuntime
 
 
 @dataclass(slots=True)
@@ -24,6 +28,8 @@ class AppContext:
     users: UserService
     started_at: datetime
     heartbeat: ServiceHeartbeat | None = None
+    # Built at start-up (it reads provider flags from the database).
+    intel: IntelRuntime | None = None
 
     @classmethod
     def build(cls, settings: Settings, paths: AppPaths) -> AppContext:

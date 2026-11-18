@@ -317,6 +317,30 @@ Requires a signed-in user.
 
 Responses: `200` `ProviderList`, `401` `ErrorResponse`
 
+### `GET /api/v1/providers/adapters`
+
+**List installed adapters and their state**
+
+Adapters are the code that can collect. Each has its real status, circuit breaker state, capabilities and today's usage.
+
+Requires permission: `collection:read`
+
+Responses: `200` `AdapterList`, `401` `ErrorResponse`, `403` `ErrorResponse`, `503` `ErrorResponse`
+
+### `POST /api/v1/providers/{provider_id}/health`
+
+**Run a provider's health check**
+
+Only adapters can be checked; catalogue entries report their planned status.
+
+Requires permission: `collection:run`
+
+| Parameter | In | Required | Description |
+|---|---|---|---|
+| `provider_id` | path | yes |  |
+
+Responses: `200` `HealthOut`, `401` `ErrorResponse`, `403` `ErrorResponse`, `503` `ErrorResponse`
+
 ### `GET /api/v1/providers/{provider_id}`
 
 **Get one catalogue entry**
@@ -328,3 +352,382 @@ Requires a signed-in user.
 | `provider_id` | path | yes |  |
 
 Responses: `200` `ProviderOut`, `401` `ErrorResponse`, `404` `ErrorResponse`
+
+## collection
+
+### `POST /api/v1/collection/plan`
+
+**Preview a collection plan**
+
+What would run for the input, and why each provider would or would not be used. Nothing is collected. An ambiguous input needs `type`.
+
+Requires permission: `collection:read`
+
+Request body: `PlanRequest`
+
+Responses: `200` `PlanOut`, `401` `ErrorResponse`, `403` `ErrorResponse`, `503` `ErrorResponse`
+
+### `POST /api/v1/collection/requests`
+
+**Submit a collection request**
+
+Computes the plan again and queues every step that can run. Active operations and paid calls above the threshold wait for approval.
+
+Requires permission: `collection:run`
+
+Request body: `PlanRequest`
+
+Responses: `201` `RequestOut`, `401` `ErrorResponse`, `403` `ErrorResponse`, `503` `ErrorResponse`
+
+### `GET /api/v1/collection/requests`
+
+**List collection requests**
+
+Requires permission: `collection:read`
+
+| Parameter | In | Required | Description |
+|---|---|---|---|
+| `limit` | query | no |  |
+| `cursor` | query | no |  |
+
+Responses: `200` `RequestList`, `401` `ErrorResponse`, `403` `ErrorResponse`, `503` `ErrorResponse`
+
+### `GET /api/v1/collection/requests/{request_id}`
+
+**Get a collection request, its plan and its jobs**
+
+Requires permission: `collection:read`
+
+| Parameter | In | Required | Description |
+|---|---|---|---|
+| `request_id` | path | yes |  |
+
+Responses: `200` `RequestDetailOut`, `401` `ErrorResponse`, `403` `ErrorResponse`, `404` `ErrorResponse`, `503` `ErrorResponse`
+
+### `POST /api/v1/collection/requests/{request_id}/cancel`
+
+**Cancel every unfinished job of a request**
+
+Requires permission: `collection:run`
+
+| Parameter | In | Required | Description |
+|---|---|---|---|
+| `request_id` | path | yes |  |
+
+Responses: `200` `RequestOut`, `401` `ErrorResponse`, `403` `ErrorResponse`, `404` `ErrorResponse`, `409` `ErrorResponse`, `503` `ErrorResponse`
+
+### `GET /api/v1/collection/jobs`
+
+**List jobs (the job history)**
+
+Requires permission: `collection:read`
+
+| Parameter | In | Required | Description |
+|---|---|---|---|
+| `status` | query | no |  |
+| `provider` | query | no |  |
+| `limit` | query | no |  |
+| `cursor` | query | no |  |
+
+Responses: `200` `JobList`, `401` `ErrorResponse`, `403` `ErrorResponse`, `503` `ErrorResponse`
+
+### `GET /api/v1/collection/jobs/{job_id}`
+
+**Get a job with its history and results**
+
+Requires permission: `collection:read`
+
+| Parameter | In | Required | Description |
+|---|---|---|---|
+| `job_id` | path | yes |  |
+
+Responses: `200` `JobDetailOut`, `401` `ErrorResponse`, `403` `ErrorResponse`, `404` `ErrorResponse`, `503` `ErrorResponse`
+
+### `POST /api/v1/collection/jobs/{job_id}/approve`
+
+**Approve a job that waits for approval**
+
+Active operations are checked against their scope again before approval.
+
+Requires permission: `collection:approve`
+
+| Parameter | In | Required | Description |
+|---|---|---|---|
+| `job_id` | path | yes |  |
+
+Responses: `200` `JobOut`, `401` `ErrorResponse`, `403` `ErrorResponse`, `404` `ErrorResponse`, `409` `ErrorResponse`, `503` `ErrorResponse`
+
+### `POST /api/v1/collection/jobs/{job_id}/cancel`
+
+**Cancel a job**
+
+Requires permission: `collection:run`
+
+| Parameter | In | Required | Description |
+|---|---|---|---|
+| `job_id` | path | yes |  |
+
+Responses: `200` `JobOut`, `401` `ErrorResponse`, `403` `ErrorResponse`, `404` `ErrorResponse`, `409` `ErrorResponse`, `503` `ErrorResponse`
+
+### `POST /api/v1/collection/jobs/{job_id}/retry`
+
+**Retry a failed or cancelled job**
+
+An active operation goes back to waiting for approval.
+
+Requires permission: `collection:run`
+
+| Parameter | In | Required | Description |
+|---|---|---|---|
+| `job_id` | path | yes |  |
+
+Responses: `200` `JobOut`, `401` `ErrorResponse`, `403` `ErrorResponse`, `404` `ErrorResponse`, `409` `ErrorResponse`, `503` `ErrorResponse`
+
+## evidence
+
+### `GET /api/v1/evidence`
+
+**List evidence**
+
+Newest first. Simulated evidence is included and flagged unless excluded.
+
+Requires permission: `evidence:read`
+
+| Parameter | In | Required | Description |
+|---|---|---|---|
+| `entity_id` | query | no |  |
+| `job_id` | query | no |  |
+| `include_simulated` | query | no |  |
+| `limit` | query | no |  |
+| `cursor` | query | no |  |
+
+Responses: `200` `EvidenceList`, `401` `ErrorResponse`, `403` `ErrorResponse`
+
+### `GET /api/v1/evidence/{evidence_id}`
+
+**Get evidence with its entity, source and integrity**
+
+Requires permission: `evidence:read`
+
+| Parameter | In | Required | Description |
+|---|---|---|---|
+| `evidence_id` | path | yes |  |
+
+Responses: `200` `EvidenceDetailOut`, `401` `ErrorResponse`, `403` `ErrorResponse`, `404` `ErrorResponse`
+
+### `GET /api/v1/evidence/{evidence_id}/raw`
+
+**The raw response behind evidence**
+
+Credential-like fields are masked. `unmasked=true` needs the `evidence:read_raw` permission and is recorded in the audit trail.
+
+Requires permission: `evidence:read`
+
+| Parameter | In | Required | Description |
+|---|---|---|---|
+| `evidence_id` | path | yes |  |
+| `unmasked` | query | no |  |
+
+Responses: `200` `RawOut`, `401` `ErrorResponse`, `403` `ErrorResponse`, `404` `ErrorResponse`
+
+### `GET /api/v1/entities`
+
+**List entities**
+
+Requires permission: `evidence:read`
+
+| Parameter | In | Required | Description |
+|---|---|---|---|
+| `type` | query | no |  |
+| `search` | query | no |  |
+| `limit` | query | no |  |
+| `cursor` | query | no |  |
+
+Responses: `200` `EntityList`, `401` `ErrorResponse`, `403` `ErrorResponse`
+
+### `GET /api/v1/entities/{entity_id}`
+
+**Get an entity**
+
+Requires permission: `evidence:read`
+
+| Parameter | In | Required | Description |
+|---|---|---|---|
+| `entity_id` | path | yes |  |
+
+Responses: `200` `EntityOut`, `401` `ErrorResponse`, `403` `ErrorResponse`, `404` `ErrorResponse`
+
+### `GET /api/v1/sources`
+
+**The source registry**
+
+Every source evidence can be attributed to, with its lineage.
+
+Requires permission: `evidence:read`
+
+Responses: `200` `SourceList`, `401` `ErrorResponse`, `403` `ErrorResponse`
+
+## scopes
+
+### `GET /api/v1/scopes`
+
+**List scopes**
+
+Requires permission: `scopes:read`
+
+Responses: `200` `ScopeList`, `401` `ErrorResponse`, `403` `ErrorResponse`
+
+### `POST /api/v1/scopes`
+
+**Record a scope of written authorisation**
+
+Creating a scope states that written authorisation exists for every target it lists (`authorization_confirmed` must be true). It is recorded in the audit trail.
+
+Requires permission: `scopes:manage`
+
+Request body: `ScopeIn`
+
+Responses: `201` `ScopeDetailOut`, `401` `ErrorResponse`, `403` `ErrorResponse`, `404` `ErrorResponse`, `409` `ErrorResponse`
+
+### `GET /api/v1/scopes/{scope_id}`
+
+**Get a scope and its rules**
+
+Requires permission: `scopes:read`
+
+| Parameter | In | Required | Description |
+|---|---|---|---|
+| `scope_id` | path | yes |  |
+
+Responses: `200` `ScopeDetailOut`, `401` `ErrorResponse`, `403` `ErrorResponse`, `404` `ErrorResponse`
+
+### `POST /api/v1/scopes/{scope_id}/rules`
+
+**Add a target or an exclusion**
+
+Requires permission: `scopes:manage`
+
+| Parameter | In | Required | Description |
+|---|---|---|---|
+| `scope_id` | path | yes |  |
+
+Request body: `ScopeRuleIn`
+
+Responses: `201` `ScopeDetailOut`, `401` `ErrorResponse`, `403` `ErrorResponse`, `404` `ErrorResponse`, `409` `ErrorResponse`
+
+### `DELETE /api/v1/scopes/{scope_id}/rules/{rule_id}`
+
+**Remove a rule**
+
+Requires permission: `scopes:manage`
+
+| Parameter | In | Required | Description |
+|---|---|---|---|
+| `scope_id` | path | yes |  |
+| `rule_id` | path | yes |  |
+
+Responses: `200` `ScopeDetailOut`, `401` `ErrorResponse`, `403` `ErrorResponse`, `404` `ErrorResponse`, `409` `ErrorResponse`
+
+### `POST /api/v1/scopes/{scope_id}/revoke`
+
+**Revoke a scope**
+
+Scopes are never deleted, so the authority behind past operations stays on record.
+
+Requires permission: `scopes:manage`
+
+| Parameter | In | Required | Description |
+|---|---|---|---|
+| `scope_id` | path | yes |  |
+
+Request body: `RevokeIn`
+
+Responses: `200` `ScopeDetailOut`, `401` `ErrorResponse`, `403` `ErrorResponse`, `404` `ErrorResponse`, `409` `ErrorResponse`
+
+### `POST /api/v1/scopes/{scope_id}/check`
+
+**Check whether a target is in scope**
+
+Answers what the scope manager would decide now. Nothing is run.
+
+Requires permission: `scopes:read`
+
+| Parameter | In | Required | Description |
+|---|---|---|---|
+| `scope_id` | path | yes |  |
+
+Request body: `ScopeCheckIn`
+
+Responses: `200` `ScopeDecisionOut`, `401` `ErrorResponse`, `403` `ErrorResponse`, `404` `ErrorResponse`
+
+## search
+
+### `POST /api/v1/search/classify`
+
+**Classify an input**
+
+Detects which of the 24 input types the input is, validates and normalises it. An ambiguous input returns every reading with `status` = `ambiguous`; nothing is guessed. Nothing is collected and no provider is contacted.
+
+Requires permission: `collection:read`
+
+Request body: `ClassifyRequest`
+
+Responses: `200` `ClassificationOut`, `401` `ErrorResponse`, `403` `ErrorResponse`
+
+### `GET /api/v1/search/types`
+
+**List the supported input types**
+
+Requires permission: `collection:read`
+
+Responses: `200` `InputTypeList`, `401` `ErrorResponse`, `403` `ErrorResponse`
+
+### `GET /api/v1/search/history`
+
+**Your search history**
+
+Requires permission: `collection:read`
+
+| Parameter | In | Required | Description |
+|---|---|---|---|
+| `limit` | query | no |  |
+
+Responses: `200` `HistoryList`, `401` `ErrorResponse`, `403` `ErrorResponse`
+
+### `DELETE /api/v1/search/history`
+
+**Clear your search history**
+
+Requires permission: `collection:read`
+
+Responses: `204`, `401` `ErrorResponse`, `403` `ErrorResponse`
+
+### `GET /api/v1/search/saved`
+
+**Your saved searches**
+
+Requires permission: `collection:read`
+
+Responses: `200` `SavedSearchList`, `401` `ErrorResponse`, `403` `ErrorResponse`
+
+### `POST /api/v1/search/saved`
+
+**Save a search**
+
+Requires permission: `collection:read`
+
+Request body: `SavedSearchIn`
+
+Responses: `201` `SavedSearchOut`, `401` `ErrorResponse`, `403` `ErrorResponse`, `409` `ErrorResponse`
+
+### `DELETE /api/v1/search/saved/{saved_id}`
+
+**Delete a saved search**
+
+Requires permission: `collection:read`
+
+| Parameter | In | Required | Description |
+|---|---|---|---|
+| `saved_id` | path | yes |  |
+
+Responses: `204`, `401` `ErrorResponse`, `403` `ErrorResponse`, `404` `ErrorResponse`
