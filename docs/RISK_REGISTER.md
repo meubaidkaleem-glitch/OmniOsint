@@ -8,7 +8,7 @@ phase.
 
 | ID | Risk | L | I | Mitigation | Owner phase | State |
 |---|---|---|---|---|---|---|
-| T-01 | Windows behaviour differs from the Linux build environment (process control, paths, DPAPI, event loop) | High | High | One lifecycle implementation in Python with no reliance on POSIX signals; Windows job in CI that installs, starts, health-checks, backs up, restores and stops the app and runs the test suite; DPAPI round-trip test that runs only on Windows | 1 | **Open** — Windows scripts reviewed and type-checked but not executed by the developer; confirm with the CI `windows` job |
+| T-01 | Windows behaviour differs from the Linux build environment (process control, paths, DPAPI, event loop) | High | High | One lifecycle implementation in Python with no reliance on POSIX signals; Windows job in CI that installs, starts, health-checks, backs up, restores and stops the app and runs the test suite; DPAPI round-trip test that runs only on Windows | 1 | **Mitigated** — the CI `windows` job runs the whole lifecycle and the test suite on Windows Server 2025 on every push. It found two Windows-only defects, both fixed |
 | T-02 | PostgreSQL is a heavy prerequisite for a desktop user | Medium | Medium | Installer detects an existing server, offers `winget` or Docker with consent; managed portable PostgreSQL considered for the packaged installer | 1, 14 | Open |
 | T-03 | No official Redis build for Windows | High | Low | Redis is optional; in-process fallbacks for cache and rate limiting; job queue lives in PostgreSQL | 1, 2 | Mitigated by design |
 | T-04 | Celery is unsupported on Windows | High | Medium | PostgreSQL-backed queue with asyncio workers (ADR-004) | 2 | Mitigated by design |

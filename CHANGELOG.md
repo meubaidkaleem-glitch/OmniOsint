@@ -57,14 +57,13 @@ development brief asks for (section 29).
 
 ```
 PHASE:            1 - Project foundation
-STATUS:           Complete and verified on Linux. Windows-specific paths written,
-                  reviewed and type-checked, but not yet executed on Windows
-                  (see "Windows verification" below).
-FILES CREATED:    239 files, in summary:
+STATUS:           Complete. Verified on Linux, and on Windows (Windows Server 2025)
+                  by the CI windows job; see "Windows verification" below.
+FILES CREATED:    240 files, in summary:
                     src/omniosint/        80 files (api, auth, audit, backup, cli, core,
                                           database + migration 0001, providers, runtime,
                                           system, users, workers)
-                    tests/                25 files (unit, integration, security, end_to_end)
+                    tests/                26 files (unit, integration, security, end_to_end)
                     frontend/             web interface, 29 component tests, Playwright journey
                     desktop/              backend-control library, Tauri app, status page, icons
                     scripts/              windows/ helpers, linux/install.sh, dev/ tools
@@ -88,27 +87,34 @@ TESTS EXECUTED:   Backend:  ruff, ruff format, mypy --strict, pytest (unit, Post
                   Desktop:  cargo test (incl. start/probe/stop of a real installation),
                             clippy -D warnings, cargo check for x86_64-pc-windows-gnu
                   Scripts:  shellcheck; fresh-clone install with scripts/linux/install.sh
-                            followed by start, readiness, interface and stop
-TEST RESULTS:     Backend   257 passed, 1 skipped (Windows-only DPAPI test), 85% line
-                            coverage including subprocesses; lint and types clean;
-                            no known vulnerabilities in the pinned dependencies
+                            followed by start, readiness, interface and stop;
+                            static checks of the Windows scripts
+                  Windows:  CI job on Windows Server 2025: install.bat (non-interactive,
+                            creates role and database), start.bat, health-check.bat,
+                            readiness over HTTP, stop.bat, no processes left, desktop
+                            control library against the installation, backup.bat and
+                            restore.bat, pytest on Windows (incl. DPAPI), uninstall.bat
+TEST RESULTS:     Backend   287 passed, 1 skipped (Windows-only DPAPI test) on Linux,
+                            85% line coverage including subprocesses; 284 passed,
+                            4 skipped (Redis not configured, POSIX-only checks) on
+                            Windows; lint and types clean; no known vulnerabilities
+                            in the pinned dependencies
                   Frontend  29 passed; lint and types clean; 0 runtime vulnerabilities
                   Browser   6 passed
                   Desktop   6 passed; clippy clean; Windows type-check clean
-                  Install   fresh clone installed in 80 s, doctor 12 ok / 1 warning
-                            (secret store on Linux uses file permissions, not DPAPI) /
-                            0 failures; started healthy, served the interface, stopped
-                            with no processes left
+                  Install   Linux: fresh clone installed in 80 s, doctor 12 ok /
+                            1 warning (secret store on Linux uses file permissions,
+                            not DPAPI) / 0 failures; started healthy, served the
+                            interface, stopped with no processes left
+                  Windows   every step of the CI job passed; doctor 14 ok / 0 warnings
+                            / 0 failures with the application running
 KNOWN LIMITATIONS:
-                  * Windows verification: no Windows machine was available, and running
-                    PowerShell in the build environment was not permitted. setup.ps1 and
-                    the .bat files were reviewed line by line for Windows PowerShell 5.1,
-                    are ASCII-only, and the winget package IDs were checked against the
-                    current winget index. The CI "windows" job exercises them on every
-                    push; its result has to be checked in the repository's Actions tab.
-                  * The Tauri application was type-checked for Windows but not compiled or
-                    run here (no WebView libraries); the CI "desktop" job builds it and
-                    uploads the installer.
+                  * Windows is verified on Windows Server 2025 in CI, not on a Windows 10
+                    or 11 desktop. The interactive prompts of install.bat (as opposed to
+                    -NonInteractive) and the winget installs have not been run.
+                  * The Tauri window has not been exercised by an automated test; its
+                    control library is tested against a real installation and the CI
+                    "desktop" job builds the installer.
                   * Backups are not encrypted (Phase 13).
                   * Restoring a backup also restores its audit trail; later entries survive
                     only in the automatic pre-restore backup.
@@ -131,18 +137,20 @@ NEXT PHASE:       2 - Core intelligence foundation: input classifier, provider f
 
 ### Windows verification
 
-What was done in place of running on Windows:
+The CI `windows` job runs the lifecycle on Windows Server 2025 on every push
+([passing run](https://github.com/meubaidkaleem-glitch/OmniOsint/actions/runs/44283837382)).
+Its first runs found two Windows-only defects, both fixed:
 
-| Item | Check |
-|---|---|
-| `setup.ps1`, `scripts/windows/*.ps1` | Line-by-line review for Windows PowerShell 5.1 (no PowerShell 7-only syntax, no classes across dot-sourcing, native output kept out of function return values, `$null` not passed through `[string]` parameters); ASCII-only |
-| `.bat`, `.cmd` | Review; CRLF line endings enforced by `.gitattributes` |
-| winget package IDs | `Python.Python.3.12`, `OpenJS.NodeJS.LTS`, `PostgreSQL.PostgreSQL.16` found in the current winget index |
-| Process control | Uses only cross-platform mechanisms (detached processes with `CREATE_NO_WINDOW`, a shutdown request file, PID plus creation time) |
-| DPAPI | Implemented with ctypes; a Windows-only test exists and runs in CI |
-| Desktop shell | `cargo check` and `clippy` for `x86_64-pc-windows-gnu` |
+* `install.bat -NonInteractive` waited for a typed password: `common.ps1`,
+  dot-sourced into the caller's scope, reset a variable that had the same name
+  as the caller's `-NonInteractive` switch. The run hung until GitHub's
+  six-hour limit. Every CI job now has a time limit, and static tests guard
+  against the collision and against unguarded prompts.
+* `omniosint doctor` printed WSL's UTF-16 output as `D e f a u l t` and called
+  Windows Server "Windows 11".
 
-Until the CI run is green, treat the Windows path as unverified.
+Two tests also assumed Linux timing: Windows reports a refused connection only
+after about two seconds of retries.
 
 ## [0.0.0] - Phase 0: requirements and architecture
 

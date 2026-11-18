@@ -7,7 +7,7 @@ recorded here; the detail of what exists is in [CHANGELOG](../CHANGELOG.md).
 | Phase | Title | Status |
 |---|---|---|
 | 0 | Requirements and architecture | Complete |
-| 1 | Project foundation | Complete on Linux; Windows verification pending CI |
+| 1 | Project foundation | Complete |
 | 2 | Core intelligence foundation | Not started |
 | 3 | Investigation management | Not started |
 | 4 | First intelligence modules | Not started |
@@ -89,13 +89,19 @@ foundation, health checks, Windows installation scripts, basic desktop shell.
 | 6 | Database connectivity is verified | Readiness check and `omniosint doctor` |
 | 7 | Tests pass | Backend, frontend and end-to-end suites |
 
-**Status.** Every criterion is met and verified on Linux: a fresh clone
-installs with `scripts/linux/install.sh`, starts, reports ready, serves the
-interface, passes the browser journeys and stops with no processes left;
-257 backend, 29 frontend, 6 browser and 6 desktop-library tests pass. The
-Windows scripts and desktop build were reviewed and type-checked but not
-executed on Windows; the CI `windows` and `desktop` jobs do that. Details in
-the Phase 1 report in [CHANGELOG](../CHANGELOG.md).
+**Status.** Every criterion is met on Linux and on Windows.
+
+* Linux: a fresh clone installs with `scripts/linux/install.sh`, starts,
+  reports ready, serves the interface, passes the browser journeys and stops
+  with no processes left.
+* Windows (CI, Windows Server 2025): `install.bat` installs non-interactively
+  and creates the database; `start.bat`, `health-check.bat`, readiness over
+  HTTP, `stop.bat` with no processes left, the desktop control library against
+  that installation, `backup.bat` and `restore.bat`, the test suite on Windows
+  (including DPAPI) and `uninstall.bat` all pass. The desktop installer is
+  built by the `desktop` job.
+
+Details in the Phase 1 report in [CHANGELOG](../CHANGELOG.md).
 
 ## Phase 2 — Core intelligence foundation
 
