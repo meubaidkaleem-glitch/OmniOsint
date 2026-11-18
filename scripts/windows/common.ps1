@@ -18,7 +18,10 @@ $script:Venv = Join-Path $script:OmniRoot '.venv'
 $script:VenvPython = Join-Path $script:Venv 'Scripts\python.exe'
 $script:MinPython = [version]'3.12'
 $script:MinNode = [version]'22.22.0'
-$script:NonInteractive = $false
+# This file is dot-sourced into the calling script's scope, so a variable set
+# here replaces a parameter of the same name. Script variables defined here
+# therefore use the Omni prefix (setup.ps1 has a -NonInteractive switch).
+$script:OmniNonInteractive = $false
 
 function Write-Step([string]$Message) {
     Write-Host ''
@@ -101,7 +104,7 @@ function Get-NativeOutput {
 }
 
 function Read-YesNo([string]$Question, [bool]$Default = $false) {
-    if ($script:NonInteractive) { return $Default }
+    if ($script:OmniNonInteractive) { return $Default }
     $suffix = '[y/N]'
     if ($Default) { $suffix = '[Y/n]' }
     while ($true) {
@@ -115,7 +118,7 @@ function Read-YesNo([string]$Question, [bool]$Default = $false) {
 }
 
 function Read-Choice([string]$Question, [string[]]$Options, [int]$Default = 1) {
-    if ($script:NonInteractive) { return $Default }
+    if ($script:OmniNonInteractive) { return $Default }
     Write-Info $Question
     for ($i = 0; $i -lt $Options.Count; $i++) {
         Write-Info ("  [{0}] {1}" -f ($i + 1), $Options[$i])
@@ -132,13 +135,15 @@ function Read-Choice([string]$Question, [string[]]$Options, [int]$Default = 1) {
 }
 
 function Read-Value([string]$Prompt, [string]$Default) {
-    if ($script:NonInteractive) { return $Default }
+    if ($script:OmniNonInteractive) { return $Default }
     $answer = Read-Host "    $Prompt [$Default]"
     if ([string]::IsNullOrWhiteSpace($answer)) { return $Default }
     return $answer.Trim()
 }
 
 function Read-Secret([string]$Prompt) {
+    # Never wait for typed input in non-interactive mode: nobody would answer.
+    if ($script:OmniNonInteractive) { Stop-Setup "$Prompt is needed, but this run is non-interactive." }
     $secure = Read-Host "    $Prompt" -AsSecureString
     $pointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
     try { return [Runtime.InteropServices.Marshal]::PtrToStringBSTR($pointer) }
@@ -225,7 +230,7 @@ function Install-WithWinget([string]$Id, [string]$Name, [switch]$Interactive, [b
         return $false
     }
     if (-not $Allowed) {
-        if ($script:NonInteractive) { return $false }
+        if ($script:OmniNonInteractive) { return $false }
         if (-not (Read-YesNo "Install $Name now with winget (package $Id)?" $false)) { return $false }
     }
     $arguments = @('install', '--id', $Id, '--exact', '--source', 'winget',

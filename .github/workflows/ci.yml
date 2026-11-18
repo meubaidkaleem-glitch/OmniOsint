@@ -21,6 +21,7 @@ jobs:
   backend:
     name: Backend (Linux)
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:16.15-alpine
@@ -39,8 +40,8 @@ jobs:
       OMNIOSINT_TEST_ADMIN_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/postgres
       OMNIOSINT_TEST_REDIS_URL: redis://127.0.0.1:6379/15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - name: Install PostgreSQL client tools
@@ -65,12 +66,13 @@ jobs:
   frontend:
     name: Web interface
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: "22.22"
           cache: npm
@@ -85,6 +87,7 @@ jobs:
   browser:
     name: Browser end-to-end
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     needs: [backend, frontend]
     services:
       postgres:
@@ -99,11 +102,11 @@ jobs:
     env:
       OMNIOSINT_E2E_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/omniosint_e2e
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "22.22"
           cache: npm
@@ -116,7 +119,7 @@ jobs:
           (cd frontend && npm ci --no-audit --no-fund && npx playwright install --with-deps chromium)
       - name: Browser tests
         run: scripts/dev/run-e2e.sh --screenshots "${{ runner.temp }}/screenshots"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: browser-screenshots
@@ -128,12 +131,13 @@ jobs:
   windows:
     name: Windows install and lifecycle
     runs-on: windows-2025
+    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "22.22"
       - name: Start the runner's PostgreSQL
@@ -152,14 +156,17 @@ jobs:
           & "$bin\pg_isready.exe" -h 127.0.0.1 -p 5432
       - name: install.bat (non-interactive, creates role and database)
         shell: cmd
+        timeout-minutes: 15
         env:
           OMNIOSINT_PG_ADMIN_PASSWORD: root
         run: install.bat -NonInteractive -Database bootstrap
       - name: start.bat
         shell: cmd
+        timeout-minutes: 5
         run: start.bat --no-open
       - name: health-check.bat
         shell: cmd
+        timeout-minutes: 5
         run: health-check.bat
       - name: Readiness over HTTP
         shell: pwsh
@@ -171,6 +178,7 @@ jobs:
           if ($page.Content -notmatch '<div id="root">') { throw 'web interface not served' }
       - name: stop.bat
         shell: cmd
+        timeout-minutes: 5
         run: stop.bat
       - name: No OmniOSINT processes remain
         shell: pwsh
@@ -184,6 +192,7 @@ jobs:
         run: cargo test --manifest-path desktop/backend-control/Cargo.toml -- --nocapture
       - name: backup.bat and restore.bat
         shell: pwsh
+        timeout-minutes: 10
         run: |
           cmd /c backup.bat --label ci
           if ($LASTEXITCODE -ne 0) { throw 'backup failed' }
@@ -204,6 +213,7 @@ jobs:
           .\.venv\Scripts\python.exe -m pytest -q
       - name: uninstall.bat keeps user data
         shell: cmd
+        timeout-minutes: 5
         run: uninstall.bat -Yes
       - name: Check the data folder survived
         shell: pwsh
@@ -214,9 +224,10 @@ jobs:
   desktop:
     name: Desktop shell (Windows build)
     runs-on: windows-2025
+    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: "22.22"
       - name: Rust toolchain
@@ -234,7 +245,7 @@ jobs:
         run: |
           npm ci --no-audit --no-fund
           npx tauri build
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: omniosint-desktop-windows
           path: |

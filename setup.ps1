@@ -57,7 +57,7 @@ param(
 )
 
 . (Join-Path $PSScriptRoot 'scripts\windows\common.ps1')
-$script:NonInteractive = [bool]$NonInteractive
+$script:OmniNonInteractive = [bool]$NonInteractive
 $summary = New-Object System.Collections.ArrayList
 $exitCode = 0
 
@@ -170,7 +170,7 @@ function Set-ExistingDatabase {
     Invoke-Omni @('config', 'set', 'database.port', $port) 'Saving the database port'
     Invoke-Omni @('config', 'set', 'database.name', $name) 'Saving the database name'
     Invoke-Omni @('config', 'set', 'database.user', $user) 'Saving the database user'
-    if ($script:NonInteractive) {
+    if ($script:OmniNonInteractive) {
         $password = $env:OMNIOSINT_DB_PASSWORD
         if (-not $password) { Stop-Setup 'Set OMNIOSINT_DB_PASSWORD for -Database existing in non-interactive mode.' }
     }
@@ -207,7 +207,7 @@ function Invoke-Bootstrap {
             }
         }
     }
-    if ($script:NonInteractive) {
+    if ($script:OmniNonInteractive) {
         $adminPassword = $env:OMNIOSINT_PG_ADMIN_PASSWORD
         if ($null -eq $adminPassword) { Stop-Setup 'Set OMNIOSINT_PG_ADMIN_PASSWORD for -Database bootstrap in non-interactive mode.' }
     }
@@ -262,7 +262,7 @@ function Initialize-Database {
                 'Skip for now'
             )
             $mode = @('bootstrap', 'existing', 'docker', 'skip')[(Read-Choice 'How should OmniOSINT get its database?' $options 1) - 1]
-            if ($script:NonInteractive) { $mode = 'skip' }
+            if ($script:OmniNonInteractive) { $mode = 'skip' }
         }
         switch ($mode) {
             'bootstrap' { Invoke-Bootstrap }

@@ -20,7 +20,7 @@ param(
 )
 
 . (Join-Path $PSScriptRoot 'common.ps1')
-$script:NonInteractive = [bool]$Yes
+$script:OmniNonInteractive = [bool]$Yes
 $exitCode = 0
 
 try {
