@@ -14,7 +14,7 @@ describe("route guard", () => {
   it("sends a fresh installation to first-run setup", async () => {
     mockApi({
       ...signedOut,
-      "GET /system/info": { body: { service: "omniosint", version: "0.1.0", api_version: "v1", setup_required: true } },
+      "GET /system/info": { body: { service: "omniosint", version: "0.2.0", api_version: "v1", setup_required: true } },
       "GET /auth/setup-status": { body: { setup_required: true, token_file: "C:\\Users\\me\\setup-token.txt" } },
     });
     renderApp("/");
@@ -25,7 +25,7 @@ describe("route guard", () => {
   it("sends a signed-out user to the sign-in page", async () => {
     mockApi({
       ...signedOut,
-      "GET /system/info": { body: { service: "omniosint", version: "0.1.0", api_version: "v1", setup_required: false } },
+      "GET /system/info": { body: { service: "omniosint", version: "0.2.0", api_version: "v1", setup_required: false } },
     });
     const { router } = renderApp("/admin/users");
     expect(await screen.findByRole("heading", { name: "Sign in" })).toBeInTheDocument();

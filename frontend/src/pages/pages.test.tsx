@@ -6,7 +6,7 @@ import { authState, shellHandlers, user } from "@/test/fixtures";
 import { errorBody, mockApi, renderApp } from "@/test/utils";
 
 const info = (setupRequired: boolean) => ({
-  body: { service: "omniosint", version: "0.1.0", api_version: "v1", setup_required: setupRequired },
+  body: { service: "omniosint", version: "0.2.0", api_version: "v1", setup_required: setupRequired },
 });
 const signedOut = {
   "GET /auth/me": { status: 401, body: errorBody("authentication_required", "Sign in to continue.") },

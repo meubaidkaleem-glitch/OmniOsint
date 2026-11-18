@@ -4473,7 +4473,7 @@
   "info": {
     "description": "OmniOSINT is an evidence-driven OSINT and intelligence investigation platform.\n\nThis API is versioned under `/api/v1`. It currently covers the platform\nfoundation: authentication, administration, health and the feature and provider\nregistries. Endpoint groups for search, investigations, entities, evidence,\ngraphs, monitoring, reports, AI and workflows are added by the phase that\nimplements them; they are not present as placeholders.\n",
     "title": "OmniOSINT API",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "openapi": "3.1.0",
   "paths": {

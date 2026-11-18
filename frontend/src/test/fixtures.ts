@@ -174,7 +174,7 @@ export function providerList(): ProviderList {
 export function shellHandlers(state: AuthState = authState()) {
   return {
     "GET /auth/me": { body: state },
-    "GET /system/info": { body: { service: "omniosint", version: "0.1.0", api_version: "v1", setup_required: false } },
+    "GET /system/info": { body: { service: "omniosint", version: "0.2.0", api_version: "v1", setup_required: false } },
     "GET /system/features": { body: featureList() },
     "GET /system/health/live": { body: { status: "ok" } },
     "GET /system/health/ready": { body: readiness() },

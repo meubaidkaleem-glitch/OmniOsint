@@ -4,7 +4,7 @@ Generated from the OpenAPI document by `scripts/dev/gen_docs.py`. Do not edit by
 hand. The live document is served at `/api/v1/openapi.json`; interactive
 documentation is available at `/api/docs` in development mode.
 
-API version: `0.1.0`
+API version: `0.2.0`
 
 ## Conventions
 

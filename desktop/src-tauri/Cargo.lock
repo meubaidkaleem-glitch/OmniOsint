@@ -2444,7 +2444,7 @@ dependencies = [
 
 [[package]]
 name = "omniosint-backend-control"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -2452,7 +2452,7 @@ dependencies = [
 
 [[package]]
 name = "omniosint-desktop"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "omniosint-backend-control",
  "serde",
