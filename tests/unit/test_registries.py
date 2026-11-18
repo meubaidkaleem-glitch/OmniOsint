@@ -53,18 +53,19 @@ def test_features_reference_real_phases() -> None:
 
 
 def test_only_built_features_are_marked_available() -> None:
-    # Phase 1 delivers administration (complete) and partial dashboard and
-    # integrations pages. Everything else must be reported as planned.
+    # Phases 1 and 2 deliver administration (complete) and partial dashboard,
+    # universal search and integrations pages. Everything else is planned.
     built = {f.key: f.status for f in FEATURES if f.status is not FeatureStatus.PLANNED}
     assert built == {
         "dashboard": FeatureStatus.PARTIAL,
+        "universal_search": FeatureStatus.PARTIAL,
         "integrations": FeatureStatus.PARTIAL,
         "administration": FeatureStatus.AVAILABLE,
     }
     for feature in FEATURES:
         if feature.status is FeatureStatus.PARTIAL:
             assert feature.limitations, f"{feature.key} must state its limitations"
-    assert feature_counts() == {"available": 1, "partial": 2, "planned": 17}
+    assert feature_counts() == {"available": 1, "partial": 3, "planned": 16}
 
 
 def test_planned_dashboard_metrics_are_in_future_phases() -> None:

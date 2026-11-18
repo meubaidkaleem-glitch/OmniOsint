@@ -36,7 +36,7 @@ PHASES: dict[int, str] = {
     14: "Hardening and release",
 }
 
-CURRENT_PHASE = 1
+CURRENT_PHASE = 2
 
 
 @dataclass(frozen=True, slots=True)
@@ -80,13 +80,20 @@ FEATURES: tuple[Feature, ...] = (
         title="Universal Search",
         group=None,
         phase=2,
-        status=_P,
+        status=FeatureStatus.PARTIAL,
         summary="One input for every indicator type, with automatic classification.",
         capabilities=(
             "Classification of 24 input types with validation and normalisation",
             "Ambiguous input shown as candidate classifications",
-            "Collection plan preview with provider selection",
+            "Collection plan preview with provider selection and approval",
+            "Collection history: requests, jobs, failures and evidence",
             "Search history and saved searches",
+        ),
+        limitations=(
+            "No real provider is integrated yet (from Phase 4), so plans list the planned "
+            "providers. The simulated provider, off by default, exercises the pipeline with "
+            "labelled test data. Files are classified from the command line; uploads arrive "
+            "in Phase 9. Questions are answered from Phase 10."
         ),
     ),
     Feature(
@@ -323,12 +330,13 @@ FEATURES: tuple[Feature, ...] = (
         summary="Provider control centre.",
         capabilities=(
             "Catalogue of planned data sources and tools",
-            "Credential configuration, health and quota per provider (Phase 5)",
-            "Usage and cost tracking (Phase 5)",
+            "Installed adapters with status, circuit breaker state and daily usage",
+            "Adapter health checks",
+            "Credential configuration and quota per provider (Phase 5)",
         ),
         limitations=(
-            "Only the catalogue is available. No provider integration is implemented "
-            "yet, so no provider can be configured or tested."
+            "No real provider integration is implemented yet: the only adapter is the "
+            "simulated test provider. Credentials are managed from Phase 5."
         ),
     ),
     Feature(
@@ -340,6 +348,7 @@ FEATURES: tuple[Feature, ...] = (
         summary="Users, roles, audit trail, system status and your account.",
         capabilities=(
             "User accounts and role assignment",
+            "Scopes of written authorisation for active operations",
             "Audit trail viewer",
             "System and service status",
             "Password, sessions and theme for your own account",

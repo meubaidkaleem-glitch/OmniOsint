@@ -176,6 +176,15 @@ async def test_collection_end_to_end(
     jobs = (await get(client, admin, "/collection/jobs", status="succeeded")).json()["items"]
     assert [item["id"] for item in jobs] == [job["id"]]
 
+    # Simulated data is counted apart; it never inflates the real figures.
+    metrics = {
+        item["key"]: item for item in (await get(client, admin, "/dashboard")).json()["metrics"]
+    }
+    assert metrics["evidence_total"]["value"] == 0
+    assert metrics["simulated_evidence"]["value"] == 3
+    assert metrics["collection_requests_24h"]["value"] == 0
+    assert metrics["entities_total"]["value"] == 1  # the indicator itself, entered by a user
+
 
 async def test_failures_are_visible_over_the_api(
     client: httpx.AsyncClient, admin: ApiUser, app: FastAPI

@@ -27,7 +27,15 @@ from omniosint.audit import service as audit
 from omniosint.auth.permissions import Permission
 from omniosint.core.features import PHASES, PLANNED_DASHBOARD_METRICS, feature_counts
 from omniosint.core.timeutil import utcnow
-from omniosint.database.models import AuditEvent, User, UserSession
+from omniosint.database.models import (
+    AuditEvent,
+    CollectionJob,
+    CollectionRequest,
+    Entity,
+    Evidence,
+    User,
+    UserSession,
+)
 from omniosint.providers.catalog import load_catalogue
 from omniosint.system.health import collect_health
 
@@ -102,6 +110,66 @@ async def dashboard(
         metrics.append(
             _available("failed_sign_ins_24h", "Failed sign-ins, last 24 hours", int(failures))
         )
+
+    if principal.has(Permission.COLLECTION_READ.value):
+        since = now - timedelta(hours=24)
+        # Simulated test data is counted apart and never mixed into real figures.
+        requests_24h = (
+            await session.execute(
+                select(func.count())
+                .select_from(CollectionRequest)
+                .where(
+                    CollectionRequest.created_at >= since, CollectionRequest.is_simulated.is_(False)
+                )
+            )
+        ).scalar_one()
+        failed_24h = (
+            await session.execute(
+                select(func.count())
+                .select_from(CollectionJob)
+                .where(
+                    CollectionJob.status == "failed",
+                    CollectionJob.finished_at >= since,
+                    CollectionJob.is_simulated.is_(False),
+                )
+            )
+        ).scalar_one()
+        metrics.append(
+            _available(
+                "collection_requests_24h", "Collection requests, last 24 hours", int(requests_24h)
+            )
+        )
+        metrics.append(
+            _available("jobs_failed_24h", "Failed collection jobs, last 24 hours", int(failed_24h))
+        )
+    if principal.has(Permission.EVIDENCE_READ.value):
+        real_evidence = (
+            await session.execute(
+                select(func.count()).select_from(Evidence).where(Evidence.is_simulated.is_(False))
+            )
+        ).scalar_one()
+        simulated_evidence = (
+            await session.execute(
+                select(func.count()).select_from(Evidence).where(Evidence.is_simulated.is_(True))
+            )
+        ).scalar_one()
+        entities = (
+            await session.execute(
+                select(func.count())
+                .select_from(Entity)
+                .where(Entity.is_simulated.is_(False), Entity.deleted_at.is_(None))
+            )
+        ).scalar_one()
+        metrics.append(_available("evidence_total", "Evidence records", int(real_evidence)))
+        metrics.append(_available("entities_total", "Entities", int(entities)))
+        if simulated_evidence:
+            metrics.append(
+                _available(
+                    "simulated_evidence",
+                    "Simulated evidence (test data, not real)",
+                    int(simulated_evidence),
+                )
+            )
 
     metrics.extend(
         Metric(

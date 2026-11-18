@@ -55,11 +55,11 @@ async def test_info_is_public(client: httpx.AsyncClient):
 async def test_feature_registry(client: httpx.AsyncClient, admin: ApiUser):
     assert (await client.get("/api/v1/system/features")).status_code == 401
     body = (await client.get("/api/v1/system/features", headers=admin.headers)).json()
-    assert body["current_phase"] == 1
+    assert body["current_phase"] == 2
     assert len(body["features"]) == 20
-    assert body["counts"] == {"available": 1, "partial": 2, "planned": 17}
+    assert body["counts"] == {"available": 1, "partial": 3, "planned": 16}
     search = next(f for f in body["features"] if f["key"] == "universal_search")
-    assert search["status"] == "planned" and search["phase"] == 2
+    assert search["status"] == "partial" and search["phase"] == 2 and search["limitations"]
 
 
 async def test_dashboard_numbers_are_records_or_explicitly_unavailable(
