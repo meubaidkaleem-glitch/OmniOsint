@@ -49,7 +49,7 @@ configuration.
 | Redis check | (part of `pytest`) | `OMNIOSINT_TEST_REDIS_URL` (optional) |
 | Coverage | `pytest --cov` | as above; measures subprocesses too |
 | Frontend | `cd frontend && npm test` | nothing |
-| Browser end-to-end | `OMNIOSINT_E2E_DATABASE_URL=... scripts/dev/run-e2e.sh` | a disposable database, Chromium |
+| Browser end-to-end | `OMNIOSINT_E2E_DATABASE_URL=... scripts/dev/run-e2e.sh` | a disposable database, Chromium; the script enables the simulated provider for that run |
 | Desktop control library | `cargo test --manifest-path desktop/backend-control/Cargo.toml` | Rust |
 
 Example:
@@ -66,7 +66,7 @@ Test layout:
 * `tests/unit` - no external services.
 * `tests/integration` - API, services and command line against PostgreSQL.
 * `tests/security` - host and origin checks, CSRF, injection, traversal,
-  secret leakage, body limits.
+  secret leakage, body limits, outbound HTTP (SSRF, DNS rebinding, redirects).
 * `tests/end_to_end` - starts and stops the real processes.
 * `frontend/src/**/*.test.tsx` - components and routing with a mocked API.
 * `frontend/e2e` - Playwright journeys against a real backend.
@@ -105,7 +105,11 @@ install-and-lifecycle job and a Windows desktop build.
 * **Identifiers:** UUIDv7 (`core.ids.uuid7`) for append-heavy tables.
 * **Secrets:** never in settings files, logs, API responses or exceptions.
 * **Honesty:** a feature that is not built is reported as planned
-  (`NotImplementedYet`, the feature registry), never simulated.
+  (`NotImplementedYet`, the feature registry), never simulated. The one
+  exception is the simulated provider, which exists to test the pipeline: it is
+  off by default, contacts nothing, and its output is marked by its
+  registration and labelled everywhere (ADR-018). Generate no data anywhere
+  else.
 
 ### Frontend
 
@@ -120,11 +124,39 @@ install-and-lifecycle job and a Windows desktop build.
 * Design tokens are CSS variables in `src/styles/index.css`; use the Tailwind
   names (`bg-surface`, `text-fg-muted`, ...) rather than raw colours.
 
-### Adding an intelligence module or provider (Phase 2 onward)
+### Adding a provider adapter
 
-Modules contribute knowledge of an indicator type; providers are adapters behind
-the provider framework. Neither stores data, calls HTTP or rate-limits on its
-own. See [PROVIDERS.md](PROVIDERS.md).
+Providers are adapters behind the provider framework. An adapter never stores
+data, opens its own HTTP connections or rate-limits itself. See
+[PROVIDERS.md](PROVIDERS.md) for the contract; `providers/simulated.py` is a
+complete example.
+
+1. Read the provider's official API documentation and terms. Only documented
+   endpoints and authentication; nothing behind a login or anti-abuse control.
+2. Subclass `IntelligenceProvider` in `src/omniosint/providers/<id>.py`. The
+   `id` is the catalogue id in `config/providers.yaml`. Declare each capability
+   (accepted types, operation, cost, cache lifetime, timeout, limits), the rate
+   limit, the credential names, the terms note and `verified_live=False`.
+3. In `collect`, use `context.http` (the guarded client) and
+   `context.credentials`; stop at `context.max_pages` and
+   `context.max_results`; check `context.is_cancelled()` between pages; raise
+   the typed errors from `providers/errors.py` with the provider's real reason.
+4. In `normalize`, return `Observation`s: keep the provider's values in
+   `original`, record `observed_at` when the provider gives it, and list
+   mentioned entities as `related` (candidates, never confirmed links). Raise
+   on data you cannot interpret; do not guess.
+5. Register the class in `BUILTIN_ADAPTERS` (`providers/registry.py`).
+6. Test with recorded responses: valid, empty and partial results,
+   authentication failure, quota, rate limiting, timeouts, malformed data,
+   pagination and outages. A live test is opt-in and skipped without
+   credentials. Set `verified_live=True` only after one has passed.
+7. Run `python scripts/dev/gen_docs.py` and update the phase report.
+
+### Adding an intelligence module (Phase 4 onward)
+
+Modules contribute knowledge of an indicator type (what to collect, how to
+present it); they ask the provider manager for capabilities and read evidence.
+They do not call providers directly.
 
 ## Dependency management
 

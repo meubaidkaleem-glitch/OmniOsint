@@ -26,16 +26,31 @@ disagree.
 
 ---
 
-## Part A — Implemented (Phase 1)
+## Part A — Implemented (Phases 1 and 2)
 
 ```
  users ──< user_roles >── roles ──< role_permissions >── permissions
    │
-   └──< user_sessions
-
+   ├──< user_sessions
+   ├──< search_history, saved_searches
+   │
  audit_events          (append-only, no foreign keys by design)
  system_settings       (key/value)
  service_instances     (process heartbeats)
+
+ Phase 2: collection, evidence and scopes
+
+ scopes ──< scope_rules
+   │
+ collection_requests ──< collection_jobs ──< collection_job_events
+                              │
+                              ├──< collection_results ──(raw_sha256)── raw_objects
+                              │
+ entities ──< evidence >── evidence_sources
+                 │
+                 └── job, collection result, raw response hash, superseded row
+
+ providers ──< provider_usage
 ```
 
 ### users
@@ -70,9 +85,9 @@ Built-in roles:
 | Role | Purpose |
 |---|---|
 | administrator | Everything, including user management and system settings |
-| analyst | Investigation work (permissions added as modules land) |
-| auditor | Read-only access including the audit trail |
-| viewer | Read-only access to what they are assigned |
+| analyst | Investigation work: search and run collection, read evidence (masked raw responses) and scopes; more permissions as modules land |
+| auditor | Read-only access including the audit trail, collection history, evidence and scopes |
+| viewer | Read-only access to what they are assigned (cases, from Phase 3) |
 
 ### user_sessions
 
@@ -139,9 +154,176 @@ check reads it to report whether a worker is alive.
 | started_at, last_heartbeat_at, stopped_at | timestamptz |
 | details | jsonb |
 
+### Phase 2 tables
+
+Migration `0002_intelligence_foundation` creates the collection, evidence and
+scope tables. Identifiers are UUIDs (v7 for the append-heavy tables). Every
+enumeration is `text` with a `CHECK`.
+
+#### evidence_sources
+
+The source registry: one row per provider adapter and catalogue entry, plus
+`omniosint.input` for what an analyst typed. Kept in step with the code and
+`config/providers.yaml` on every upgrade.
+
+| Column | Notes |
+|---|---|
+| id | text PK, the provider id (`simulated`, `shodan`, ...) |
+| name, homepage_url, terms_note | |
+| kind | `api`, `dataset`, `tool`, `local`, `analyst`, `upload`, `simulated` |
+| provider_id | the adapter, when there is one |
+| reliability | `unassessed`, `high`, `medium`, `low` (assessed in Phase 7) |
+| upstream_source_ids | jsonb array: sources this one derives from, so two reports from the same upstream are not counted as independent |
+| is_simulated | true only for the simulated provider |
+
+#### entities
+
+One row per thing observed, shared by everything that refers to it.
+
+| Column | Notes |
+|---|---|
+| id | uuid PK |
+| type | one of 29 entity types (`email`, `domain`, `ip_address`, `network_prefix`, ...) |
+| canonical_key | normalised identifier; unique together with `type` |
+| display_name, attributes | as first seen; attributes are jsonb |
+| first_observed_at, last_observed_at | widened by every observation |
+| is_simulated | true while only simulated evidence refers to it; cleared by the first real observation |
+| merged_into_id | self reference for entity resolution (Phase 7) |
+| deleted_at | soft delete |
+
+Entities are created with `INSERT ... ON CONFLICT (type, canonical_key)`, so two
+workers observing the same thing at once get one row.
+
+#### raw_objects
+
+A stored raw response, addressed by the SHA-256 of its content. The bytes live
+in the object store under `data/storage/objects`, compressed and encrypted with
+AES-256-GCM under a key kept in the secret store (ADR-013).
+
+| Column | Notes |
+|---|---|
+| sha256 | PK, lower-case hex (checked) |
+| size, content_type | |
+| encryption | `aes-256-gcm` |
+| retain_until | when housekeeping deletes the bytes and this row (`collection.raw_retention_days`, default 90) |
+
+#### evidence
+
+One attributable observation. **Append-only:** triggers reject `UPDATE` and
+`TRUNCATE` always, and `DELETE` unless the session has set
+`omniosint.evidence_purge = on` (only retention does). A correction is a new
+row naming the one it supersedes.
+
+| Column | Notes |
+|---|---|
+| id | uuid (v7) PK |
+| entity_id | FK entities (restrict) |
+| source_id | FK evidence_sources (restrict); `provider_id` repeats the adapter |
+| job_id, collection_result_id | FK to what produced it (restrict) |
+| observation_kind | what was observed (`simulated.attribute`, later `dns.a_record`, ...) |
+| source_url, provider_object_id | where the provider says it came from |
+| collected_at, observed_at, verified_at | collection time; the time the provider says it was true; verification (Phase 3) |
+| normalized | jsonb: attributes and the mentions it carries (candidate relationships, not confirmed links) |
+| content_hash | SHA-256 of the canonical JSON of the evidence content; recomputed by the integrity check |
+| raw_sha256, raw_pointer | the raw response it was derived from, and the page within it |
+| verification_status | `unverified`, `corroborated`, `verified`, `disputed` |
+| is_redacted, is_simulated | `is_simulated` comes from the provider's registration, never from the adapter |
+| transformation_history | jsonb array of the steps that produced the row (normaliser and version) |
+| supersedes_id | self reference for corrections |
+| investigation_id, relationship_id | reserved for Phases 3 and 7; no foreign key yet |
+
+#### providers and provider_usage
+
+`providers` holds one row per adapter or catalogue entry: name, category,
+adapter version, `enabled`, `priority`, non-secret `config` and the last health
+check. `provider_usage` counts requests, failures, cache hits and credits per
+provider, capability and day (primary key `(provider_id, day, capability)`).
+API keys are never stored in the database; they go to the secret store.
+
+#### scopes and scope_rules
+
+Recorded authorisation for active work. In Phase 2 scopes stand alone; Phase 3
+attaches them to cases.
+
+| Column (scopes) | Notes |
+|---|---|
+| id | uuid PK |
+| name, description | |
+| mode | `passive`, `authorized_discovery`, `active_assessment` |
+| authorized_by, authorization_reference, authorization_note | who gave the written authorisation and where it is; `authorized_by` must not be blank |
+| valid_from, valid_until | `valid_until > valid_from` (checked) |
+| created_by, approved_by, approved_at | recording a scope requires the authorisation statement and records who made it |
+| revoked_at, revoked_by, revoke_reason | scopes are revoked, never deleted, so the jobs that used them stay explained |
+
+`scope_rules` (cascade with their scope): `kind` (`domain`, `wildcard`, `ip`,
+`cidr`, `url_prefix`), normalised `value`, `is_exclusion`, `restrictions` (jsonb,
+for ports and protocols in later phases). Unique per scope, kind, value and
+exclusion flag. Exclusions always win; CIDR rules may be no broader than /8
+(IPv4) or /16 (IPv6).
+
+#### collection_requests
+
+One row per plan that was run.
+
+| Column | Notes |
+|---|---|
+| id | uuid (v7) PK |
+| input_text, indicator_type, indicator_value | what the analyst entered and the reading used |
+| entity_id | the entity the indicator became |
+| mode, strategy | `passive` or `active`; `free_first` or `include_paid` |
+| scope_id | the scope chosen for active work (restrict) |
+| options, plan | jsonb: the options given and the plan exactly as shown, including the sources that were not used and why |
+| status | derived from its jobs: `pending`, `awaiting_approval`, `running`, `completed`, `partial`, `failed`, `cancelled` |
+| is_simulated, created_by, created_at, finished_at | |
+
+#### collection_jobs
+
+The queue and its history: one row per provider capability to call.
+
+| Column | Notes |
+|---|---|
+| id | uuid (v7) PK |
+| request_id | FK collection_requests (cascade) |
+| indicator_type, indicator_value, entity_id | |
+| provider_id, capability | |
+| is_active, scope_id | `CHECK (NOT is_active OR scope_id IS NOT NULL)`: an active job cannot exist without a scope |
+| is_simulated | |
+| status | `queued`, `awaiting_approval`, `running`, `succeeded`, `failed`, `cancelled`, `skipped` |
+| priority, attempt, max_attempts, scheduled_at | retries are scheduled with exponential backoff, only for retryable errors |
+| lease_owner, lease_expires_at | the worker holding it; an expired lease is recovered |
+| started_at, finished_at, cancel_requested_at | |
+| options, progress, error, outcome, cost | jsonb; `error` keeps the provider's real code and message |
+| cache_key | identifies an identical call, for reuse and joining |
+| requested_by, approved_by, approved_at | |
+
+Jobs are leased with `SELECT ... FOR UPDATE SKIP LOCKED`. A partial index on
+`(priority, scheduled_at) WHERE status = 'queued'` keeps dequeueing cheap, and
+one on `lease_expires_at WHERE status = 'running'` finds abandoned leases.
+
+#### collection_job_events
+
+The job history shown in the interface: `kind` (`created`, `approved`,
+`started`, `scope_checked`, `retry_scheduled`, `retry_requested`,
+`cancel_requested`, `succeeded`, `failed`, `cancelled`, `skipped`), `message`,
+`details` (jsonb), `occurred_at`. Cascade with the job.
+
+#### collection_results
+
+What one call returned, page by page: `raw_sha256`, `raw_size`, `content_type`,
+`status_code`, `normalized` (jsonb) and `item_count`, or `normalization_error`
+when the response could not be normalised (the raw response is kept for
+inspection). `from_cache` and `reused_result_id` record reuse of a fresh earlier
+result; `cache_key` with `expires_at` is indexed for that lookup.
+
+#### search_history and saved_searches
+
+Per user (cascade with the user). History keeps the query, the classification
+status and the candidate types of the newest 200 searches; saved searches have
+a unique name per user, the query, an optional chosen type and options.
+
 ---
 
-## Part B — Target model (Phases 2 to 13)
+## Part B — Target model (Phases 3 to 13)
 
 ### Investigations (Phase 3)
 
@@ -149,44 +331,24 @@ check reads it to report whether a worker is alive.
 |---|---|---|
 | investigations | A case | id, case_ref (human-readable, unique), title, description, objective, status (`draft`, `planned`, `running`, `paused`, `awaiting_review`, `completed`, `archived`), created_by, assignee_id, tags, created_at, updated_at, archived_at, deleted_at, retention_until |
 | investigation_members | Who may see and change a case | investigation_id, user_id, case_role |
-| investigation_scopes | Authorisation for active work | id, investigation_id, mode (`passive`, `authorized_discovery`, `active_assessment`), authorization_note, authorization_evidence_file_id, valid_from, valid_until, approved_by |
-| scope_rules | Individual targets and exclusions | scope_id, kind (`domain`, `wildcard`, `ip`, `cidr`, `url`, `port`, `protocol`), value, is_exclusion, restrictions (jsonb) |
+| investigation_scopes | Links the Phase 2 `scopes` to cases | investigation_id, scope_id, added_by, added_at; scopes gain an optional authorisation document (upload) |
 | indicators | Inputs submitted to a case | id, investigation_id, raw_input, type, normalized_value, candidates (jsonb), created_by; unique per case and normalised value |
 | findings | Analyst- or engine-stated conclusions | id, investigation_id, title, summary, category, severity, status, created_by, created_at |
 | finding_evidence | Evidence supporting a finding | finding_id, evidence_id |
 | analyst_notes | Notes on a case, entity, relationship, evidence item or finding | id, investigation_id, target_type, target_id, author_id, body, created_at, updated_at, deleted_at |
-| saved_searches, search_history | Universal search | user_id, query, filters, created_at |
 
-### Collection and providers (Phases 2 and 5)
-
-| Table | Purpose | Key columns |
-|---|---|---|
-| providers | Registered adapters | id (slug), name, category, adapter_version, enabled, config (jsonb, non-secret), priority |
-| provider_credentials | API keys, encrypted | id, provider_id, label, ciphertext, key_id, created_at, last_validated_at, status |
-| provider_health | Latest and historical checks | provider_id, checked_at, status, latency_ms, detail, quota (jsonb) |
-| provider_usage | Requests and cost per day | provider_id, day, endpoint, requests, credits, cost_estimate |
-| evidence_sources | The source registry | id, slug, name, kind (`api`, `public_record`, `tool`, `upload`, `analyst`), provider_id, reliability, upstream_source_ids (lineage for independence analysis), terms_note |
-| collection_jobs | The job queue and its history | id, investigation_id, indicator_id, module, provider_id, operation, status (`queued`, `awaiting_approval`, `running`, `succeeded`, `failed`, `cancelled`, `skipped`), priority, attempt, max_attempts, scheduled_at, started_at, finished_at, lease_owner, lease_expires_at, progress (jsonb), error (jsonb), requested_by, approved_by, cost_estimate, parent_job_id, dedup_key |
-| collection_results | What a job returned | id, job_id, raw_object_key, raw_sha256, raw_size, content_type, normalized (jsonb), item_count, from_cache, received_at, expires_at |
-
-`collection_jobs` is leased with `SELECT ... FOR UPDATE SKIP LOCKED`. A partial
-index on `(priority, scheduled_at) WHERE status = 'queued'` keeps dequeueing
-cheap however large the history grows.
-
-### Evidence (Phase 2)
+### Providers (Phases 4 to 6)
 
 | Table | Purpose | Key columns |
 |---|---|---|
-| evidence | One attributable observation | id (v7), investigation_id, entity_id, relationship_id, source_id, provider_id, source_url, provider_object_id, collected_at, observed_at, verified_at, collection_result_id, normalized (jsonb), content_hash, verification_status, is_redacted, transformation_history (jsonb), created_at |
+| provider_health | Historical health checks (Phase 2 keeps the latest on `providers`) | provider_id, checked_at, status, latency_ms, detail, quota (jsonb) |
 
-Evidence rows are never updated in place. A correction is a new row that
-references the one it supersedes.
+Provider keys stay in the protected secret store, not in the database.
 
-### Entities and graph (Phases 2 and 7)
+### Entities and graph (Phase 7)
 
 | Table | Purpose | Key columns |
 |---|---|---|
-| entities | One row per real-world thing, shared by all cases | id, type (28 types from the brief), canonical_key, display_name, attributes (jsonb), first_observed_at, last_observed_at, merged_into_id, deleted_at; unique `(type, canonical_key)` |
 | entity_identifiers | Alternative identifiers of an entity | entity_id, id_type, value, normalized_value; unique `(id_type, normalized_value)` |
 | investigation_entities | Which entities a case uses | investigation_id, entity_id, added_by, added_at, pinned |
 | relationships | Typed edges | id, source_entity_id, target_entity_id, type, status (`observed`, `candidate`, `supported`, `verified`, `conflicting`, `rejected`, `needs_review`), is_inferred, first_observed_at, last_observed_at, attributes (jsonb), created_by |
@@ -242,7 +404,7 @@ constraint trigger.
 |---|---|---|
 | Expired and revoked sessions | 7 days after expiry | Worker housekeeping (implemented) |
 | Audit events | Kept; configurable from Phase 13 | Retention job with the purge flag |
-| Raw provider responses | 90 days unless attached to a finding | `collection_results.expires_at` (Phase 2) |
+| Raw provider responses | 90 days (`collection.raw_retention_days`); kept longer when attached to a finding from Phase 3 | `raw_objects.retain_until`, purged by worker housekeeping (implemented) |
 | Cases | Until deleted; optional `retention_until` | Phase 3 |
 
 Raw responses are not kept indefinitely by default: they can contain personal

@@ -8,7 +8,7 @@ recorded here; the detail of what exists is in [CHANGELOG](../CHANGELOG.md).
 |---|---|---|
 | 0 | Requirements and architecture | Complete |
 | 1 | Project foundation | Complete |
-| 2 | Core intelligence foundation | Not started |
+| 2 | Core intelligence foundation | Complete |
 | 3 | Investigation management | Not started |
 | 4 | First intelligence modules | Not started |
 | 5 | Internet asset providers | Not started |
@@ -110,13 +110,20 @@ and registry, normalisation, evidence manager, source registry, rate limiter,
 cache, collection job system, scope manager.
 
 **Acceptance.**
-* A sample indicator of every supported type is classified; ambiguous input
-  returns every candidate instead of a guess.
-* A mock provider returns structured data through the real pipeline.
-* Results are normalised and stored; evidence stays linked to its source.
-* Failed provider operations (timeout, quota, malformed data) are handled and
-  visible in job history.
-* No active operation runs without passing the scope manager.
+
+| # | Criterion | How it is verified |
+|---|---|---|
+| 1 | A sample indicator of every supported type is classified; ambiguous input returns every candidate instead of a guess | `tests/unit/test_classifier.py`: one sample per type (a test fails if a type has none), ambiguity cases; browser journey (ambiguous hash) |
+| 2 | A mock provider returns structured data through the real pipeline | The simulated provider through queue, worker, provider manager, normaliser and evidence store: `tests/integration/test_collection_pipeline.py`, the API and CLI tests, and the browser journey against a running worker |
+| 3 | Results are normalised and stored; evidence stays linked to its source | Evidence rows name their source, job, raw response hash and transformation history; integrity check recomputes both hashes (same tests) |
+| 4 | Failed provider operations (timeout, quota, malformed data) are handled and visible in job history | Every simulated failure mode (timeout, outage, rate limit, quota, refused credentials, malformed, partial, flaky) in the pipeline tests; retries only for retryable errors; browser journey shows a quota failure with its reason |
+| 5 | No active operation runs without passing the scope manager | Database constraint (an active job must name a scope); scope checked when planned, when approved and again before running; tests for revoked, expired, excluded and uncovered targets; browser journey (blocked without scope, approval inside one) |
+
+**Status.** Every criterion is met. The provider framework is complete, but
+no real provider is integrated: the first arrive in Phases 4 to 6. Until then
+the only adapter is the simulated provider, which is off by default and whose
+output is labelled simulated everywhere. Details in the Phase 2 report in
+[CHANGELOG](../CHANGELOG.md).
 
 ## Phase 3 — Investigation management
 

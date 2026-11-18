@@ -20,28 +20,31 @@ Status legend: **Available** · **Partial** (some of it works, limits stated) ·
 | Authentication, sessions, CSRF | 1 | Available | |
 | Role-based access control | 1 | Available | Built-in roles; custom roles planned for Phase 13 |
 | Audit trail | 1 | Available | Append-only; viewer in Administration |
-| Protected secret storage (DPAPI) | 1 | Available | Used for the database password now, provider keys from Phase 5 |
+| Protected secret storage (DPAPI) | 1 | Available | Holds the database password and the raw-response key; provider keys when keyed integrations arrive (Phases 4 to 6) |
 | Health checks and diagnostics | 1 | Available | `health/live`, `health/ready`, `omniosint doctor` |
 | Process lifecycle (start, stop, status) | 1 | Available | |
 | Windows install and lifecycle scripts | 1 | Available | Run end to end on every push by the CI `windows` job (Windows Server 2025) |
-| Backup and restore | 1 | Partial | Unencrypted archives; encryption in Phase 13 |
+| Backup and restore | 1 and 2 | Partial | Database, settings and raw responses (exported decrypted, encrypted again on restore); archives themselves are unencrypted until Phase 13 |
 | Desktop shell | 1 | Partial | Starts, monitors and stops the backend; its control library is tested against a real Windows installation and the installer is built by CI; the window itself has not been exercised by an automated test; tray mode in Phase 11 |
-| Command palette (Ctrl+K) | 1 | Partial | Navigation and actions; indicator search in Phase 2 |
-| Redis cache and rate limiting | 2 | Planned | Connection health check exists |
-| Collection job queue | 2 | Planned | |
-| Scope manager | 2 | Planned | |
+| Command palette (Ctrl+K) | 1 and 2 | Available | Navigation, actions, and "search for ..." into Universal Search |
+| Provider rate limiting | 2 | Available | Token bucket per provider, shared through Redis when it is configured, per process otherwise; waits are bounded |
+| Result cache | 2 | Available | A fresh earlier result is reused within each capability's lifetime; identical calls in flight are joined; "ignore cached results" forces a call |
+| Circuit breaker and timeouts | 2 | Available | Per provider; a failing provider is paused instead of retried in a loop |
+| Outbound HTTP guard | 2 | Available | Special-use addresses refused, DNS answers checked and pinned, redirects re-checked, size and time limits |
+| Collection job queue | 2 | Available | PostgreSQL queue with leases, retries for retryable errors only, approval, cancellation and job history |
+| Scope manager | 2 | Available | Recorded scopes with a written-authorisation statement; checked at plan, approval and run; attached to cases in Phase 3 |
 | Multi-user refinements, retention policies | 13 | Planned | |
 
 ## Universal input engine (brief section 4)
 
 | Feature | Phase | Status |
 |---|---|---|
-| Type detection for all 24 input types | 2 | Planned |
-| Validation and normalisation | 2 | Planned |
-| Ambiguity handling (show candidates) | 2 | Planned |
-| Collection plan preview and approval | 2 | Planned |
-| Search history and saved searches | 2 | Planned |
-| Provider selection and advanced options | 2 | Planned |
+| Type detection for all 24 input types | 2 | Available |
+| Validation and normalisation | 2 | Available |
+| Ambiguity handling (show candidates) | 2 | Available |
+| Collection plan preview and approval | 2 | Available |
+| Search history and saved searches | 2 | Available |
+| Provider selection and advanced options | 2 | Partial — strategy (free first or include paid), cache bypass and active mode with a scope everywhere; restricting a plan to chosen providers in the API and CLI; provider-specific options arrive with the integrations |
 
 ## Intelligence modules (brief section 5)
 
@@ -72,13 +75,13 @@ Status legend: **Available** · **Partial** (some of it works, limits stated) ·
 
 | Engine | Phase | Status |
 |---|---|---|
-| Entity registry (28 entity types) | 2 and 7 | Planned |
+| Entity registry (29 entity types) | 2 and 7 | Partial — entities are registered from evidence by type and canonical key; resolution and merging in Phase 7 |
 | Relationship engine (typed, evidence-linked) | 7 | Planned |
 | Graph queries, filters, path analysis | 7 | Planned |
 | Graph exports: PNG, SVG, JSON, GraphML, CSV | 7 | Planned |
 | Entity resolution with analyst review | 7 | Planned |
 | Confidence engine, six separate dimensions | 7 | Planned |
-| Evidence and provenance engine | 2 | Planned |
+| Evidence and provenance engine | 2 | Available — append-only records linked to source, job, raw response and transformations, with an integrity check; review and verification in Phase 3 |
 | Evidence explorer | 3 | Planned |
 | Temporal engine and snapshots | 11 | Planned |
 
@@ -95,8 +98,11 @@ Status legend: **Available** · **Partial** (some of it works, limits stated) ·
 
 ## Providers (brief section 10)
 
-See [PROVIDERS](PROVIDERS.md). No provider integration exists yet; the
-catalogue is loaded from `config/providers.yaml` and shown as planned.
+See [PROVIDERS](PROVIDERS.md). The provider framework exists (Phase 2): the
+adapter contract, registry, rate limits, circuit breaker, timeouts, cache and
+guarded HTTP client. No real provider is integrated yet; the catalogue is
+loaded from `config/providers.yaml` and shown as planned. The only adapter is
+the simulated provider used for testing, which is off by default.
 
 ## Case management, monitoring, workflows, reporting
 
@@ -118,10 +124,10 @@ catalogue is loaded from `config/providers.yaml` and shown as planned.
 |---|---|---|
 | Application shell, navigation, themes | 1 | Available |
 | First-run setup, sign-in, account settings | 1 | Available |
-| Dashboard | 1 | Partial — system health, module availability and activity; case metrics from Phase 3 |
-| Administration: users, roles, audit log, system status | 1 | Available |
-| Integrations (provider control centre) | 1 | Partial — catalogue only; health, quota and keys from Phase 5 |
-| Universal search | 2 | Planned |
+| Dashboard | 1 and 2 | Partial — system health, module availability, activity, collection and evidence figures; case metrics from Phase 3 |
+| Administration: users, roles, scopes, audit log, system status | 1 and 2 | Available |
+| Integrations (provider control centre) | 1 and 2 | Partial — catalogue, the adapters that exist and their health checks; keys and quotas when keyed integrations arrive |
+| Universal search, collection history, evidence pages | 2 | Partial — the whole pipeline works, but only the simulated provider can collect until real integrations arrive (Phases 4 to 6) |
 | Investigation workspace | 3 | Planned |
 | Module workspaces | 4 to 9 | Planned |
 | Relationship graph workspace | 7 | Planned |

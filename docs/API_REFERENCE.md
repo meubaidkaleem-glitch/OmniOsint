@@ -299,7 +299,7 @@ Responses: `200` `DashboardResponse`, `401` `ErrorResponse`
 
 ## providers
 
-The provider catalogue. Read-only: no provider integration is implemented yet.
+The provider catalogue, the adapters that exist and their health checks. No real provider is integrated yet.
 
 ### `GET /api/v1/providers`
 

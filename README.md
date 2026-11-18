@@ -7,12 +7,14 @@ relationship graph, keep the evidence behind every claim, and report it.
 Windows 10/11 is the primary platform; Linux, including WSL2, is supported. It
 runs on your own computer and listens on that computer only.
 
-> **Project status: Phase 1 of 14 complete.** The platform foundation works:
-> installation, start and stop, accounts and permissions, audit trail, health
-> checks, backup and restore, the web interface and a desktop shell. **No
-> intelligence module or provider integration exists yet**; the interface shows
-> those sections as *Planned — not yet implemented*, with the phase that
-> delivers each. See [docs/ROADMAP.md](docs/ROADMAP.md) and
+> **Project status: Phase 2 of 14 complete.** The platform foundation and the
+> core intelligence pipeline work: universal search classifies any indicator,
+> shows a collection plan and runs it through a job queue, a scope manager and
+> an evidence store. **No real provider is integrated yet**, so nothing real is
+> collected: the first integrations arrive in Phases 4 to 6. A simulated
+> provider, off by default and labelled everywhere, exercises the pipeline with
+> test data. Unbuilt sections show *Planned — not yet implemented* with the
+> phase that delivers each. See [docs/ROADMAP.md](docs/ROADMAP.md) and
 > [CHANGELOG.md](CHANGELOG.md).
 
 ![The OmniOSINT dashboard](docs/images/dashboard.png)
@@ -35,6 +37,22 @@ Full instructions: [docs/INSTALLATION.md](docs/INSTALLATION.md).
 
 ## What works today
 
+* **Universal search**: one box for 24 input types (email, phone, domain, URL,
+  IP, range, AS number, hashes, certificate fingerprints, CVE, packages,
+  repositories, coordinates and more). Input is validated and normalised on
+  your computer; ambiguous input lists every reading for you to choose. Search
+  history and saved searches.
+* **Collection plans and jobs**: before anything runs, the plan lists every
+  source that could serve the indicator and why it would or would not be used
+  (planned, not configured, paid, cached, needs approval, blocked). Jobs run in
+  the background with retries, cancellation, approval and a history that shows
+  the real reason for every failure.
+* **Evidence store**: every observation is kept with its source, job, raw
+  response and transformations, append-only and hashed, with an integrity check.
+  Raw responses are encrypted on disk and expire after 90 days by default.
+* **Scopes**: active work runs only inside a recorded scope (written
+  authorisation, targets, exclusions, validity), checked three times and
+  approved by a person.
 * **Accounts and access**: first-run setup with a one-time token, sign-in,
   password policy, lockout, sessions you can review and end, four built-in
   roles, user administration that cannot lock you out.
@@ -42,14 +60,19 @@ Full instructions: [docs/INSTALLATION.md](docs/INSTALLATION.md).
   database.
 * **Dashboard** of real records only: figures that need unbuilt modules are
   listed as not yet available, never shown as zero.
-* **Provider catalogue** of 79 data sources and tools with their access terms
-  and planned phase.
-* **Operations**: `omniosint` command line, health checks and `doctor`
-  diagnostics, backup and atomic restore, protected secret storage (DPAPI on
-  Windows).
-* **Interface**: twenty-section navigation, Ctrl+K command palette, dark and
-  light themes.
+* **Provider framework and catalogue**: the adapter contract with rate limits,
+  circuit breaker, caching and an outbound HTTP client that cannot be pointed at
+  internal addresses; a catalogue of 79 data sources and tools with their access
+  terms and planned phase.
+* **Operations**: `omniosint` command line (including `classify`,
+  `investigate`, `jobs`, `evidence` and `scopes`), health checks and `doctor`
+  diagnostics, backup and atomic restore including raw responses, protected
+  secret storage (DPAPI on Windows).
+* **Interface**: twenty-section navigation, Ctrl+K command palette (type an
+  indicator to search for it), dark and light themes.
 * **Desktop shell** (Tauri) that starts, watches and stops the service.
+
+![Universal search with a collection plan (simulated provider enabled)](docs/images/universal-search.png)
 
 ## Principles
 

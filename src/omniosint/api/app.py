@@ -62,7 +62,8 @@ OPENAPI_TAGS = [
     {
         "name": "providers",
         "description": (
-            "The provider catalogue. Read-only: no provider integration is implemented yet."
+            "The provider catalogue, the adapters that exist and their health checks. "
+            "No real provider is integrated yet."
         ),
     },
 ]
@@ -70,11 +71,15 @@ OPENAPI_TAGS = [
 DESCRIPTION = """\
 OmniOSINT is an evidence-driven OSINT and intelligence investigation platform.
 
-This API is versioned under `/api/v1`. It currently covers the platform
-foundation: authentication, administration, health and the feature and provider
-registries. Endpoint groups for search, investigations, entities, evidence,
-graphs, monitoring, reports, AI and workflows are added by the phase that
-implements them; they are not present as placeholders.
+This API is versioned under `/api/v1`. It covers the platform foundation
+(authentication, administration, health, the feature and provider registries)
+and the core intelligence pipeline: universal search, collection plans,
+requests and jobs, evidence, entities, sources and scopes. Endpoint groups for
+investigations, graphs, monitoring, reports, AI and workflows are added by the
+phase that implements them; they are not present as placeholders.
+
+No real provider is integrated yet. Collection results from the simulated
+provider, when it is enabled, are marked `is_simulated`.
 """
 
 

@@ -50,9 +50,9 @@ Three properties drive most design choices:
           v                                       v
   +----------------------+            +--------------------------+
   |  PostgreSQL          | <--------> |  Worker process          |
-  |  system of record,   |            |  heartbeat, housekeeping |
-  |  job queue, graph    |            |  (collection jobs and    |
-  +----------------------+            |   scheduler from Phase 2)|
+  |  system of record,   |            |  collection jobs,        |
+  |  job queue, graph    |            |  heartbeat, housekeeping |
+  +----------------------+            |  (schedules: Phase 11)   |
           ^                           +------------+-------------+
           |                                        |
   +----------------------+            +------------v-------------+
@@ -68,7 +68,7 @@ supervisor implemented in Python (`omniosint start` / `stop` / `status`):
 | Process | Command | Responsibility |
 |---|---|---|
 | API | `omniosint serve` | REST API, authentication, serves the built web UI |
-| Worker | `omniosint worker` | Heartbeat and housekeeping today; collection jobs, monitoring schedules and report rendering in later phases |
+| Worker | `omniosint worker` | Collection jobs (Phase 2), heartbeat, housekeeping (ended sessions, raw responses past retention); monitoring schedules and report rendering in later phases |
 
 The Windows `.bat` scripts and the desktop shell do not contain lifecycle logic
 of their own. They call the same CLI commands, so there is one implementation
@@ -84,12 +84,19 @@ omniosint/
 │   ├── api/                 FastAPI application, middleware, v1 routers, schemas
 │   ├── auth/                passwords, sessions, CSRF, permissions, throttling
 │   ├── audit/               audit trail service
-│   ├── backup/              backup and restore (pg_dump / pg_restore)
+│   ├── backup/              backup and restore (pg_dump / pg_restore, raw responses)
 │   ├── cli/                 Typer command-line interface
+│   ├── collection/          planner, job queue, executor, collection service
 │   ├── core/                configuration, paths, logging, errors, ids, crypto,
-│   │                        secret store, feature registry
+│   │                        secret store, file locks, feature registry
 │   ├── database/            SQLAlchemy models, engine, Alembic migrations, seeds
-│   ├── providers/           provider catalogue (adapters arrive in Phase 2+)
+│   ├── evidence/            evidence records, entity registry, source registry,
+│   │                        encrypted object store
+│   ├── indicators/          universal input classifier and parsers
+│   ├── net/                 address classification, guarded outbound HTTP client
+│   ├── providers/           adapter contract, registry, manager, rate limits,
+│   │                        circuit breaker, simulated provider, catalogue
+│   ├── scopes/              scope rules, the scope manager, scope service
 │   ├── runtime/             process supervisor, shutdown signalling, server runner
 │   ├── system/              health checks, diagnostics (`doctor`)
 │   ├── users/               user administration service
@@ -189,7 +196,8 @@ Stack traces never leave the process.
 
 ## 5. Shared intelligence foundation
 
-**[Design — Phases 2 to 7]** One pipeline serves every module. Modules
+**[Implemented in Phase 2 up to the evidence and entity registry; the rest is
+design for Phases 7 and 11]** One pipeline serves every module. Modules
 contribute knowledge about an indicator type; they do not own storage, HTTP,
 rate limiting or graph logic.
 
@@ -206,13 +214,13 @@ rate limiting or graph logic.
 
 | Component | Responsibility | Phase |
 |---|---|---|
-| Classifier | Detect type(s) of an input, validate, normalise. Returns every plausible classification with a reason; never guesses silently | 2 |
-| Planner | Turn (indicator, objective, mode) into an ordered collection plan with provider choice, cost estimate and approval needs | 2 |
-| Scope manager | Single gate for every active operation: approved targets, exclusions, expiry, operation restrictions | 2 |
-| Provider framework | Adapter contract, registry, health, quota, rate limit, retry, circuit breaker, cache | 2 |
-| Normaliser | Provider output to common observation records without discarding original values | 2 |
-| Evidence manager | Immutable evidence records, raw response references, hashes, transformation history | 2 |
-| Entity registry | One canonical entity per normalised identifier, shared by all modules | 2, 7 |
+| Classifier | Detect type(s) of an input, validate, normalise. Returns every plausible classification with a reason; never guesses silently (`indicators/`) | 2, **implemented** |
+| Planner | Turn (indicator, mode, strategy, scope) into a collection plan with provider choice, cost, cache reuse and approval needs (`collection/planner.py`) | 2, **implemented** |
+| Scope manager | Single gate for every active operation: approved targets, exclusions, validity, operation restrictions (`scopes/`) | 2, **implemented** |
+| Provider framework | Adapter contract, registry, health, quota, rate limit, retry, circuit breaker, cache, joined calls (`providers/`) | 2, **implemented** |
+| Normaliser | Provider output to common observation records without discarding original values (adapter `normalize`, validated by the manager) | 2, **implemented** |
+| Evidence manager | Append-only evidence records, raw response references, hashes, transformation history, integrity check (`evidence/`) | 2, **implemented** |
+| Entity registry | One canonical entity per normalised identifier, shared by all modules | 2 (**registry implemented**), 7 (resolution) |
 | Relationship engine | Typed, evidence-linked edges with status (observed, candidate, supported, verified, conflicting, rejected) | 7 |
 | Entity resolution | Candidate matching with analyst review; never merges on name, username, avatar or location alone | 7 |
 | Confidence engine | Six separate dimensions, each with a stored rationale; no single blended score | 7 |
@@ -237,11 +245,13 @@ Design rules fixed now because changing them later is expensive:
 | Concern | Choice | Status |
 |---|---|---|
 | Structured records | PostgreSQL 15+ (asyncpg driver, SQLAlchemy 2, Alembic) | **Implemented** |
-| Job queue | PostgreSQL table with `FOR UPDATE SKIP LOCKED` leases, asyncio workers | Design, Phase 2 (ADR-004) |
-| Cache, rate-limit state, pub/sub | Redis when configured, in-process fallback otherwise | Health check implemented; use from Phase 2 |
+| Job queue | PostgreSQL table with `FOR UPDATE SKIP LOCKED` leases, asyncio workers | **Implemented** (ADR-004) |
+| Rate-limit state | Redis when configured (one Lua script per check), in-process fallback otherwise | **Implemented** |
+| Result cache | Fresh results reused from PostgreSQL (`collection_results`), keyed by provider, capability, indicator and options | **Implemented** |
+| Pub/sub | Redis when configured | Design, Phase 11 |
 | Graph | PostgreSQL is the system of record; `GraphStore` interface with a PostgreSQL implementation and an optional Neo4j projection | Design, Phase 7 (ADR-005) |
 | Search | PostgreSQL full-text and trigram indexes first; OpenSearch optional at scale | Design, Phase 12 (ADR-012) |
-| Object storage | Local content-addressed store under the data directory, encrypted at rest; S3-compatible later | Design, Phase 2 (ADR-013) |
+| Object storage | Local content-addressed store under the data directory, encrypted at rest; S3-compatible later | **Implemented** for raw responses (ADR-013) |
 | Secrets | AES-256-GCM envelope, master key protected by Windows DPAPI | **Implemented** (ADR-011) |
 
 The full data model is in [DATABASE_SCHEMA](DATABASE_SCHEMA.md).
@@ -259,7 +269,7 @@ frontend/src/
 ├── api/            fetch client, generated OpenAPI types, query hooks
 ├── components/ui/  design-system primitives (button, form, surface, table, overlay)
 ├── components/layout/  shell, sidebar, top bar, command palette
-├── pages/          dashboard, planned, integrations, auth/, admin/
+├── pages/          dashboard, planned, integrations, auth/, admin/, search/
 ├── stores/         Zustand stores for UI state (theme, sidebar)
 ├── lib/            navigation spec, formatting, utilities
 └── styles/         design tokens (dark default, light alternative)
@@ -358,8 +368,9 @@ Summary only; the full design and threat model are in [SECURITY](../SECURITY.md)
 | Audit trail | Append-only table enforced by a database trigger | Implemented |
 | Secrets at rest | AES-256-GCM envelope; master key under Windows DPAPI | Implemented |
 | Browser hardening | Strict CSP, no third-party origins, frame denial | Implemented |
-| Active-operation gate | Scope manager | Design, Phase 2 |
-| Outbound request safety (SSRF) | Central HTTP client with destination policy | Design, Phase 2 |
+| Active-operation gate | Scope manager, checked at plan, approval and run; database constraint that an active job names a scope | Implemented |
+| Outbound request safety (SSRF) | Central HTTP client: destination policy, checked addresses pinned for the connection, redirects re-checked (ADR-019) | Implemented |
+| Raw responses at rest | AES-256-GCM under a key held in the secret store; opaque file names | Implemented |
 | File handling | Size limits, type detection, sandboxed parsing | Design, Phase 9 |
 
 ## 11. Configuration
@@ -398,11 +409,11 @@ not touch investigations.
 
 | Layer | Tooling | What it proves |
 |---|---|---|
-| Unit | pytest | Pure logic: configuration, crypto, password policy, tokens, pagination, process state |
-| Integration | pytest + real PostgreSQL | Migrations, authentication flows, RBAC, audit, health, backup round trip |
-| Security | pytest | Headers, host and origin validation, CSRF, lockout, injection attempts, traversal |
-| Frontend | Vitest + Testing Library | Navigation, forms, guards, error states |
-| End to end | Playwright + real backend | First-run setup, sign-in, administration, sign-out in a real browser |
+| Unit | pytest | Pure logic: configuration, crypto, password policy, tokens, pagination, process state, the classifier (one sample per input type), scope rules, the provider framework, the object store |
+| Integration | pytest + real PostgreSQL | Migrations, authentication flows, RBAC, audit, health, backup round trip with raw responses, the collection pipeline with every simulated failure mode |
+| Security | pytest | Headers, host and origin validation, CSRF, lockout, injection attempts, traversal, outbound HTTP (DNS rebinding, internal redirects, size limits) |
+| Frontend | Vitest + Testing Library | Navigation, forms, guards, error states, search, plans, jobs, scopes |
+| End to end | Playwright + real backend and worker | First-run setup, sign-in, administration, sign-out; search, plans, collection, evidence, a provider failure, and a scoped active job with approval |
 | Lifecycle | pytest, real processes | `start`, health, `stop` leave no stray processes |
 | Windows | GitHub Actions `windows-latest` | Install, start, health check and stop through the `.bat` scripts |
 
@@ -532,8 +543,8 @@ is a file readable only by the owner.
 *Alternatives.* Plain `.env` files; a third-party keyring library.
 *Reason.* The brief requires DPAPI or equivalent. One encryption format
 everywhere, with only the key protection being platform-specific, keeps the
-code small. The same key will protect provider credentials (Phase 5) and stored
-evidence (Phase 2).
+code small. The secret store also holds the object-store key (Phase 2) and
+will hold provider credentials.
 
 ### ADR-012 PostgreSQL search first, OpenSearch optional
 *Decision.* Full-text and trigram indexes in PostgreSQL until measurements show
@@ -544,6 +555,12 @@ search service sits behind an interface so the engine can change.
 ### ADR-013 Local content-addressed object store
 *Decision.* Raw provider responses and uploaded files are stored under the data
 directory by SHA-256, encrypted at rest, with retention metadata in PostgreSQL.
+*Implementation (Phase 2).* Each object is compressed, then encrypted with
+AES-256-GCM under a random key kept in the secret store; the associated data
+binds the file to its hash. File names are an HMAC of the hash, so a directory
+listing does not reveal what is stored. Because the key cannot leave the
+machine's secret store, backups export objects decrypted and a restore encrypts
+them again under the local key.
 *Reason.* Deduplication and integrity checking come for free, and large blobs
 stay out of the database.
 
@@ -569,6 +586,36 @@ TruffleHog's AGPL), and the brief forbids installing software silently.
 *Alternatives.* A vendor's agent runner; a third-party agent framework.
 *Reason.* Every tool call must pass our permission, scope and approval gates
 and be recorded as evidence-linked history, across cloud and local models.
+
+### ADR-018 A simulated provider, labelled by its registration
+*Decision.* The pipeline is exercised end to end by a built-in `simulated`
+adapter, off by default, that contacts nothing and generates data only in
+documentation ranges. Whether a result is simulated is decided by the
+provider's registration, not by anything the adapter returns, and the flag is
+carried by evidence, entities, requests and jobs.
+*Alternatives.* Mocks inside tests only; recorded responses from a real
+provider.
+*Reason.* Phase 2 must show the real pipeline working before any real provider
+exists, without ever letting test data pass for a finding. Mocks alone would not
+exercise the worker, the interface or the CLI; recordings would need a real
+provider's terms and data.
+
+### ADR-019 Outbound HTTP connects only to addresses it has checked
+*Decision.* The shared HTTP client resolves names itself, checks every address
+against the destination policy, and connects to the checked address (a custom
+network backend under `httpx`). Redirects go through the same check.
+*Alternatives.* Checking the hostname before the request and letting the HTTP
+library resolve it again.
+*Reason.* A second resolution can return a different, internal address (DNS
+rebinding), which turns a provider call into a request to the local network.
+
+### ADR-020 Scopes stand alone until cases exist
+*Decision.* Phase 2 records scopes as their own objects, approved when they are
+recorded with a written-authorisation statement and revoked rather than
+deleted. Phase 3 attaches them to investigations.
+*Reason.* No active operation may run without a scope, and the gate has to
+exist before the first active capability does. Revocation instead of deletion
+keeps every past active job explained.
 
 ## 16. Runtime dependencies
 

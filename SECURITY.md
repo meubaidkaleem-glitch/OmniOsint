@@ -40,8 +40,15 @@ the OmniOSINT user's own operating-system session.
 | Script injection in the interface | React escaping; strict Content Security Policy with no inline scripts and no third-party origins; `nosniff`; framing denied | Implemented |
 | Information leakage in errors and logs | Generic error messages with a request id; stack traces stay in logs; log redaction for credentials | Implemented |
 | Oversized requests | Body size limit | Implemented |
-| Server-side request forgery | Destination policy in the shared HTTP client | Planned, Phase 2 |
-| Active operations outside authorisation | Scope manager | Planned, Phase 2 |
+| Server-side request forgery | Every provider request goes through one HTTP client: http and https only, no credentials in URLs, no proxy settings from the environment. Each address a name resolves to is checked against a destination policy (no loopback, private, link-local, multicast, reserved or other special-use ranges, including IPv4 embedded in IPv6) and the connection goes to the checked address, so DNS rebinding cannot redirect it; redirects are checked again | Implemented |
+| Oversized or hostile provider responses | Response size cap and timeouts; observations validated against a schema; raw responses shown as data, never rendered as HTML | Implemented |
+| Active operations outside authorisation | Scope manager: an active job must name a recorded scope (database constraint), and the scope is checked when the plan is made, when the job is approved and again immediately before it runs; every check is in the job history and the audit trail. Active jobs always wait for approval | Implemented |
+| Runaway or costly collection | Per-provider rate limits, circuit breaker, bounded retries for retryable errors only, page and result caps, approval for paid calls above a threshold | Implemented |
+| Raw responses read from disk | AES-256-GCM under a key held in the secret store; file names are an HMAC of the content hash, so a listing reveals nothing | Implemented |
+| Evidence altered after collection | Evidence rows are append-only (database triggers); each carries a hash of its content and of the raw response, and the integrity check recomputes both | Implemented |
+| Credentials exposed in raw responses | Credential-like fields are masked in the raw view; the unmasked view needs `evidence:read_raw` and is audited, and a response that cannot be masked is shown only unmasked | Implemented |
+| Credentials pasted into a search | Removed from any input before classification (`scheme://user:pass@` forms); never stored in search history | Implemented |
+| Test data mistaken for findings | The simulated provider is off by default; whether data is simulated comes from the provider's registration, is stored on every record and shown everywhere; dashboards count it separately | Implemented |
 | Malicious files | Type detection, limits, sandboxed parsing, no execution | Planned, Phase 9 |
 | Data sent to cloud models | Local-only mode, explicit consent | Planned, Phase 10 |
 | Encrypted backups | Passphrase encryption | Planned, Phase 13 |
@@ -89,9 +96,17 @@ bypass, destructive testing, malware execution, use or validation of discovered
 secrets, circumvention of provider restrictions, and scraping of restricted
 information.
 
-From Phase 2, every active operation must pass the scope manager, which checks
-approved targets, exclusions, expiry and operation-specific restrictions, and
-records who approved it and on what authority.
+Every active operation passes the scope manager (implemented in Phase 2). A
+scope is recorded with a statement that written authorisation exists, who gave
+it and until when; it lists targets (domains, wildcards, addresses, networks no
+broader than /8 or /16, URL prefixes) and exclusions, which always win. The
+manager checks that the scope is approved, unrevoked and valid at that moment,
+that it permits the kind of operation, and that it covers the whole target and
+excludes none of it. It runs when the plan is made, when the job is approved
+and again immediately before the job runs, and each decision is recorded in
+the job history and the audit trail. Active jobs always need an approval from
+someone with `collection:approve`. Scopes are revoked, never deleted, so every
+past active job stays explained.
 
 ## Development practices
 
@@ -103,7 +118,19 @@ records who approved it and on what authority.
 
 ## Known limitations
 
-* Backups are not encrypted (Phase 13). Keep them on an encrypted volume.
+* Backups are not encrypted (Phase 13), and they contain the raw provider
+  responses in readable form (the key that protects them on disk cannot leave
+  the secret store). Keep backups on an encrypted volume, or leave the raw
+  responses out with `omniosint backup create --no-raw-responses`.
+* A restore removes stored raw responses that the restored database does not
+  refer to, so none escapes its retention period. The automatic pre-restore
+  backup keeps them.
+* Masking of raw responses is by field name in JSON responses. A credential
+  stored under an unexpected name is not recognised.
+* The scope manager checks a target as given. No active capability exists yet
+  that contacts anything (the simulated probe contacts nothing); when real
+  ones arrive (Phases 5 and 8), a domain target's resolved addresses will have
+  to pass the scope too.
 * Restoring a backup restores its audit trail as well; entries recorded after
   the backup was taken are kept only in the automatic pre-restore backup.
 * On Linux the secret store's master key is protected by file permissions only;

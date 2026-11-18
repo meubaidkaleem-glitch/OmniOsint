@@ -52,8 +52,17 @@ feature registry, so the sidebar can never claim more than the backend offers.
 | 16 | AI Investigation Center | Analysis | `/ai` | `ai_investigation` | 10 |
 | 17 | Monitoring and Alerts | Operations | `/monitoring` | `monitoring` | 11 |
 | 18 | Reports and Evidence | Operations | `/reports` | `reports_evidence` | 13 |
-| 19 | Integrations | Platform | `/integrations` | `integrations` | 5 (catalogue: 1) |
+| 19 | Integrations | Platform | `/integrations` | `integrations` | 5 (catalogue: 1; adapters and health checks: 2) |
 | 20 | Administration and Settings | Platform | `/admin` | `administration` | 1 |
+
+### Universal Search sub-pages (Phase 2)
+
+| Page | Route | Permission |
+|---|---|---|
+| Search: classification, plan, run; recent and saved searches | `/search` (`?q=` pre-fills the input) | `collection:read` (running needs `collection:run`) |
+| Collection history | `/search/history` | `collection:read` |
+| Request: jobs, history, approval, cancel, retry, sources not run | `/search/requests/:id` | `collection:read` (actions need `collection:run` or `collection:approve`) |
+| Evidence: observation, provenance, integrity, raw response | `/search/evidence/:id` | `evidence:read` (unmasked raw needs `evidence:read_raw`) |
 
 ### Administration and Settings sub-pages
 
@@ -62,6 +71,7 @@ feature registry, so the sidebar can never claim more than the backend offers.
 | My account (profile, password, sessions, theme) | `/admin/account` | any signed-in user |
 | Users | `/admin/users` | `users:read` (changes need `users:manage`) |
 | Roles | `/admin/roles` | `roles:read` |
+| Scopes | `/admin/scopes` | `scopes:read` (changes need `scopes:manage`) |
 | Audit log | `/admin/audit` | `audit:read` |
 | System status | `/admin/system` | `system:read` |
 
@@ -106,7 +116,8 @@ It contains no forms, charts or sample data.
 | `↑` `↓` `Enter` | Move and select inside the palette |
 
 The palette lists every section the user can open, plus actions (toggle theme,
-sign out). From Phase 2 it also classifies indicators typed into it.
+sign out). For a user who may search, it also offers "Search for ..." with the
+typed text, which opens Universal Search with that input.
 
 ## Investigation workspace (Phase 3)
 

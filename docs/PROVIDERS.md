@@ -3,11 +3,13 @@
 How OmniOSINT integrates external data sources and tools, and the inventory of
 what is planned.
 
-**Current state: no provider integration is implemented.** The catalogue below
-is the plan. In the interface and the CLI every entry is shown as
-"Planned — integration not yet implemented." until its adapter exists and is
-tested. The adapter framework is built in Phase 2 and the first integrations in
-Phases 4 to 6.
+**Current state: the provider framework exists; no real provider is
+integrated.** Phase 2 built the adapter contract, the registry and everything
+around each call (below). The catalogue is the plan: in the interface and the
+CLI every entry is shown as "Planned — integration not yet implemented." until
+its adapter exists and is tested. The first integrations arrive in Phases 4 to
+6. The only adapter today is the [simulated provider](#the-simulated-provider),
+which is for testing and off by default.
 
 ## Principles
 
@@ -28,61 +30,104 @@ Phases 4 to 6.
 6. **Tools are not bundled.** Local tools are detected, version-checked and
    called through an adapter; installing one is always the user's decision.
 
-## Adapter contract (Phase 2)
+## Adapter contract (implemented in Phase 2)
 
-Each provider is an independent adapter implementing one interface. Intelligence
-modules never call a provider API themselves; they ask the provider manager for
-a capability.
+Each provider is an independent adapter: a subclass of `IntelligenceProvider`
+in `src/omniosint/providers/`. Nothing else calls a provider API; the
+collection worker asks the provider manager to run one capability.
 
 ```python
-class IntelligenceProvider(Protocol):
-    metadata: ProviderMetadata          # id, category, capabilities, cost model
+class IntelligenceProvider(ABC):
+    metadata: ClassVar[ProviderMetadata]   # id, category, version, capabilities,
+                                           # rate limit, credential names, terms
 
-    async def authenticate(self) -> AuthResult: ...
-    async def health_check(self) -> HealthResult: ...
-    async def get_quota(self) -> Quota | None: ...       # None when not exposed
-    async def investigate(self, indicator: Indicator,
-                          context: CollectionContext) -> RawResult: ...
-    def normalize(self, raw: RawResult) -> list[Observation]: ...
+    async def collect(self, indicator: Indicator,
+                      context: CollectionContext) -> RawResult: ...
+    def normalize(self, indicator: Indicator, capability: Capability,
+                  raw: RawResult) -> list[Observation]: ...
+    async def health_check(self, context: CollectionContext) -> HealthResult: ...
+    async def get_quota(self, context: CollectionContext) -> Quota | None: ...
     async def close(self) -> None: ...
 ```
 
-`ProviderMetadata` declares, per capability: the indicator types it accepts,
-whether the call is passive or active, whether it costs credits, the rate limit
-and whether results may be cached and for how long.
+* A `Capability` declares the indicator types it accepts, its operation
+  (`lookup` is passive; `discovery` and `assessment` contact the target and are
+  active), its cost (free, credits per call, or unknown), how long its results
+  may be reused, its timeout and its page and result limits.
+* `collect` returns the raw responses, page by page, exactly as received.
+  `normalize` turns them into `Observation`s: one statement about one entity,
+  with attributes, mentioned entities (candidate relationships, never confirmed
+  links), the provider's own values kept unmodified in `original`, and the
+  observation time when the provider gives one.
+* Failures are raised as typed errors (`ProviderTimeout`,
+  `ProviderRateLimited`, `ProviderQuotaExceeded`, `ProviderAuthFailed`,
+  `ProviderMalformedResponse`, `ProviderUnavailable`, ...). Each says whether
+  a retry can help, and its real message is what the job history shows.
+* `CollectionContext` carries the HTTP client, the credentials (never logged),
+  the options, the page and result caps, a progress callback and a
+  cancellation check.
 
-What the framework supplies around every adapter, so adapters stay small:
+What the framework supplies around every call, so adapters stay small:
 
 | Concern | Supplied by the framework |
 |---|---|
-| HTTP client | One shared async client with timeouts and a destination policy (SSRF defence) |
-| Rate limiting | Per-provider token bucket; state shared through Redis when configured |
-| Retry | Bounded exponential backoff on retryable failures only |
-| Circuit breaker | Stops calling a failing provider and reports it as unavailable |
-| Pagination | Bounded page iteration with a per-job result cap |
-| Cache | Keyed on provider, capability and normalised indicator, with a TTL |
-| Query deduplication | Identical requests in flight are joined |
-| Quota and cost | Usage recorded per call; estimates before paid calls |
-| Credentials | Encrypted at rest; never returned by the API or written to logs |
-| Evidence | Raw response stored once, content-addressed; observations linked to it |
+| HTTP client | `SafeHttpClient`: http and https only, no credentials in URLs, response size cap, timeouts, no proxy settings from the environment. Every address a name resolves to is checked against the destination policy (no loopback, private, link-local, multicast or other special-use ranges) and the connection goes to the checked address, so DNS rebinding cannot redirect it. Redirects are checked again |
+| Rate limiting | Token bucket per provider; shared through Redis (one Lua script) when Redis is configured, per process otherwise. A call waits at most `collection.rate_limit_max_wait_seconds`, then fails as rate limited |
+| Timeouts | Each call is bounded by its capability's timeout |
+| Circuit breaker | Repeated failures pause a provider for a while; calls fail fast as unavailable instead of piling up |
+| Retry | Exponential backoff with jitter, for retryable errors only, up to `collection.max_attempts` |
+| Pagination | Bounded by the capability's page and result limits; a truncated result says so |
+| Cache | A fresh earlier result for the same provider, capability, indicator and options is reused instead of called again; "ignore cached results" forces a call |
+| Query deduplication | Identical calls in flight are joined: one request, one result |
+| Validation | Observations are validated against the schema; a response that cannot be normalised fails the job as malformed and its raw response is kept for inspection |
+| Usage | Requests, failures, cache hits and credits recorded per provider, capability and day |
+| Credentials | Read from the protected secret store by name; never returned by the API or written to logs |
+| Evidence | Raw response stored once, content-addressed and encrypted; each observation becomes an evidence row linked to its source, job, raw response and transformation history |
 
-## Execution strategy (Phase 2)
+## Execution strategy (implemented in Phase 2)
 
-* Strategies: free-first (default), paid fallback, user-selected providers,
-  explicit priority order.
-* Parallel requests only where a provider permits them, within bounded
-  concurrency.
-* Incremental collection: what is already cached and fresh is not fetched again.
-* A plan is shown before it runs. Anything active, or anything above the
-  spending threshold, waits for approval.
+* The plan lists every source that could serve the indicator, with its status
+  and the reason: will run, cached result, needs approval, blocked by the scope
+  manager, not chosen (paid while free comes first), not configured, planned or
+  excluded. Nothing runs until the analyst runs the plan.
+* Strategies: free first (default) or include paid. The API and CLI can also
+  restrict a plan to chosen providers. Order follows provider priority.
+* What is cached and fresh is reused rather than fetched again.
+* Anything active waits for approval, always, and only inside a recorded scope
+  that covers the target. Paid calls wait for approval above
+  `collection.approval_credit_threshold`.
+* Jobs run in the worker, up to `collection.max_concurrent_jobs` at a time.
 
-## Testing (Phases 2, 5, 6)
+## The simulated provider
 
-* Routine tests use recorded responses and cover: valid, invalid, empty and
-  partial results, authentication failure, quota exhaustion, rate limiting,
-  timeouts, malformed data, pagination and outages.
-* Live tests are opt-in and run only when credentials are present. An adapter
-  that has only been tested against recordings is labelled "not verified live".
+`simulated` exists to exercise the whole pipeline before real providers exist.
+It is **off by default** (`collection.enable_simulated_provider`) and:
+
+* contacts nothing: its "responses" are generated from a hash of the indicator,
+  using only documentation ranges (`192.0.2.0/24`, `*.simulated.example`), so
+  they cannot be mistaken for real infrastructure;
+* is marked simulated by its registration, not by its own output: evidence,
+  entities, requests and jobs it touches carry `is_simulated`, the interface
+  labels them, and the dashboard counts them separately from real records;
+* offers a passive lookup, a paid lookup (declared as one simulated credit, to
+  exercise approvals; nothing is charged) and an active probe (declared active,
+  so it needs a scope and an approval, although it contacts nothing);
+* can be told to fail for testing, with the `simulate` option: `timeout`,
+  `unavailable`, `rate_limited`, `quota`, `auth`, `malformed`, `empty`,
+  `partial`, `flaky` or `slow`.
+
+## Testing
+
+* Implemented (Phase 2): the framework is tested with the simulated provider
+  for valid, empty and partial results, authentication failure, quota
+  exhaustion, rate limiting, timeouts, outages, malformed data, retries,
+  circuit breaking, cache reuse, joined calls, cancellation and lost workers;
+  and the HTTP client against DNS rebinding, redirects to internal addresses,
+  oversized responses and credentials in URLs.
+* For each real adapter (Phases 4 to 6): recorded responses covering the same
+  cases, plus pagination. Live tests are opt-in and run only when credentials
+  are present. An adapter tested only against recordings is labelled "not
+  verified live".
 
 ## Status texts
 

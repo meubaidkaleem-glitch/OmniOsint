@@ -172,17 +172,24 @@ omniosint stop
 omniosint backup restore FILE      # or restore.bat FILE
 ```
 
-A backup is a zip archive with a PostgreSQL dump, your user settings file and
-checksums. It needs the PostgreSQL command line tools (`pg_dump`, `pg_restore`,
-`psql`); set `database.pg_bin_dir` if they are not on PATH.
+A backup is a zip archive with a PostgreSQL dump, your user settings file, the
+stored raw provider responses and checksums for all of them. It needs the
+PostgreSQL command line tools (`pg_dump`, `pg_restore`, `psql`); set
+`database.pg_bin_dir` if they are not on PATH.
 
 * Restoring replaces all data in the database, in one transaction: it either
   completes or changes nothing. The current data is backed up first.
+* Raw responses are stored encrypted under a key that cannot leave this
+  computer's secret store, so the backup holds them decrypted and the restore
+  encrypts them again under the key of the computer it runs on. Raw responses
+  the restored data does not refer to are removed. `backup create
+  --no-raw-responses` leaves them out of the archive.
 * The audit trail is part of the data and is restored too; entries made after
   the backup was taken remain in that automatic pre-restore backup.
-* **Backups are not encrypted** in this version. Keep them on an encrypted
-  volume. Secrets are not included; re-enter them after restoring on another
-  computer.
+* **Backups are not encrypted** in this version, and include the raw responses
+  in readable form. Keep them on an encrypted volume. Secrets are not included;
+  re-enter them after restoring on another computer.
+* Backups made by the Phase 1 version (no raw responses) can still be restored.
 
 ## Uninstalling
 

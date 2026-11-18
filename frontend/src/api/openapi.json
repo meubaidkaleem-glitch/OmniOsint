@@ -4471,7 +4471,7 @@
     }
   },
   "info": {
-    "description": "OmniOSINT is an evidence-driven OSINT and intelligence investigation platform.\n\nThis API is versioned under `/api/v1`. It currently covers the platform\nfoundation: authentication, administration, health and the feature and provider\nregistries. Endpoint groups for search, investigations, entities, evidence,\ngraphs, monitoring, reports, AI and workflows are added by the phase that\nimplements them; they are not present as placeholders.\n",
+    "description": "OmniOSINT is an evidence-driven OSINT and intelligence investigation platform.\n\nThis API is versioned under `/api/v1`. It covers the platform foundation\n(authentication, administration, health, the feature and provider registries)\nand the core intelligence pipeline: universal search, collection plans,\nrequests and jobs, evidence, entities, sources and scopes. Endpoint groups for\ninvestigations, graphs, monitoring, reports, AI and workflows are added by the\nphase that implements them; they are not present as placeholders.\n\nNo real provider is integrated yet. Collection results from the simulated\nprovider, when it is enabled, are marked `is_simulated`.\n",
     "title": "OmniOSINT API",
     "version": "0.2.0"
   },
@@ -8533,7 +8533,7 @@
       "name": "dashboard"
     },
     {
-      "description": "The provider catalogue. Read-only: no provider integration is implemented yet.",
+      "description": "The provider catalogue, the adapters that exist and their health checks. No real provider is integrated yet.",
       "name": "providers"
     }
   ]
