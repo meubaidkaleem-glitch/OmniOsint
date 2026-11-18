@@ -130,7 +130,9 @@ async def test_database_check_reports_an_unreachable_server(app_paths: AppPaths)
     settings = make_settings(
         app_paths,
         "postgresql://nobody:nothing@127.0.0.1:1/omniosint_test",
-        database={"connect_timeout_seconds": 1},
+        # Not shorter: Windows retries a refused connection for about two
+        # seconds before reporting it, and would report a timeout instead.
+        database={"connect_timeout_seconds": 5},
     )
     db = Database.from_settings(settings)
     try:

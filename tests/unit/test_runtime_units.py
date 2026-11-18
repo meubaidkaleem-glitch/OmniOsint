@@ -7,6 +7,7 @@ import os
 import socket
 import sys
 import time
+from pathlib import Path
 
 import psutil
 import pytest
@@ -16,6 +17,7 @@ from omniosint.core.paths import AppPaths, write_private_text
 from omniosint.database.errors import as_omni_error
 from omniosint.runtime import shutdown, supervisor
 from omniosint.runtime.supervisor import ManagedProcess, RunState
+from omniosint.system import doctor
 from omniosint.system.health import describe_database_error
 
 
@@ -143,3 +145,37 @@ def test_private_files_are_owner_only(app_paths: AppPaths) -> None:
     target = app_paths.run_dir / "private.txt"
     write_private_text(target, "x")
     assert target.stat().st_mode & 0o077 == 0
+
+
+# --------------------------------------------------------------------------- doctor
+def test_tool_version_line_removes_utf16_padding(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # wsl.exe answers in UTF-16 when its output is redirected; read as UTF-8
+    # that shows up as a NUL after every character.
+    if sys.platform == "win32":
+        pytest.skip("uses a shell script as a stand-in for wsl.exe")
+    tool = tmp_path / "fake-wsl"
+    tool.write_bytes(
+        b"#!/bin/sh\nprintf 'D\\000e\\000f\\000a\\000u\\000l\\000t\\000 \\0002\\000\\n'\n"
+    )
+    tool.chmod(0o755)
+    monkeypatch.setattr(doctor.shutil, "which", lambda _name: str(tool))
+    assert doctor.tool_version_line("wsl", "--status") == "Default 2"
+
+
+@pytest.mark.parametrize(
+    ("edition", "build", "expected"),
+    [
+        ("Professional", 22631, "Windows 11"),
+        ("Core", 19045, "Windows 10"),
+        ("ServerDatacenter", 26100, "Windows Server 2025"),
+        ("ServerStandard", 20348, "Windows Server 2022"),
+        ("ServerStandard", 99999, "Windows Server"),
+    ],
+)
+def test_windows_names(
+    edition: str, build: int, expected: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(doctor.platform, "win32_edition", lambda: edition, raising=False)
+    assert doctor._windows_name(10, build) == expected

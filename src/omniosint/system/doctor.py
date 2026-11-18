@@ -7,6 +7,7 @@ missing are reported as information, not as failures.
 from __future__ import annotations
 
 import asyncio
+import os
 import platform
 import shutil
 import struct
@@ -70,18 +71,24 @@ def tool_version_line(executable: str, *arguments: str) -> str | None:
     path = shutil.which(executable)
     if path is None:
         return None
+    # wsl.exe writes UTF-16 when its output is redirected, unless WSL_UTF8 is set.
+    environment = {**os.environ, "WSL_UTF8": "1"}
     try:
         completed = subprocess.run(  # noqa: S603 - resolved by shutil.which
             [path, *(arguments or ("--version",))],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
             check=False,
             stdin=subprocess.DEVNULL,
+            env=environment,
         )
     except (OSError, subprocess.SubprocessError):
         return "installed (version could not be read)"
-    output = (completed.stdout or completed.stderr or "").strip().splitlines()
+    text = (completed.stdout or completed.stderr or "").replace("\x00", "")
+    output = text.strip().splitlines()
     return output[0].strip() if output else "installed"
 
 
@@ -94,6 +101,17 @@ def _parse_version(text: str) -> tuple[int, ...]:
     return ()
 
 
+_WINDOWS_SERVER_RELEASES = {14393: "2016", 17763: "2019", 20348: "2022", 26100: "2025"}
+
+
+def _windows_name(major: int, build: int) -> str:
+    edition = platform.win32_edition() if hasattr(platform, "win32_edition") else ""
+    if "server" in (edition or "").lower():
+        release = _WINDOWS_SERVER_RELEASES.get(build)
+        return f"Windows Server {release}" if release else "Windows Server"
+    return f"Windows {'11' if build >= 22000 else major}"
+
+
 def check_platform() -> Check:
     system = platform.system()
     bits = struct.calcsize("P") * 8
@@ -101,7 +119,7 @@ def check_platform() -> Check:
         version = sys.getwindowsversion() if hasattr(sys, "getwindowsversion") else None
         major = version.major if version else 0
         build = version.build if version else 0
-        label = f"Windows {'11' if build >= 22000 else major} (build {build}), {bits}-bit"
+        label = f"{_windows_name(major, build)} (build {build}), {bits}-bit"
         if major < 10 or bits != 64:
             return Check(
                 "Operating system",

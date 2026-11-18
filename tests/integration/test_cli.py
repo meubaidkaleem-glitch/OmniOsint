@@ -119,7 +119,8 @@ def test_unreachable_database_exits_with_code_4(tmp_path: Path):
     env = cli_env(
         tmp_path,
         "postgresql://nobody:nothing@127.0.0.1:1/omniosint_test",
-        OMNIOSINT_DATABASE__CONNECT_TIMEOUT_SECONDS="1",
+        # Windows needs about two seconds to report a refused connection.
+        OMNIOSINT_DATABASE__CONNECT_TIMEOUT_SECONDS="5",
     )
     result = run_cli("db", "check", "--json", env=env)
     assert result.returncode == 4
